@@ -1,0 +1,149 @@
+fmod Carniceria is
+	pr NAT .
+	sorts Pedido Estado Furgo Pedidos Granja Cliente Clientes EstadoC Libreta Carniceria ListaFurgo Carretera Sys .
+	subsort Pedido < Pedidos .
+	subsort Cliente < Clientes .
+	subsort Nat < Libreta .
+	subsort Carniceria Granja Carretera < Sys .
+	subsort Furgo < ListaFurgo .
+	op pv : -> Pedido [ctor] .
+	***[idCarnicera|cantidadCerdo,cantidadVaca]
+	op [_|_,_] : Nat Nat Nat -> Pedido [ctor] . 
+	
+	*** Estado 
+	ops reparto vuelta esperando : -> Estado [ctor] .
+	
+	*** Furgo [Nat Pedido Estado] 
+	op fv : -> Furgo[ctor] .
+	op [_,_,_] : Nat Pedido Estado -> Furgo[ctor] .
+	op lfv : -> ListaFurgo[ctor] .
+	op __ : ListaFurgo ListaFurgo -> ListaFurgo [assoc ctor id: lfv] .
+	
+	*** Pedidos
+	op pv : -> Pedidos [ctor] .
+	op __ : Pedidos Pedidos -> Pedidos [ctor assoc comm id: pv] .
+	
+	*** Granja [cantidadCerdo,cantidadVaca|idGranja,furgoneta,listaPedidos]
+	op [_,_|_,_,_] : Nat Nat Nat Furgo Pedidos -> Granja [ctor] .
+	*** lista id de granjas 
+	
+	op lv : -> Libreta [ctor] .
+	op __ : Libreta Libreta -> Libreta[ctor assoc comm id: lv] .
+	
+	*** Cliente [cv,cc] 
+	op [_,_] : Nat Nat -> Cliente [ctor] .
+	
+	*** Lista de Clientes 
+	op cv : -> Clientes [ctor] .
+	op __ : Clientes Clientes -> Clientes [ctor assoc id: cv] .
+	
+	*** Estado de la carniceria
+	ops abierta cerrada : -> EstadoC [ctor] .
+	
+	*** [idCarniceria|estadoCarniceria,cantidadCerdo,cantidadVaca,colaClientes,furgoneta,Libreta]
+	op [_|_,_,_,_,_,_] : Nat EstadoC Nat Nat Clientes Furgo Libreta -> Carniceria [ctor] .
+	*** [igranja icarniceria | furgo ida , furgovuelta]
+	op [_,_|_,_] : Nat Nat ListaFurgo ListaFurgo -> Carretera [ctor] .
+	*** op sv : -> Sys [ctor] . porque no sistema vacio
+	op __ : Sys Sys -> Sys [ctor assoc comm ] .
+endfm
+
+mod REGLAS is
+	*** pr Test .
+	pr Carniceria .
+	vars C V iG iF iC C1 V1 C2 V2 : Nat .
+	var P P': Pedidos .
+	var Cc Cc1 CC : Clientes .
+	var F : Furgo .
+	var L L' : Libreta .
+	var LFi LFv : ListaFurgo .
+	crl[carga-furgo] : [C,V | iG,[iF,pv,esperando],[iC | C1 , V1] P] => [sd(C,C1), sd(V,V1) | iG ,[iG,[iC | C1,V1], reparto ] , P ] 
+	   if C >= C1 /\ V >= V1 .
+	rl[alCarril] : [C, V | iG ,[iG,[iC | C1,V1], reparto ] , P ]  [iG, iC | LFi, LFv] => [C, V | iG , fv , P ] [iC, iG | LFi [iG,[iC | C1,V1], reparto ]  , LFv] .
+	
+	rl[entrarCarniceria] : [iC | abierta , C , V , CC , fv ,L] [iG, iC | [iG,[iC | C1,V1], reparto ] LFi, LFv] => [iC | abierta, C, V, CC ,[iG,[iC | C1,V1] , reparto ], L ] [iG, iC | LFi, LFv] .
+	
+	rl[dejarProductor] : [iC | abierta,C,V, CC ,[iG,[iC | C1,V1], reparto ],L iG L'] => [iC | abierta,C + C1,V + V1, CC ,[iG, pv , vuelta ], L L'] .
+	
+	rl[alCarrilVuelta] : [iC | abierta,C + C1,V + V1,Cc,[iG,pv, vuelta ],L L'] [iG, iC | LFi, LFv] => [iC | abierta,C + C1,V + V1,Cc,fv,L L'] [iG, iC | LFi, LFv [iG,pv, vuelta ] ] .
+	
+	rl[llegadaAGranja ] : [iG, iC | LFi, [iG,pv, vuelta ] LFv ] [C,V | iG, fv , P] => [iG, iC | LFi, LFv ] [C,V | iG, [iG,pv, esperando ] , P] .
+	
+	crl[venta] : [iC | abierta,C ,V ,[C1,V1] Cc,F,L] => [iC | abierta,sd(C,C1) ,sd(V,V1) ,Cc,F,L] 
+	 if C >= C1 /\ V >= V1 .
+	 
+	rl[cerrar] : [iC | abierta,C ,V ,cv,F,L] => [iC | cerrada ,C ,V ,cv,F,L] .	
+	
+	rl[desaparecer] : [iC | abierta,C ,V ,[C1 , V1 ] Cc1 [C2 , V2] Cc ,fv,L] => [iC | abierta,C ,V ,[C1 , V1 ] Cc1 Cc ,fv,L] .
+	
+endm 
+
+load model-checker.maude
+
+mod PROPS is
+	pr REGLAS .
+	pr SATISFACTION .
+	
+	subsort Sys < State .
+	
+	vars C V iG iF iC C1 V1 C2 V2 N : Nat .
+	var P P' : Pedidos .
+	var Pe Pe1 : Pedido .
+	var Cc Cc1 CC : Clientes .
+	var F F1 : Furgo .
+	var L L' : Libreta .
+	var LFi LFv : ListaFurgo .
+	var E : EstadoC .
+	var EF EF1 : Estado .
+	var S : Sys .
+	
+	
+	op tieneSuministros : Nat Nat Nat -> Prop [ctor] .
+	ceq [iC | E , C , V , CC , fv ,L] S |= tieneSuministros(iC,C1,V1) = true 
+	 if C > C1 /\ V > V1 .
+	
+	op tienePedido : Nat Nat -> Prop [ctor] .
+	eq [C1,V1 | iG,F , P [iC | C2 ,	V2 ] P'] S |= tienePedido(iC,iG) = true .
+	
+	op esperaPedido : Nat Nat -> Prop [ctor] .
+	eq [iC | E , C , V , CC , F ,L iG L'] S |= esperaPedido(iC, iG) = true .
+	
+	op abierta  : Nat -> Prop [ctor] .
+	eq [iC | abierta , C , V , CC , F ,L ] S |= abierta(iC) = true .
+	
+	op cerrada  : Nat -> Prop [ctor] .
+	eq [iC | cerrada , C , V , CC , F ,L ] S |= cerrada(iC) = true .
+	
+	op tieneCliente : Nat -> Prop [ctor] .
+	eq [iC | E , C , V , [C1,V1] CC , F ,L ] S |= tieneCliente(iC) = true .
+	
+	op hayFurgoneta : Nat -> Prop [ctor] .
+	eq [iC | E , C , V , CC , [iG,[iC | C1,V1], reparto ] ,L ] S |= hayFurgoneta(iC) = true .
+	eq [iG, iC | [iG,[iC | C1,V1], reparto ] LFi, LFv] S |= hayFurgoneta(iC) = true .
+	eq [C, V | iG ,[iG,[iC | C1,V1], reparto ] , P ] S |= hayFurgoneta(iC) = true .
+	
+	op hayFurgonetaEnGranja : Nat -> Prop [ctor] .
+	eq [C, V | iG ,[iG,[iC | C1,V1], EF ] , P ] S |= hayFurgonetaEnGranja(iG) = true .
+	
+	op hayAtasco : -> Prop [ctor] .
+	eq [iG, iC | [iG,Pe, EF ] [iG,Pe1, EF1 ] LFi, LFv] S |= hayAtasco = true .
+	eq [iG, iC | LFi, [iG,Pe, EF ] [iG,Pe1, EF1 ] LFv] S |= hayAtasco = true .
+	
+	op hayExactamenteFurgonetas : Nat -> Prop [ctor] .
+	eq S |= hayExactamenteFurgonetas(N) = N == furgos(S) .
+	
+	op furgos : Sys -> Nat [ctor] .
+	eq furgos([iC | E , C , V , CC , [iG, Pe , EF ] ,L] S) = 1 + furgos(S) .
+	eq furgos([C,V | iG,[iG, Pe , EF ] , P ] S) = 1 + furgos(S) .
+	eq furgos([iG, iC | [iG,Pe, EF ]  LFi, LFv] S) = 1 + furgos([iG, iC | LFi, LFv] S) . 
+	eq furgos([iG, iC | LFi, [iG,Pe, EF ]  LFv]  S) = 1 + furgos([iG, iC | LFi, LFv] S) . 
+	eq furgos(S) = 0 [owise] .
+endm
+
+mod TEST2 is
+  pr PROPS .
+  pr LTL-SIMPLIFIER .
+  pr MODEL-CHECKER .
+endm
+
+red modelCheck(init, [](<>cerrada(1))) .

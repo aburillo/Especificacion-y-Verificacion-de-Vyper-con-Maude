@@ -1,0 +1,6 @@
+mod MUTEX is 
+	pr MSET .
+	sort Mutex .
+	op [_,_|_] : MSET MSET MSET -> MUTEX [ctor] .
+	rl[i-e] : [NM,M'|M''] => [M,NM|M''] .
+    rl[e-sc] : [M,NM|NM] => [M,NM|M''] .	

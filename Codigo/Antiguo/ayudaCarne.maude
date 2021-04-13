@@ -1,0 +1,9 @@
+fmod Test is
+	pr Carniceria .
+	op init : -> Sys .
+	eq init = [3,5 | 1,[1,pv,esperando],[1 | 4,3] [2 | 4,3]] [1 | abierta,C,V,cv,fv,1] [2 | abierta,C,V,cv,fv,1 ] .
+	op init2 : -> Sys .
+	eq init2 = [1,2|1,[1,pv,esperando],[1|0,1] [2|0,1]] [1|abierta,C,V,cv,fv,1] [2|abierta,C,V,cv,fv,1 ] .
+	op init3 : -> Sys .
+	eq init3 = [C,V|1,F,[1|C1,V1]] [C2,V2|2,F1,[1|C3,V3]] [1|abierta,0,0,[1,1] [1,0],fv,1 2] .
+endfm

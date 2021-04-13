@@ -1,0 +1,13 @@
+mod RIO2 is
+	pr NAT .
+	sort Rio .
+	vars N N' : Nat .
+	op [_,_,_] : Nat Nat Bool -> Rio[ctor] .
+	crl[cid] : [s(N), N' , true] => [N,N',false] 
+	 if N >= N' .
+	crl [cii]: [N,N', false] => [s(N), N', true] 
+	 if N < 3 /\ sd(sd(3,N),1) >= sd(3,N') .
+	rl [cifd] : [s(N),s(N'), true] => [N,N', false] .
+	crl[cfd] : [N,s(N'), true] => [N,N', false] 
+	if sd(3,N) >= sd(3,N') .
+endm 

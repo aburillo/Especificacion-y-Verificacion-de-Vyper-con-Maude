@@ -1,0 +1,520 @@
+***Adrián Burillo Elmaleh
+***Laura de la Fuente Lorenzo
+
+fmod FIESTA is
+  pr NAT .
+  pr STRING .
+  
+  sort estadoP Persona estadoT colaP colaPOrd Tienda conjP PlazaMayor ZonaResidencial Billy LocalModa Venancio Recreativos Sistema .
+  subsort Billy Venancio < Persona .
+  subsort Persona < colaPOrd < colaP .
+  subsort Persona < conjP .
+  subsort Recreativos ZonaResidencial LocalModa PlazaMayor Tienda < Sistema .
+
+  var cP cPP : colaP .
+  vars e e1 : estadoP .
+  vars din din1 cR cR1 cH cH1 cA cA1 nC nC1 edad edad1 : Nat .
+  vars en en1 : Bool . 
+  vars n n1 : String .
+
+  ops relajado ebrio contentoPeroNoMucho satisfecho humillado indiferente : -> estadoP [ctor] .
+  
+  ***[nombre,estado,dinero,cantidadR, cantidadH, cantidadA,numCopas,edad,entrada]
+  op [_|_,_,_,_,_,_,_,_] : String estadoP Nat Nat Nat Nat Nat Nat Bool -> Persona [ctor] .
+  
+  ops abierta cerrada : -> estadoT [ctor] .
+  op cv : -> colaPOrd [ctor] .
+  op _;_ : colaP colaP -> colaP [ctor assoc id: cv] .
+  cmb [n | e,din,cR,cH,cA,nC,edad,en] ; [n1 | e1,din1,cR1,cH1,cA1,nC1,edad1,en1] ; cP : colaPOrd 
+      if din > din1 /\ [n1 | e1,din1,cR1,cH1,cA1,nC1,edad1,en1] ; cP : colaPOrd .
+  op sort : colaP -> colaPOrd .
+  ceq sort(cP ; [n | e,din,cR,cH,cA,nC,edad,en] ; [n1 | e1,din1,cR1,cH1,cA1,nC1,edad1,en1] ; cPP) = sort(cP ; [n1 | e1,din1,cR1,cH1,cA1,nC1,edad1,en1] ; [n | e,din,cR,cH,cA,nC,edad,en] ; cPP)
+      if din < din1 .
+  eq sort(cP) = cP [owise] .
+  
+  ***[estado,colaPersonas,numBolsas,precioBolsa]
+  op {_,_,_,_} : estadoT colaP Nat Nat -> Tienda [ctor] .
+  
+  op cpv : -> conjP [ctor] .
+  op __ : conjP conjP -> conjP [ctor assoc comm id: cpv] .
+  
+  ***{conjuntoPersonas}
+  op {_} : conjP -> PlazaMayor [ctor] .
+  
+  ***{conjuntoPersonas}
+  op <_> : conjP -> ZonaResidencial [ctor] .
+  
+  ***[numEntradas,precioEntradaAct]
+  op [_,_] : Nat Nat -> Billy [ctor] .
+  
+  ***{colaPersonas,aforoAct,conjPersonasDentro,precioCopas,precioRefresco}
+  op {_,_,_,_,_} : colaP Nat conjP Nat Nat -> LocalModa [ctor] .
+  
+  ***{dinero}
+  op [_] : Nat -> Venancio [ctor] .
+  
+  ***{conjuntoPersonas}
+  op |_| : conjP -> Recreativos [ctor] .
+  
+  op __ : Sistema Sistema -> Sistema [ctor assoc comm] .
+  
+endfm
+
+fmod TEST is
+  pr FIESTA .
+  
+  op init : -> Sistema .
+  
+  eq init = < ["Pepe" | relajado,10,0,0,0,0,19,false]["Adri" | relajado,5,0,0,0,0,27,false]["Laura" | relajado,10,0,0,0,0,24,false]["Fer" | relajado,15,0,0,0,0,50,false] > {abierta,cv,2,5}{[5,5]}{cv,3,[5],10,5} | cpv | .
+endfm
+
+mod REGLAS is
+  pr TEST .
+
+  var cP : colaP .
+  vars nB pB din din1 cR cH cA cR1 cH1 cA1 nC nC1 edad edad1 nE pE pC pR : Nat .
+  var e e1 : estadoP .
+  vars cjP cjP1 : conjP .
+  var en en1 : Bool .
+  var eT : estadoT .
+  vars n n1 : String .
+
+  ***ZONA RESIDENCIAL
+  ***Ir desde la zona residencia a la tienda siempre que se esté en estado relajado
+  rl [residencia-tienda] : {abierta,cP,nB,pB} < [n | relajado,din,cR,cH,cA,nC,edad,en] cjP > => {abierta,cP ;[n | relajado,din,cR,cH,cA,nC,edad,en],nB,pB} < cjP > .
+
+  ***Ir desde la zona residencial a la plaza mayor siempre que se esté en estado relajado
+  rl [residencia-Plaza] : {cjP1} < [n | relajado,din,cR,cH,cA,nC,edad,en] cjP > => {cjP1 [n | relajado,din,cR,cH,cA,nC,edad,en]} < cjP > .
+
+  ***Ir desde la zona residencial al local siempre que se esté en estado relajado
+  rl [residencia-local] : {cP,nB,cjP1,pC,pR} < [n | relajado,din,cR,cH,cA,nC,edad,en] cjP > => {sort(cP ;[n | relajado,din,cR,cH,cA,nC,edad,en]),nB,cjP1,pC,pR} < cjP > .
+
+  ***Ir desde la zona residencial a los recreativos siempre que se esté en estado relajado
+  rl [residencia-recreativos] : | cjP1 | < [n | relajado,din,cR,cH,cA,nC,edad,en] cjP > => | cjP1 [n | relajado,din,cR,cH,cA,nC,edad,en] | < cjP > .
+
+  ***TIENDA
+  ***Comprar una bolsa en la tienda siempre que esté abierta y la persona tenga dinero para comprar y luego se va a la plaza mayor
+  crl [comprar] : {abierta,[n | e,din,cR,cH,cA,nC,edad,en]; cP,s(nB),pB} {cjP} => {abierta,cP,nB,pB} {cjP [n | e,sd(din,pB),s(cR),s(cH),s(cA),nC,edad,en]} 
+                  if din >= pB .
+
+  ***Cerrar la tienda cuando se queda sin bolsas para poder vender
+  rl [cerrar] : {abierta,cP,0,pB} => {cerrada,cP,0,pB} .
+
+  ***Ir a la plaza mayor o por no tener dinero o porque la tienda esté cerrada.
+  crl [tienda-Plaza] : {abierta,[n | e,din,cR,cH,cA,nC,edad,en]; cP,nB,pB} {cjP} => {abierta,cP,nB,pB} {cjP [n | e,din,cR,cH,cA,nC,edad,en] } 
+                        if din < pB .
+  rl [tienda-Plaza] : {cerrada,[n | e,din,cR,cH,cA,nC,edad,en]; cP,nB,pB} {cjP} => {cerrada,cP,nB,pB} {cjP [n | e,din,cR,cH,cA,nC,edad,en]} .
+
+  
+  ***PLAZA MAYOR 
+  ***Consumir copa si se dispone de refresco, hielo y alcohol
+  rl [copa] : {cjP [n | e,din,s(cR),s(cH),s(cA),nC,edad,en]} => {cjP [n | e,din,cR,cH,cA,s(nC),edad,en]} .
+
+  ***Consumir refresco si dispone de él y de hielos.
+  rl [refresco] : {cjP [n | e,din,s(cR),s(cH),cA,nC,edad,en]} => {cjP [n | e,din,cR,cH,cA,nC,edad,en]} .
+
+  ***Robar hielo y refresco siempre y cuando haya alguien que tenga
+  rl [robar] : {[n | e,din,cR,cH,cA,nC,edad,en] [n1 | e1,din1,s(cR1),cH1,cA1,nC1,edad1,en1] cjP} => {[n | e,din,s(cR),cH,cA,nC,edad,en] [n1 | e1,din1,cR1,cH1,cA1,nC1,edad1,en1] cjP} .
+  rl [robar] : {[n | e,din,cR,cH,cA,nC,edad,en] [n1 | e1,din1,cR1,s(cH1),cA1,nC1,edad1,en1] cjP} => {[n | e,din,cR,s(cH),cA,nC,edad,en] [n1 | e1,din1,cR1,cH1,cA1,nC1,edad1,en1] cjP} .
+ 
+  ***Se pasa a estado ebrio si se la persona ha bebido cuatro o más copas
+  crl [ebrio] : {[n | relajado,din,cR,cH,cA,nC,edad,en] cjP} => {[n | ebrio,din,cR,cH,cA,nC,edad,en] cjP}
+              if nC >= 4 .
+
+  ***Comprar entrada siempre y cuando Billy tenga y la persona tenga dinero. El precio de la entrada se incrementa en 5.
+  crl [entrada] : {[s(nE),pE][n | e,din,cR,cH,cA,nC,edad,false] cjP} => {[nE,pE + 5][n | e,sd(din,pE),cR,cH,cA,nC,edad,true] cjP}
+              if din >= pE .
+
+  ***Ir a a la tienda siempre que esté abierta y se tenga dinero para poder comprar. Sino se comprueba eso entraría en bucle.
+  rl [plaza-Tienda] : {[n | e,din,cR,cH,cA,nC,edad,en] cjP} {eT,cP,nB,pB} => {cjP} {eT,cP ; [n | e,din,cR,cH,cA,nC,edad,en],nB,pB} . 
+
+   ***Ir al local.
+  rl [plaza-Local] : {[n | e,din,cR,cH,cA,nC,edad,en] cjP} {cP,nB,cjP1,pC,pR} => {cjP} {sort(cP ;[n | e,din,cR,cH,cA,nC,edad,en]),nB,cjP1,pC,pR} .
+  
+  ***Ir a los recreativos
+  rl [plaza-Recreativos] : {[n | e,din,cR,cH,cA,nC,edad,en] cjP} | cjP1 | => {cjP} | cjP1 [n | e,din,cR,cH,cA,nC,edad,en] | .
+
+ 
+  
+  ***LOCAL DE MODA
+
+  ***Entrar al local siempre que se tenga entrada, no se haya cubierto el aforo y tenga más de 18 años
+  crl [entrar-local] : {[n | e,din,cR,cH,cA,nC,edad,true]; cP,s(nB),cjP1,pC,pR} => {cP,nB,cjP1 [n | e,din,0,0,0,nC,edad,true],pC,pR}
+                      if edad > 18 .
+
+  ***Ir a la plaza si no se tiene la edad (> 18 ) para entrar al local, que no tenga entrada o porque el aforo esté cubierto.
+  crl [local-Plaza] : {[n | e,din,cR,cH,cA,nC,edad,en]; cP,nB,cjP1,pC,pR}{cjP} => {cP,nB,cjP1,pC,pR}{cjP [n | e,din,cR,cH,cA,nC,edad,en]}
+                     if (edad <= 18) or (en == false) or (nB == 0) .
+
+  ***Consumir copa en el local siempre que se tenga el dinero para pagarla
+  crl [local-copa] : {cP,nB,cjP1 [n | e,din,cR,cH,cA,nC,edad,en],pC,pR} => {cP,nB,cjP1 [n | e,sd(din,pC),cR,cH,cA,s(nC),edad,en],pC,pR}
+                      if din >= pC .
+  ***Consumir refresco en el local siempre que se tenga dinero para consumirlo
+  crl [local-refresco] : {cP,nB,cjP1 [n | e,din,cR,cH,cA,nC,edad,en],pC,pR} => {cP,nB,cjP1 [n | e,sd(din,pR),cR,cH,cA,nC,edad,en],pC,pR}
+                      if din >= pR .
+  crl [local-refresco] : {cP,nB,cjP1 [din],pC,pR} => {cP,nB,cjP1 [sd(din,pR)],pC,pR}
+                      if din >= pR .
+
+  ***Si una persona lleva cuatro o más copas.
+  crl [local-ebrio] : {cP,nB,cjP1 [n | relajado,din,cR,cH,cA,nC,edad,en],pC,pR} => {cP,nB,cjP1 [n | ebrio,din,cR,cH,cA,nC,edad,en],pC,pR}
+                      if nC >= pR .
+
+  ***Expulsar a la zona residencial a una persona en estado "ebrio"
+  rl [expulsar-local-residencia] : {cP,nB,cjP1 [n | ebrio,din,cR,cH,cA,nC,edad,en],pC,pR} < cjP > => {cP,s(nB),cjP1,pC,pR} < cjP [n | ebrio,din,cR,cH,cA,nC,edad,en] > .
+
+  ***Salir del local e irse a la zona residencia.
+  rl [local-residencia] : {cP,nB,cjP1 [n | relajado,din,cR,cH,cA,nC,edad,en],pC,pR} < cjP > => {cP,s(nB),cjP1,pC,pR} < cjP [n | contentoPeroNoMucho,din,cR,cH,cA,nC,edad,en] > .
+  
+  ***RECREATIVOS
+  ***Dos personas juegan una partida y se van a casa con un estado distinto en función de si han ganado, perdido o empatado.
+  crl [ganar] : | [n | e,din,cR,cH,cA,nC,edad,en] [n1 | e1,din1,cR1,cH1,cA1,nC1,edad1,en1] cjP1 | < cjP > => | cjP1 | < cjP [n | satisfecho,din,cR,cH,cA,nC,edad,en] [n1 | humillado,din1,cR1,cH1,cA1,nC1,edad1,en1] >
+               if nC > nC1 .
+  crl [ganar] : | [n | e,din,cR,cH,cA,nC,edad,en] [n1 | e1,din1,cR1,cH1,cA1,nC1,edad1,en1] cjP1 | < cjP > => | cjP1 |  < cjP [n | humillado,din,cR,cH,cA,nC,edad,en] [n1 | satisfecho,din1,cR1,cH1,cA1,nC1,edad1,en1] >
+               if nC < nC1 .
+  crl [ganar] : | [n | e,din,cR,cH,cA,nC,edad,en] [n1 | e1,din1,cR1,cH1,cA1,nC1,edad1,en1] cjP1 | < cjP > => | cjP1 |  < cjP [n | indiferente,din,cR,cH,cA,nC,edad,en] [n1 | indiferente,din1,cR1,cH1,cA1,nC1,edad1,en1] >
+               if nC == nC1 .
+
+endm 
+
+load model-checker.maude
+
+mod PROPS is
+  pr REGLAS .
+  pr SATISFACTION .
+
+  subsort Sistema < State .
+
+  var Sys : Sistema .
+  var cP cPP : colaP .
+  vars a pC pR din cR cH cA nC edad : Nat .
+  var cjP : conjP .
+  var n : String .
+  var e : estadoP .
+  var en : Bool .
+  var eT : estadoT .
+
+
+
+  op genteLocal : -> Prop [ctor] .
+  op personaConcretaLocal : String -> Prop [ctor] .
+  op personaConcretaTienda : String -> Prop [ctor] .
+  op personaConcretaRecreativos : String -> Prop [ctor] .
+  op ebrio : -> Prop [ctor] .
+  op personaConcretaEbrio : String -> Prop [ctor] .
+  op sinDinero : -> Prop [ctor] .
+  op personaConcretaEntrada : String -> Prop [ctor] .
+
+  ***a
+  eq {cP,a,cjP [n | e,din,cR,cH,cA,nC,edad,en],pC,pR} Sys |= genteLocal = true .
+  ***eq {cP ; [n | e,din,cR,cH,cA,nC,edad,en] ; cPP,a,cjP,pC,pR} Sys |= genteLocal = true .
+
+  ***b
+  eq {cP,a,cjP [n | e,din,cR,cH,cA,nC,edad,en],pC,pR} Sys |= personaConcretaLocal(n) = true .
+  ***eq {cP ; [n | e,din,cR,cH,cA,nC,edad,en] ; cPP,a,cjP,pC,pR} Sys |= personaConcretaLocal(n) = true .
+
+  ***c
+  eq {eT,cP ;[n | e,din,cR,cH,cA,nC,edad,en]; cPP,a,pC} Sys |= personaConcretaTienda(n) = true .
+
+  ***d
+  eq | cjP [n | e,din,cR,cH,cA,nC,edad,en] | Sys |= personaConcretaRecreativos(n) = true .
+
+  ***e
+  eq < cjP [n | ebrio,din,cR,cH,cA,nC,edad,en] > Sys |= ebrio = true .
+  eq {eT,cP ;[n | ebrio,din,cR,cH,cA,nC,edad,en]; cPP,a,pC} Sys |= ebrio = true .
+  eq {cjP [n | ebrio,din,cR,cH,cA,nC,edad,en]} Sys |= ebrio = true .
+  eq {cP,a,cjP [n | ebrio,din,cR,cH,cA,nC,edad,en],pC,pR} Sys |= ebrio = true .
+  eq {cP ;[n | ebrio,din,cR,cH,cA,nC,edad,en]; cPP,a,cjP,pC,pR} Sys |= ebrio = true .
+  eq | cjP [n | ebrio,din,cR,cH,cA,nC,edad,en] | Sys |= ebrio = true .
+
+  ***f
+  eq < cjP [n | ebrio,din,cR,cH,cA,nC,edad,en] > Sys |= personaConcretaEbrio(n) = true .
+  eq {eT,cP ;[n | ebrio,din,cR,cH,cA,nC,edad,en]; cPP,a,pC} Sys |= personaConcretaEbrio(n) = true .
+  eq {cjP [n | ebrio,din,cR,cH,cA,nC,edad,en]} Sys |= personaConcretaEbrio(n) = true .
+  eq {cP,a,cjP [n | ebrio,din,cR,cH,cA,nC,edad,en],pC,pR} Sys |= personaConcretaEbrio(n) = true .
+  eq {cP ;[n | ebrio,din,cR,cH,cA,nC,edad,en]; cPP,a,cjP,pC,pR} Sys |= personaConcretaEbrio(n) = true .
+  eq | cjP [n | ebrio,din,cR,cH,cA,nC,edad,en] | Sys |= personaConcretaEbrio(n) = true .
+
+  ***g
+  eq < cjP [n | e,0,cR,cH,cA,nC,edad,en] > Sys |= sinDinero = true .
+  eq {eT,cP ;[n | e,0,cR,cH,cA,nC,edad,en]; cPP,a,pC} Sys |= sinDinero = true .
+  eq {cjP [n | e,0,cR,cH,cA,nC,edad,en]} Sys |= sinDinero = true .
+  eq {cP,a,cjP [n | e,0,cR,cH,cA,nC,edad,en],pC,pR} Sys |= sinDinero = true .
+  eq {cP ;[n | e,0,cR,cH,cA,nC,edad,en]; cPP,a,cjP,pC,pR} Sys |= sinDinero = true .
+  eq | cjP [n | e,0,cR,cH,cA,nC,edad,en] | Sys |= sinDinero = true .
+
+  ***h
+  eq < cjP [n | e,din,cR,cH,cA,nC,edad,true] > Sys |= personaConcretaEntrada(n) = true .
+  eq {eT,cP ;[n | e,din,cR,cH,cA,nC,edad,true]; cPP,a,pC} Sys |= personaConcretaEntrada(n) = true .
+  eq {cjP [n | e,din,cR,cH,cA,nC,edad,true]} Sys |= personaConcretaEntrada(n) = true .
+  eq {cP,a,cjP [n | e,din,cR,cH,cA,nC,edad,true],pC,pR} Sys |= personaConcretaEntrada(n) = true .
+  eq {cP ;[n | e,din,cR,cH,cA,nC,edad,true]; cPP,a,cjP,pC,pR} Sys |= personaConcretaEntrada(n) = true .
+  eq | cjP [n | e,din,cR,cH,cA,nC,edad,true] | Sys |= personaConcretaEntrada(n) = true .
+
+  
+
+endm
+
+mod TEST2 is
+  pr PROPS .
+  pr LTL-SIMPLIFIER .
+  pr MODEL-CHECKER .
+endm
+
+red modelCheck(init, <> [] (~ genteLocal)) .  
+--- Falso. Porque entra en un bucle infinito entre las reglas plaza-local y local-plaza y por lo tanto no deja salir a la persona que está dentro
+--- del local.
+--- CONTRAEJEMPLO:
+--- {{[4,10]} < ["Fer" |
+---     indiferente,10,1,1,1,0,50,false] ["Laura" | indiferente,10,0,0,0,0,24,false] > | cpv | {cerrada,["Adri" | relajado,
+---     0,1,1,1,0,27,false],0,5} {cv,2,[0] ["Pepe" | relajado,0,0,0,0,0,19,true],10,5},'tienda-Plaza}, {{[4,10] ["Adri" |
+---     relajado,0,1,1,1,0,27,false]} < ["Fer" | indiferente,10,1,1,1,0,50,false] ["Laura" | indiferente,10,0,0,0,0,24,
+---     false] > | cpv | {cerrada,cv,0,5} {cv,2,[0] ["Pepe" | relajado,0,0,0,0,0,19,true],10,5},'plaza-Local} {{[4,10]} < [
+---     "Fer" | indiferente,10,1,1,1,0,50,false] ["Laura" | indiferente,10,0,0,0,0,24,false] > | cpv | {cerrada,cv,0,5} {[
+---     "Adri" | relajado,0,1,1,1,0,27,false],2,[0] ["Pepe" | relajado,0,0,0,0,0,19,true],10,5},'local-Plaza}
+
+red modelCheck(init, personaConcretaEbrio("Fer") -> [] personaConcretaEbrio("Fer")) .   
+****Cierto ya que una vez ebrio (en la plaza mayor o en el local) aunque se vaya a cualquier otro sitio el estado no cambia nunca.
+
+red modelCheck(init, [](personaConcretaTienda("Laura") /\ personaConcretaLocal("Laura") /\ personaConcretaRecreativos("Laura"))) . 
+****Falso. Puedes haber estado en la tienda y en los recreativos o en la tienda y el local, pero no se puede haber estado en el local
+*** y en los recreativos porque si sales de alguno de los dos vas a la zona residencial directamente con un estado diferente a "relajado" y por
+**** lo tanto no puedes volver a salir de la zona residencial.
+--- CONTRAEJEMPLO: 
+--- En este caso entra en bucle y se va todo el rato de la tienda al local y del local a la tienda.
+---   {{[5,5] ["Adri" |
+---     relajado,0,1,1,1,0,27,false] ["Pepe" | relajado,10,0,0,0,0,19,false]} < cpv > | cpv | {cerrada,["Fer" | relajado,
+---     10,1,1,1,0,50,false] ; ["Laura" | relajado,10,0,0,0,0,24,false],0,5} {cv,3,[0],10,5},'plaza-Tienda} {{[5,5] ["Pepe"
+---     | relajado,10,0,0,0,0,19,false]} < cpv > | cpv | {cerrada,["Fer" | relajado,10,1,1,1,0,50,false] ; ["Laura" |
+---     relajado,10,0,0,0,0,24,false] ; ["Adri" | relajado,0,1,1,1,0,27,false],0,5} {cv,3,[0],10,5},'plaza-Tienda} {{[5,5]}
+---     < cpv > | cpv | {cerrada,["Fer" | relajado,10,1,1,1,0,50,false] ; ["Laura" | relajado,10,0,0,0,0,24,false] ; [
+---     "Adri" | relajado,0,1,1,1,0,27,false] ; ["Pepe" | relajado,10,0,0,0,0,19,false],0,5} {cv,3,[0],10,5},
+---     'tienda-Plaza}
+
+red modelCheck(init, [](personaConcretaEntrada("Laura") -> <> personaConcretaLocal("Laura"))) . 
+***Falso. Puedes tener entrada y desde la plaza no ir necesariamente al local. O también puede pasar que tengas entrada, estés esperando
+*** en la cola del local y que no puedas entrar o porque el aforo está cubierto o no tengas la edad suficiente (>18).
+--- CONTRAEJEMPLO: 
+--- En este caso una persona que tiene entrada("Laura")va de la plaza a la tienda y de la tienda a la plaza indefinidamente.
+--- {{[4,10] ["Adri" | relajado,0,1,1,1,0,27,false]} < cpv > | ["Fer" | relajado,10,1,1,1,0,50,false] |
+---     {cerrada,["Laura" | relajado,5,0,0,0,0,24,true] ; ["Pepe" | relajado,10,0,0,0,0,19,false],0,5} {cv,3,[0],10,5},
+---     'tienda-Plaza} {{[4,10] ["Adri" | relajado,0,1,1,1,0,27,false] ["Laura" | relajado,5,0,0,0,0,24,true]} < cpv > | [
+---     "Fer" | relajado,10,1,1,1,0,50,false] | {cerrada,["Pepe" | relajado,10,0,0,0,0,19,false],0,5} {cv,3,[0],10,5},
+---     'plaza-Tienda} {{[4,10] ["Laura" | relajado,5,0,0,0,0,24,true]} < cpv > | ["Fer" | relajado,10,1,1,1,0,50,false] |
+---     {cerrada,["Pepe" | relajado,10,0,0,0,0,19,false] ; ["Adri" | relajado,0,1,1,1,0,27,false],0,5} {cv,3,[0],10,5},
+---     'plaza-Tienda} {{[4,10]} < cpv > | ["Fer" | relajado,10,1,1,1,0,50,false] | {cerrada,["Pepe" | relajado,10,0,0,0,0,
+---     19,false] ; ["Adri" | relajado,0,1,1,1,0,27,false] ; ["Laura" | relajado,5,0,0,0,0,24,true],0,5} {cv,3,[0],10,5},
+---     'tienda-Plaza})
+
+red modelCheck(init, (personaConcretaLocal("Laura") -> personaConcretaEntrada("Laura"))) . 
+***Ciero porque para entrar al local hay que tener entrada
+
+red modelCheck(init,  [] ~ ( personaConcretaEntrada("Laura")  /\ personaConcretaRecreativos("Laura") ) ).
+***Falso. Se puede comprar una entrada en la plaza y en cualquier momento irse a los recreativos 
+--- CONTRAEJEMPLO:
+---  {{[4,10] ["Laura" | relajado,5,0,0,0,0,24,true]} < cpv > | ["Fer" | relajado,10,1,1,1,0,50,false] |
+---     {cerrada,["Pepe" | relajado,10,0,0,0,0,19,false] ; ["Adri" | relajado,0,1,1,1,0,27,false],0,5} {cv,3,[0],10,5},
+---     'plaza-Recreativos} {{[4,10]} < cpv > | ["Fer" | relajado,10,1,1,1,0,50,false] ["Laura" | relajado,5,0,0,0,0,24,
+---     true] | {cerrada,["Pepe" | relajado,10,0,0,0,0,19,false] ; ["Adri" | relajado,0,1,1,1,0,27,false],0,5} {cv,3,[0],
+---     10,5},'tienda-Plaza} {{[4,10] ["Pepe" | relajado,10,0,0,0,0,19,false]} < cpv > | ["Fer" | relajado,10,1,1,1,0,50,
+---     false] ["Laura" | relajado,5,0,0,0,0,24,true] | {cerrada,["Adri" | relajado,0,1,1,1,0,27,false],0,5} {cv,3,[0],10,
+---     5},'tienda-Plaza}
+set trace off .
+rew [10] init .
+
+***( Determinar que reglas se pueden transformar en ecuaciones por cada una de las propiedades.
+--- Se pede transformar siempre y cuando la regla no afecte a la propiedad, es decir, que si la propiedad 
+--- era cierta o falsa antes de aplicar la regla, depués de aplicarla, la propiedad tiene que mantener su valor.
+
+--- (a) Hay gente en el local de moda. 
+--- 	- residencia-tienda: Si
+--- 	- residencia-Plaza: Si
+--- 	- residencia-local: Si
+--- 	- residencia-recreativos: Si
+--- 	- comprar: Si
+--- 	- cerrar: Si
+--- 	- tienda-Plaza: Si
+--- 	- copa: Si
+--- 	- refresco: Si
+--- 	- robar: Si
+--- 	- ebrio: Si
+--- 	- entrada: Si
+--- 	- plaza-Tienda: Si
+--- 	- plaza-Local: Si
+--- 	- plaza-Recreativos: Si
+--- 	- entrar-local: No 
+--- 	- local-Plaza: Si
+--- 	- local-copa: Si
+--- 	- local-refresco: Si
+--- 	- local-ebrio: Si
+--- 	- expulsar-local-residencia: No
+--- 	- local-residencia: No
+--- 	- ganar: Si
+--- (b) Una persona concreta está en el local de moda. 
+--- 	- residencia-tienda: Si
+--- 	- residencia-Plaza: Si
+--- 	- residencia-local: Si
+--- 	- residencia-recreativos: Si
+--- 	- comprar: Si
+--- 	- cerrar: Si
+--- 	- tienda-Plaza: Si
+--- 	- copa: Si
+--- 	- refresco: Si
+--- 	- robar: Si
+--- 	- ebrio: Si
+--- 	- entrada: Si
+--- 	- plaza-Tienda: Si
+--- 	- plaza-Local: Si
+--- 	- plaza-Recreativos: Si
+--- 	- entrar-local: No 
+--- 	- local-Plaza: Si
+--- 	- local-copa: Si
+--- 	- local-refresco: Si
+--- 	- local-ebrio: Si
+--- 	- expulsar-local-residencia: No
+--- 	- local-residencia: No
+--- 	- ganar: Si
+--- (c) Una persona concreta está en la tienda. 
+--- 	- residencia-tienda: No
+--- 	- residencia-Plaza: Si
+--- 	- residencia-local: Si
+--- 	- residencia-recreativos: Si
+--- 	- comprar: No (Porque la persona que compra una bolsa se va a la plaza mayor)
+--- 	- cerrar: Si
+--- 	- tienda-Plaza: No
+--- 	- copa: Si
+--- 	- refresco: Si
+--- 	- robar: Si
+--- 	- ebrio: Si
+--- 	- entrada: Si
+--- 	- plaza-Tienda: No
+--- 	- plaza-Local: Si
+--- 	- plaza-Recreativos: Si
+--- 	- entrar-local: Si 
+--- 	- local-Plaza: Si
+--- 	- local-copa: Si
+--- 	- local-refresco: Si
+--- 	- local-ebrio: Si
+--- 	- expulsar-local-residencia: Si
+--- 	- local-residencia: Si
+--- 	- ganar: Si
+--- (d) Una persona concreta está en los recreativos. 
+--- 	- residencia-tienda: Si
+--- 	- residencia-Plaza: Si
+--- 	- residencia-local: Si
+--- 	- residencia-recreativos: No
+--- 	- comprar: Si
+--- 	- cerrar: Si
+--- 	- tienda-Plaza: Si
+--- 	- copa: Si
+--- 	- refresco: Si
+--- 	- robar: Si
+--- 	- ebrio: Si
+--- 	- entrada: Si
+--- 	- plaza-Tienda: Si
+--- 	- plaza-Local: Si
+--- 	- plaza-Recreativos: No
+--- 	- entrar-local: Si
+--- 	- local-Plaza: Si
+--- 	- local-copa: Si
+--- 	- local-refresco: Si
+--- 	- local-ebrio: Si
+--- 	- expulsar-local-residencia: Si
+--- 	- local-residencia: Si
+--- 	- ganar: NO
+--- (e) Hay alguien ebrio (en cualquier lugar). 
+--- 	- residencia-tienda: Si
+--- 	- residencia-Plaza: Si
+--- 	- residencia-local: Si
+--- 	- residencia-recreativos: Si
+--- 	- comprar: Si
+--- 	- cerrar: Si
+--- 	- tienda-Plaza: Si
+--- 	- copa: Si
+--- 	- refresco: Si
+--- 	- robar: Si
+--- 	- ebrio: No
+--- 	- entrada: Si
+--- 	- plaza-Tienda: Si
+--- 	- plaza-Local: Si
+--- 	- plaza-Recreativos: Si
+--- 	- entrar-local: Si 
+--- 	- local-Plaza: Si
+--- 	- local-copa: Si
+--- 	- local-refresco: Si
+--- 	- local-ebrio: No
+--- 	- expulsar-local-residencia: Si
+--- 	- local-residencia: Si
+--- 	- ganar: Si
+--- (f) Hay alguien concreto ebrio (en cualquier lugar). 
+--- 	- residencia-tienda: Si
+--- 	- residencia-Plaza: Si
+--- 	- residencia-local: Si
+--- 	- residencia-recreativos: Si
+--- 	- comprar: Si
+--- 	- cerrar: Si
+--- 	- tienda-Plaza: Si
+--- 	- copa: Si
+--- 	- refresco: Si
+--- 	- robar: Si
+--- 	- ebrio: No
+--- 	- entrada: Si
+--- 	- plaza-Tienda: Si
+--- 	- plaza-Local: Si
+--- 	- plaza-Recreativos: Si
+--- 	- entrar-local: Si 
+--- 	- local-Plaza: Si
+--- 	- local-copa: Si
+--- 	- local-refresco: Si
+--- 	- local-ebrio: No
+--- 	- expulsar-local-residencia: Si
+--- 	- local-residencia: Si
+--- 	- ganar: Si
+--- (g) Hay alguien que se ha quedado sin dinero. 
+--- 	- residencia-tienda: Si
+--- 	- residencia-Plaza: Si
+--- 	- residencia-local: Si
+--- 	- residencia-recreativos: Si
+--- 	- comprar: No
+--- 	- cerrar: Si
+--- 	- tienda-Plaza: Si
+--- 	- copa: Si
+--- 	- refresco: Si
+--- 	- robar: Si
+--- 	- ebrio: Si
+--- 	- entrada: No
+--- 	- plaza-Tienda: Si
+--- 	- plaza-Local: Si
+--- 	- plaza-Recreativos: Si
+--- 	- entrar-local: Si 
+--- 	- local-Plaza: Si
+--- 	- local-copa: No
+--- 	- local-refresco: No
+--- 	- local-ebrio: Si
+--- 	- expulsar-local-residencia: Si
+--- 	- local-residencia: Si
+--- 	- ganar: Si
+--- (h) Hay alguien concreto con entrada. 
+--- 	- residencia-tienda: Si
+--- 	- residencia-Plaza: Si
+--- 	- residencia-local: Si
+--- 	- residencia-recreativos: Si
+--- 	- comprar: Si
+--- 	- cerrar: Si
+--- 	- tienda-Plaza: Si
+--- 	- copa: Si
+--- 	- refresco: Si
+--- 	- robar: Si
+--- 	- ebrio: Si
+--- 	- entrada: No
+--- 	- plaza-Tienda: Si
+--- 	- plaza-Local: Si
+--- 	- plaza-Recreativos: Si
+--- 	- entrar-local: Si 
+--- 	- local-Plaza: Si
+--- 	- local-copa: Si
+--- 	- local-refresco: Si
+--- 	- local-ebrio: Si
+--- 	- expulsar-local-residencia: Si
+--- 	- local-residencia: Si
+--- 	- ganar: Si
+)

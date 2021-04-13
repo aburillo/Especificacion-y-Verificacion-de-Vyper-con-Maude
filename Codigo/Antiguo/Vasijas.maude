@@ -1,0 +1,16 @@
+mod VASIJAS is
+	pr NAT .
+	sorts Vasija Sis .
+	subsort Vasija < Sis .
+	op vasija : Nat Nat -> Vasija [ctor] .
+	op __ : Sis Sis -> Sis [ctor assoc comm] .
+	vars M1 N1 M2 N2 : Nat .
+	op initial : -> Sis .
+	eq initial = vasija(3,0) vasija(5,0) vasija(8,0) .
+	rl [vacia] : vasija(M1,N1) => vasija(M1,0) .
+    rl [llena] : vasija(M1,N1) => vasija(M1,M1) .
+	crl [transvase1] : vasija(M1,N1) vasija(M2,N2) => vasija(M1,0) vasija(M2,N2 + N1) 
+	 if M2 > N2 + N1 .
+	crl [transvase2] : vasija(M1,N1) vasija(M2,N2) => vasija(M1,sd( N1 + N2, M2)) vasija(M2,M2) 
+	 if M2 <= N2 + N1 .
+endm 

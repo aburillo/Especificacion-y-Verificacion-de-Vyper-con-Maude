@@ -1,0 +1,21 @@
+mod HASH is 
+	pr NAT .
+	pr STRING .
+	sorts Pair Hash Est Nodo Msj Cnm Loc .
+	subsort Pair < Hash .
+	op thu : -> Hash [ctor] .
+	op _;_ : Hash Hash -> Hash [ctor assoc comm id: thu] .
+	op _->_ : Nat Nat -> Pair [ctor] .
+	ops act inact : -> Est [ctor] .
+	op <_,_,_,_> : Nat Est Nat String -> Nodo [ctor] .
+	op to_:_ : Nat String -> Msj [ctor] .
+	subsort Nodo Msj < Cnm .
+	op __ : Cnm Cnm -> Cnm [ctor assoc comm] .
+	subsort Hash < Cnm .
+	op [_|_] : Nat Cnm -> Loc [ctor] .
+	vars N N' N'' : Nat .
+	vars S : String .
+	vars CN : Cnm .
+	rl[i-a] : < N , inact , N' , S > => < N , act , N' , S > .
+	crl[ir-c] : [ N | (to N' : s) CN ] [ N'' | H CN ] =>
+endm

@@ -1,0 +1,15 @@
+fmod MCONJ is
+	pr NAT .
+	sort Mconj .
+	subsort Nat < Mconj .
+	op mv : -> Mconj[ctor] .
+	op __ : Mconj Mconj -> Mconj[ctor comm assoc id: mv] .
+	vars N : Nat .
+	vars M : Mconj .
+	op esta? : Mconj Nat -> Bool .
+	eq esta?(N M , N) = true .
+	eq esta?(M , N) = false [owise] .
+	op | _ | : Mconj -> Nat .
+	eq | mv | = 0 .
+	eq | N M | = s(| M |) .
+endfm

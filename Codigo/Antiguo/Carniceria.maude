@@ -1,0 +1,247 @@
+---Adrián Burillo Elmaleh
+---Laura de la Fuente Lorenzo
+
+
+fmod CARNICERIA is
+  pr NAT .
+
+  sort Pedido Estado Furgoneta CPedidos Granja Cliente EstadoC ListaC LIdGranjas Carniceria Carretera LFurgonetas Sistema .
+
+  subsort Pedido < CPedidos .
+  subsort Nat < LIdGranjas .
+  subsort Cliente < ListaC .
+  subsort Furgoneta < LFurgonetas .
+  subsort Carniceria Granja Carretera < Sistema .
+
+  op pv : -> Pedido [ctor] .
+  ***[idPedido|cantidadCerdo,cantidadVaca]
+  op [_|_,_] : Nat Nat Nat -> Pedido [ctor] .
+
+  ops reparto vuelta esperando : -> Estado [ctor] .
+  op fv : -> Furgoneta [ctor] .
+  ***[idGranja,pedido,estado]
+  op [_,_,_] : Nat Pedido Estado -> Furgoneta [ctor] .
+
+  op cv : -> CPedidos [ctor] .
+  op __ : CPedidos CPedidos -> CPedidos [ctor assoc comm id: cv] .
+  ***[cantidadCerdo,cantidadVaca|idGranja,furgoneta,listaPedidos]
+  op [_,_|_,_,_] : Nat Nat Nat Furgoneta CPedidos -> Granja [ctor] .
+
+  ***[cantidadCerdo,cantidadVaca]
+  op [_,_] : Nat Nat -> Cliente [ctor] .
+
+  ops abierta cerrada : -> EstadoC [ctor] .
+  op lv : -> ListaC [ctor] .
+  op __ : ListaC ListaC -> ListaC [ctor assoc id: lv] .
+  op lidv : -> LIdGranjas .
+  op __ : LIdGranjas LIdGranjas -> LIdGranjas [ctor assoc comm id: lidv] .
+  ***[idCarniceria|estadoCarniceria,cantidadCerdo,cantidadVaca,colaClientes,furgoneta,listaIdsGranjas]
+  op [_|_,_,_,_,_,_] : Nat EstadoC Nat Nat ListaC Furgoneta LIdGranjas -> Carniceria [ctor] .
+
+  op lfv : -> LFurgonetas [ctor] .
+  op __ : LFurgonetas LFurgonetas -> LFurgonetas [ctor assoc id: lfv] .
+  ***[idGranja,idCarniceria|listaFurgonetasIda,listaFurgonetasVuelta]
+  op [_,_|_,_] : Nat Nat LFurgonetas LFurgonetas -> Carretera [ctor] .
+
+  op __ : Sistema Sistema -> Sistema [ctor assoc comm] .
+
+endfm
+
+fmod TEST is
+  pr CARNICERIA .
+
+  op init : -> Sistema .
+
+  eq init = [3,5 | 1,[1,pv,esperando],[1 | 3,4][2 | 3,4]][1,2 | 2,[2,pv,esperando],[1 | 0,1][2 | 0,1]]
+            [1 | abierta,0,0,[1,1][0,1],fv, 1 2][2 | abierta,0,0,[0,2],fv, 1 2][1,1 | lfv,lfv][1,2 | lfv,lfv][2,1 | lfv,lfv][2,2 | lfv,lfv] .
+
+endfm
+
+mod REGLAS is
+  pr TEST .
+
+
+  vars c1 v1 idG idF idC c2 v2 c3 v3 : Nat .
+  var cP : CPedidos .
+  vars lC lC1 : ListaC .
+  var idsG : LIdGranjas .
+  vars lF1 lF2 : LFurgonetas .
+  var P : Pedido .
+  var E : Estado .
+  var E1 : EstadoC .
+  var F : Furgoneta .
+
+  crl[carga-furgo] : [c1,v1 | idG,[idF,pv,esperando],[idC | c2,v2] cP] => [sd(c1,c2),sd(v1,v2) | idG,[idF,[idC | c2,v2],reparto],cP]
+	 if c1 >= c2 /\ v1 >= v2 .
+
+  rl[en-reparto] : [c1,v1 | idG,[idF,[idC | c2,v2],reparto],cP][idG,idC | lF1,lF2] => [c1,v1 | idG,fv,cP][idG,idC | lF1 [idF,[idC | c2,v2],reparto],lF2] .
+
+  rl[destino] : [idG,idC | [idG,P,reparto] lF1,lF2][idC | E1,c1,v1,lC,fv,idsG] => [idG,idC | lF1,lF2][idC | E1,c1,v1,lC,[idG,P,reparto],idsG] .
+
+  rl[descargar] : [idC | E1,	c1,v1,lC,[idG,[idC | c2,v2],reparto],idG idsG] => [idC | E1,c1 + c2,v1 + v2,lC,[idG,pv,vuelta],idsG] .
+
+  rl[carretera-vuelta] : [idC | E1,c1,v1,lC,[idG,pv,vuelta],idsG][idG,idC | lF1,lF2] => [idC | E1,c1,v1,lC,fv,idsG][idG,idC | lF1,lF2 [idG,pv,vuelta]] .
+
+  rl[vuelta] : [idG,idC | lF1,[idG,pv,vuelta] lF2][c1,v1 | idG,fv,cP] => [idG,idC | lF1,lF2][c1,v1 | idG,[idG,pv,esperando],cP] .
+
+  crl[vender] : [idC | abierta,c1,v1,[c2,v2] lC,F,idsG] => [idC | abierta,sd(c1,c2),sd(v1,v2),lC,F,idsG]
+	  if c1 >= c2 /\ v1 >= v2 .
+
+  rl[cerrar] : [idC | abierta,c1,v1,lv,F,idsG] => [idC | cerrada,c1,v1,lv,F,idsG] .
+
+  rl[desaparecer] : [idC | E1,c1,v1,[c3,v3] lC [c2,v2] lC1,F,idsG] => [idC | E1,c1,v1,[c3,v3] lC lC1,F,idsG] .
+
+endm
+
+load model-checker.maude
+
+mod PROPS is
+  pr REGLAS .
+  pr SATISFACTION .
+
+  subsort Sistema < State .
+
+  vars c1 v1 iG iC c2 v2 N : Nat .
+  var f : Furgoneta .
+  var lP : CPedidos .
+  var e : EstadoC .
+  var lC : ListaC .
+  var lG : LIdGranjas .
+  var p p1 : Pedido .
+  vars lF1 lF2 : LFurgonetas .
+  var Sys : Sistema .
+  var e1 : Estado .
+
+  op tieneSuministros : Nat Nat Nat -> Prop [ctor] .
+  ops tienePedido esperaPedido : Nat Nat -> Prop [ctor] .
+  ops abierta cerrada tieneCliente hayFurgoneta hayFurgonetaEnGranja hayExactamenteFurgonetas : Nat -> Prop [ctor] .
+  op hayAtasco : -> Prop [ctor] .
+  op aux : Sistema -> Nat [ctor] .
+
+  ceq[iC | e, c1,v1,lC,f,lG] Sys |=  tieneSuministros(iC,c2,v2) = true
+     if c1 >= c2 /\ v1 >= v2 .
+
+  eq [c1,v1 | iG,f,[iC | c2,v2] lP] Sys |= tienePedido(iG,iC) = true .
+
+  eq [iC | e, c1,v1,lC,f,iG lG] Sys |= esperaPedido(iC,iG) = true .
+
+  eq [iC | abierta , c1,v1,lC,f,lG] Sys |= abierta(iC) = true .
+
+  eq [iC | cerrada , c1,v1,lC,f,lG] Sys |= cerrada(iC) = true .
+
+  eq [iC | cerrada , c1,v1,[c2,v2] lC,f,lG] Sys |= tieneCliente(iC) = true .
+
+  eq [iC | e, c1,v1,lC,[iG,p,reparto],lG] Sys |= hayFurgoneta(iC) = true .
+  eq [iG,iC | [iG,p,reparto] lF1, lF2] Sys |= hayFurgoneta(iC) = true .
+
+  eq [c1,v1 | iG,[iG,[iC | c2,v2],reparto],lP] Sys |= hayFurgoneta(iC) = true .
+
+  eq [c1,v1 | iG,[iG,p,e1],lP] Sys |= hayFurgonetaEnGranja(iG) = true .
+
+  eq [iG,iC | [iG,p,e1] [iG,p1,e1] lF1, lF2] Sys |= hayAtasco = true .
+  eq [iG,iC |  lF1, [iG,p,e1] [iG,p1,e1] lF2] Sys |= hayAtasco = true .
+
+  eq Sys |= hayExactamenteFurgonetas(N) = N == aux(Sys) .
+
+  eq aux([c1,v1 | iG,[iG,p,e1],lP] Sys) = 1 + aux(Sys) .
+  eq aux([iC | e, c1,v1,lC,[iG,p,e1],lG] Sys) = 1 + aux(Sys) .
+  eq aux([iG,iC | [iG,p,e1] lF1,  lF2] Sys) = 1 + aux([iG,iC | lF1,  lF2] Sys) .
+  eq aux([iG,iC | lF1, [iG,p,e1] lF2] Sys) = 1 + aux([iG,iC | lF1,  lF2] Sys) .
+  eq aux(Sys) = 0 [owise] .
+
+endm
+
+mod TEST2 is
+  pr PROPS .
+  pr LTL-SIMPLIFIER .
+  pr MODEL-CHECKER .
+endm
+
+(a)
+red modelCheck(init, [] (<> cerrada(1))) .
+---Falso porque la carnicería 1 no tiene suministros suficientes para abastecer al primer cliente de la cola y la granja que suministra
+---a esa carnicería tampoco, por tanto, al ser el primer cliente de la cola no se puede ir y nunca cerraría esa carnicería.
+---{[1,1 | lfv,lfv] [1,
+---    2 | lfv,lfv] [2,1 | lfv,lfv] [2,2 | lfv,lfv] [0,1 | 1,[1,pv,esperando],[1 | 3,4]] [1,0 | 2,[2,pv,esperando],cv] [1
+---    | abierta,0,1,[1,1],fv,1] [2 | abierta,3,3,lv,fv,lidv],'cerrar}, {[1,1 | lfv,lfv] [1,2 | lfv,lfv] [2,1 | lfv,lfv] [
+---    2,2 | lfv,lfv] [0,1 | 1,[1,pv,esperando],[1 | 3,4]] [1,0 | 2,[2,pv,esperando],cv] [1 | abierta,0,1,[1,1],fv,1] [2 |
+---    cerrada,3,3,lv,fv,lidv],deadlock}
+
+red modelCheck(init, [](<> cerrada(2))) .   ***false 
+---{[1,1 | lfv,lfv] [1,2 | lfv,lfv] [2,1 | lfv,lfv] [2,2 | lfv,[2,pv,vuelta]] [0,1
+---   | 1,[1,pv,esperando],[2 | 3,4]] [1,0 | 2,fv,cv] [1 | cerrada,2,3,lv,fv,lidv] [2 | abierta,0,1,[0,2],fv,1],'vuelta},
+---    {[1,1 | lfv,lfv] [1,2 | lfv,lfv] [2,1 | lfv,lfv] [2,2 | lfv,lfv] [0,1 | 1,[1,pv,esperando],[2 | 3,4]] [1,0 | 2,[2,
+---    pv,esperando],cv] [1 | cerrada,2,3,lv,fv,lidv] [2 | abierta,0,1,[0,2],fv,1],deadlock}
+
+(b)
+red modelCheck(init, ([] (tieneCliente(1) /\ tieneSuministros(1,1,1))) -> <> cerrada(1)) .  ***true
+---Siempre que hay clientes y se tienen los suministros necesarios para ellos, estos desaparecen y, por lo tanto, 
+---llegará el momento en que la carnicería se quedará sin clientes y cerrará.
+red modelCheck(init, ([] (tieneCliente(2) /\ tieneSuministros(2,2,2))) -> <> cerrada(2)) .  ***true
+
+(c)
+red modelCheck(init, [] ~ (abierta(1) /\ cerrada(1))) .  ***true
+---trivial, dependiendo de si hay clientes o no cambia de estado.
+red modelCheck(init, [] ~ (abierta(2) /\ cerrada(2))) .  ***true
+
+(d)
+red modelCheck(init, [] (esperaPedido(1,1) -> <>(~ esperaPedido(1,1)))) .  ***false
+---Es el caso en el que una carnicería realiza un pedido a una granja de una cantidad de vaca y de cerdo y esta granja no dispone 
+---de la cantidad necesaria de alguna.
+---{[1,1 | lfv,lfv] [1,
+---    2 | lfv,lfv] [2,1 | lfv,lfv] [2,2 | lfv,lfv] [0,1 | 1,[1,pv,esperando],[1 | 3,4]] [1,0 | 2,[2,pv,esperando],cv] [1
+---    | abierta,0,1,[1,1],fv,1] [2 | abierta,3,3,lv,fv,lidv],'cerrar}, {[1,1 | lfv,lfv] [1,2 | lfv,lfv] [2,1 | lfv,lfv] [
+---    2,2 | lfv,lfv] [0,1 | 1,[1,pv,esperando],[1 | 3,4]] [1,0 | 2,[2,pv,esperando],cv] [1 | abierta,0,1,[1,1],fv,1] [2 |
+---    cerrada,3,3,lv,fv,lidv],deadlock}
+
+--- red modelCheck(init, [] (esperaPedido(1,2) -> ~ esperaPedido(1,2))) .
+--- red modelCheck(init, [] (esperaPedido(2,1) -> ~ esperaPedido(2,1))) .
+--- red modelCheck(init, [] (esperaPedido(2,2) -> ~ esperaPedido(2,2))) .
+
+(e)
+red modelCheck(init, <> hayFurgoneta(1)) . ***true
+---En nuestro caso da verdadero porque las granjas de nuestro sistema inicial tiene suficientes recursos (cantidad de cerdo y vaca)
+---para poder cargar ambas furgonetas y ponerlas en reparto
+
+red modelCheck(init, <> hayFurgoneta (2)) .  ***true
+
+(f)
+red modelCheck(init, <> [] (hayFurgonetaEnGranja(1) /\ hayFurgonetaEnGranja(2))) .  ***true
+---Esto puede pasar en dos casos, porque las granjas ya no tengan más pedidos o porque el pedido que tenga no pueda realizarse
+---por falta de suministros y, en ambos casos, las furgonetas se quedarán paradas para siempre en ambas granjas
+
+(g)
+red modelCheck(init, [] (~ tieneCliente(1) -> <> cerrada(1))) .  ***false
+---Falso porque la carnicería 1 no tiene suministros suficientes para abastecer al primer cliente de la cola y la granja que suministra
+---a esa carnicería tampoco, por tanto, al ser el primer cliente de la cola no se puede ir y nunca cerraría esa carnicería.
+---{[1,1 | lfv,lfv] [1,
+---    2 | lfv,lfv] [2,1 | lfv,lfv] [2,2 | lfv,lfv] [0,1 | 1,[1,pv,esperando],[1 | 3,4]] [1,0 | 2,[2,pv,esperando],cv] [1
+---    | abierta,0,1,[1,1],fv,1] [2 | abierta,3,3,lv,fv,lidv],'cerrar}, {[1,1 | lfv,lfv] [1,2 | lfv,lfv] [2,1 | lfv,lfv] [
+---    2,2 | lfv,lfv] [0,1 | 1,[1,pv,esperando],[1 | 3,4]] [1,0 | 2,[2,pv,esperando],cv] [1 | abierta,0,1,[1,1],fv,1] [2 |
+---    cerrada,3,3,lv,fv,lidv],deadlock}
+
+red modelCheck(init, [] (~ tieneCliente(2) -> <> cerrada(2))) .  ***false 
+---{[1,1 | lfv,lfv] [1,2 | lfv,lfv] [2,1 | lfv,lfv] [2,2 | lfv,[2,pv,vuelta]] [0,1
+---    | 1,[1,pv,esperando],[2 | 3,4]] [1,0 | 2,fv,cv] [1 | cerrada,2,3,lv,fv,lidv] [2 | abierta,0,1,[0,2],fv,1],'vuelta},
+---   {[1,1 | lfv,lfv] [1,2 | lfv,lfv] [2,1 | lfv,lfv] [2,2 | lfv,lfv] [0,1 | 1,[1,pv,esperando],[2 | 3,4]] [1,0 | 2,[2,
+---    pv,esperando],cv] [1 | cerrada,2,3,lv,fv,lidv] [2 | abierta,0,1,[0,2],fv,1],deadlock}
+
+(h)
+red modelCheck(init, [] (hayAtasco -> <> ~ hayAtasco)) .   ***true
+---Como en nuestro caso solo tenemos dos furgonetas y el atasco significa que haya dos o más furgonetas en alguno de los dos sentidos, 
+---esto quiere decir que tanto las granjas como las carnicerías tienen sitio para una furgoneta y, entonces, la furgoneta que está en cabeza
+---puede salir de la carretera, quitando así el atasco
+
+(i)
+red modelCheck(init, [] hayExactamenteFurgonetas(2)) .  ***true
+---Porque hemos creado un sistema inicial con solo dos furgonetas.
+
+(j)
+red modelCheck(init, [] (hayAtasco -> ~ (hayFurgonetaEnGranja(1) /\ hayFurgonetaEnGranja(2)))) .   ***true
+---Como solo tenemos dos furgonetas, si hay atasco esas dos furgonetas van a estar en la carretera y, por lo tanto,
+---no puede estar en ninguna de las granjas.
+
+
+---rew init .
+set trace off .
+

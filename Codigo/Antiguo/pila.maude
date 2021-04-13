@@ -1,0 +1,13 @@
+fmod PILA is
+	pr NAT .
+	sort Pila .
+	op pila-vacia : -> Pila [ctor] .
+	op apila : Nat Pila -> Pila [ctor] .
+	var N : Nat .
+	var P : Pila .
+	op desapila : Pila -> Pila .
+	eq desapila(pila-vacia) = pila-vacia .
+	eq desapila(apila(N,P)) = P .
+	op cima : Pila ~> Nat .
+	eq cima(apila(N,P)) = N . 
+endfm

@@ -1,0 +1,21 @@
+mod RIO is
+    sort Lado Elem Par Sis .
+	subsort Par < Sis .
+	ops i d : -> Lado[ctor] .
+	vars L L' L1 L2 L3 : Lado .
+	ops o c l p : -> Elem[ctor] .
+	op [_,_] : Elem lado -> Par [ctor]
+	op __ : Sis Sis -> Sis[ctor assoc comm] .
+	op cambia : Lado -> Lado .
+	eq cambia(i) = d .
+	eq cambia(d) = i .
+	op seComen : Lado Lado Lado Lado -> Bool .
+	eq seComen(L,L1,L2,L3) = (L1==L2 or L2==L3) and (L1!= L3) .
+	crl[po] : [p,L] [o,L] => [p,L'] [o,L']
+	 if L' := cambia(L) .
+	crl [p] : [p,L] [c,L1] [o,L2] [l,L3] => [p,cambia(L)] [c,L1] [o,L2] [l,L3] 
+	 if not seComen(cambia(L),L1,L2,L3)  .
+	crl [pc] : [p,L] [c,L] [o,L1] [l,L2] => [p,L'] [c,L'] [o,L1] [l,L2] 
+	 if L' := cambia(L) and not seComen(L',L',L1,L2) .
+endfm .
+	 

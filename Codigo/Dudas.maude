@@ -1,0 +1,576 @@
+fmod BOOLEAN is
+	pr TIPOS .
+	pr STRING .
+	sorts DeclaracionBooleana OperacionBooleana Negacion AND OR BasicB ValuesB .
+	subsort  BasicB String < ValuesB .
+	subsort Negacion AND OR  < OperacionBooleana .
+	op True False : ->  BasicB [ctor] .
+	op __=_ : Boolean String ValuesB -> DeclaracionBooleana [ctor] .
+	op not _ : ValuesB -> Negacion [ctor] .
+	op _and_ : ValuesB ValuesB -> AND [ctor comm] .
+	op _or_ : ValuesB ValuesB -> OR [ctor comm] .
+	op obv : -> OperacionBooleana [ctor] .
+	op __ : OperacionBooleana OperacionBooleana -> OperacionBooleana [ctor id : obv] .
+endfm
+*** al tener la variable de operaciones booleanas no se enq ue momento puedo resolver el not and y or
+*** sin operaciones booleanas no se como poder concatener varias operaciones para que funciones
+*** de la forma a or b or c and not d
+fmod INT is
+	pr NAT .
+	pr BOOLEAN .
+	sort Nnat Int .
+	vars N S : Nat . 
+	subsort Nnat Nat < Int .
+	op -_ : Nat -> Nnat [ctor] .
+	op _ +l _ : Int Int -> Int [assoc] .
+	eq(N +l S) = (N + S) .
+	eq(- N +l - S) = if N > S
+					then - sd(N,S)
+					else  sd(S,N)
+					fi .
+	eq(- N +l S) = if N >= S
+					then - sd(N,S)
+					else sd(S,N)
+					fi .
+	eq(N +l - S) = if N >= S
+					then sd(N,S)
+					else - sd(S,N)
+					fi .
+    op _ - _ : Int Int -> Int .
+	eq ( N - S ) = if N > S
+					then sd(N,S)
+					else  - sd(S,N)
+					fi .
+	eq (- N - - S) = if N > S
+					then - sd(N,S)
+					else  sd(S,N)
+					fi .
+	eq (- N - S) = (- N +l - S) .
+	eq (N - - S) = (N +l S) .
+	op _ <I _ : Int Int -> BasicB .
+	eq(- N <I S) = True .
+	eq(- N <I - S) = if N < S 
+	                then True 
+					elif S < N
+					then False 
+					fi .
+	eq (N <I -S) = False .
+	eq( N <I  S) = if N < S 
+	                then True 
+					elif S < N
+					then False 
+					fi .
+*** cpomo puedo hacer else if 
+fmod FLOAT1 is
+	pr INT .
+	pr BOOLEAN .
+	sorts Float Decim Zeros Z .
+	subsort Zero < Zeros .
+	vars N S : Nat . 
+	vars I I1 : Int .
+	var L : Zero .
+	vars Z1 Z2 : Zeros .
+    *** op 0 : -> Z [ctor] .
+	op zv : -> Zeros [ctor] .
+	op __ : Zeros Zeros -> Zeros [ctor assoc comm id: zv] .
+	op _,_ : Zero Nat -> Decim [ctor] .
+	***op _._ : Int Decim -> Float [ctor] .
+	*** op _.__ : Int Zeros Nat -> Float [ctor] .
+	op _._ : Int Nat -> Float [ctor] .
+	op nZ _ : Zeros -> Nat .
+    eq (nZ 0 Z1) = 1 +I nZ (Z1) .
+	eq (nZ zv) = 0 . 
+	op nd _ : Nat -> Nat .
+	eq (nd N) = if N > 0 
+	                then 1 +I nd (N /I 10) 
+					else 0  
+					fi .
+	op DigitosIguales(_,_) : Nat Nat -> Nat .
+	eq (DigitosIguales(N,S)) = if nd(N) == nd(S)
+							   then N + S 
+							   else DigitosDiferentes(N,S)
+							   fi .
+	op DigitosDiferentes(_,_) : Nat Nat -> Nat .
+	eq (DigitosDiferentes(N,S)) = if nd(N) < nd(S)
+							  then S +I (N *I ((nd(S) -I nd(N)) * 10)) 
+							  else N +I (S *I ((nd(N) -I nd(S)) * 10))
+							  fi .
+	***op _+_ : Float Float -> Float .
+	*** eq (I . N + I1 . S ) = I +I I1 . zv DigitosIguales(N,S) .
+	op _+R_ : Decim Nat -> Decim .
+	eq ((L , N )+R S ) = L , (S + N) .
+endfm
+
+fmod INT1 is
+	pr NAT .
+	pr BOOLEAN .
+	sort Nnat Int .
+	vars N S : Nat . 
+	vars I I1 : Int . 
+	subsort Nnat Nat < Int .
+	op -_ : Nat -> Nnat [ctor] .
+	op _ +I _ : Int Int -> Int [comm] .
+	eq(N +I S) = (N + S) .
+	eq(- N +I - S) = if N > S
+					then - sd(N,S)
+					else  sd(S,N)
+					fi .
+	eq(- N +I S) = if N >= S
+					then - sd(N,S)
+					else sd(S,N)
+					fi .
+	eq(N +I - S) = if N >= S
+					then sd(N,S)
+					else - sd(S,N)
+					fi .
+    op _ -I _ : Int Int -> Int .
+	eq ( N -I S ) = if N >= S
+					then sd(N,S)
+					else  - sd(S,N)
+					fi .
+	eq (- N -I - S) = if N > S
+					then - sd(N,S)
+					else  sd(S,N)
+					fi .
+	eq (- N -I S) = (- N +I - S) .
+	eq (N -I - S) = (N +I S) .
+	op _ *I _ : Int Int -> Int [comm].
+	eq ( N *I S ) = N * S .
+	eq (- N *I - S) = N * S .
+	eq (- N *I S) = -( N * S) .
+
+	op _ /I _ : Int Int -> Int .
+	eq ( N /I S ) = if N >= S 
+					then 1 +I ((N -I S) /I S) 
+					else 0 
+					fi .
+	eq (- N /I - S) = if N >= S 
+					 then 1 +I ((N -I S) /I S) 
+					 else 0 
+					 fi .
+	eq (- N /I S) = - ( N /I S) .
+	eq ( N /I - S) = - ( N /I S) .
+	op _ %I _ : Int Int -> Int .
+	eq ( N %I S ) = if N >= S 
+					then ((N -I S) %I S) 
+					else  N
+					fi .
+	eq (- N %I S) = ( N %I S) .
+	*** exponencial
+	op _ **I _ : Int Int -> Int .
+	eq ( N **I S ) = if S > 0
+					then  N *I (N **I (S -I 1))
+					else  1
+					fi .
+    eq ( - N **I S ) = if S > 0
+					then  - N *I (N **I (S -I 1))
+					else  1
+					fi .
+	*** menor
+	op _ <I _ : Int Int -> BasicB .
+	eq(- N <I S) = True .
+	eq(- N <I - S) = if N <= S 
+	                 then False 
+					 else True 
+					 fi .
+	eq (N <I - S) = False .
+	eq( N <I  S) = if N < S 
+	                then True 
+					else False 
+					fi .
+	*** menor o igual
+	op _ <=I _ : Int Int -> BasicB .
+	eq(- N <=I S) = True .
+	eq(- N <=I - S) = if N < S 
+	                 then False 
+					 else True 
+					 fi .
+	eq (N <=I - S) = False .
+	eq( N <=I  S) = if N <= S 
+	                then True 
+					else False 
+					fi .
+	*** == igual 
+	op _ ==I _ : Int Int -> BasicB .
+	eq( N ==I N) = True .
+	eq( - N ==I - N) = True .
+	eq (I ==I I1) = False [owise] .
+endfm
+fmod INT128 is
+	pr TIPOS .
+	pr BOOLEAN .
+	pr INT .
+	sort DeclaracionInt128 OperacionInt128 .
+	var S : String .
+	var N N1 : Int .
+	subsort Int < OperacionInt128 .
+	*** subsort Int String < OperacionInt128 .
+	op __ = _ : Integer128 String Int -> DeclaracionInt128 [ctor] .
+	 *** crl[DeclaracionInt128Valida] : int128 S = N => int128 S = N
+	*** OPERACIONES DE COMPARACION 
+	op _<l_ : OperacionInt128 OperacionInt128 -> ValuesB .
+	eq(N <l N1) =  (N <I N1) .
+    op _<=l_ : OperacionInt128 OperacionInt128 -> ValuesB .
+	eq(N <=l N1) =  (N <=I N1) .
+    op _==l_ : OperacionInt128 OperacionInt128 -> ValuesB .
+	eq(N ==l N1) =  (N ==I N1) .  
+	op _>l_ : OperacionInt128 OperacionInt128 -> ValuesB . 
+	eq(N >l N1) =  (N1 <I N) .
+	op _>=l_ : OperacionInt128 OperacionInt128 -> ValuesB . 
+	eq(N >=l N1) =  (N1 <=I N) .
+	op _!=l_ : OperacionInt128 OperacionInt128 -> ValuesB .
+	eq(N !=l N1) =  not (N ==I N1) .
+	*** OPERACIONES ARITMETICAS
+	op _+l_ : OperacionInt128 OperacionInt128 -> OperacionInt128 .
+	eq(N +l N1) =  (N +I N1) .
+	op _-l_ : OperacionInt128 OperacionInt128 -> OperacionInt128 .
+	eq(N -l N1) =  (N -I N1) .
+	***falta el menos unario
+	op _*l_ : OperacionInt128 OperacionInt128 -> OperacionInt128 .
+	eq(N *l N1) =  (N *I N1) .
+	op _/l_ : OperacionInt128 OperacionInt128 -> OperacionInt128 .
+	eq(N /l N1) =  (N /I N1) .
+	op _%l_ : OperacionInt128 OperacionInt128 -> OperacionInt128 .
+	eq(N %l N1) =  (N %I N1) .
+	op _**l_ : OperacionInt128 OperacionInt128 -> OperacionInt128 .
+	eq(N **l N1) =  (N **I N1) .
+endfm  
+fmod UINT256 is
+	pr TIPOS .
+	pr BOOLEAN .
+	pr INT .
+	sort DeclaracionUInt256 OperacionUInt256 .
+	var S : String .
+	var N N1 : Nat .
+	subsort Nat < OperacionUInt256 .
+	*** subsort Int String < OperacionInt128 .
+	op __ = _ : Integer256 String Nat -> DeclaracionUInt256 [ctor] .
+	 *** crl[DeclaracionInt128Valida] : int128 S = N => int128 S = N
+	*** OPERACIONES DE COMPARACION 
+	op _<l1_ : OperacionUInt256 OperacionUInt256 -> ValuesB .
+	eq(N <l1 N1) =  (N <I N1) .
+    op _<=l1_ : OperacionUInt256 OperacionUInt256 -> ValuesB .
+	eq(N <=l1 N1) =  (N <=I N1) .
+    op _==l1_ : OperacionUInt256 OperacionUInt256 -> ValuesB .
+	eq(N ==l1 N1) =  (N ==I N1) .  
+	op _>l1_ : OperacionUInt256 OperacionUInt256 -> ValuesB . 
+	eq(N >l1 N1) =  (N1 <I N) .
+	op _>=l1_ : OperacionUInt256 OperacionUInt256 -> ValuesB . 
+	eq(N >=l1 N1) =  (N1 <=I N) .
+	op _!=l1_ : OperacionUInt256 OperacionUInt256 -> ValuesB .
+	eq(N !=l1 N1) =  not (N ==I N1) .
+	*** OPERACIONES ARITMETICAS
+	op _+l1_ : OperacionUInt256 OperacionUInt256 -> OperacionUInt256 .
+	eq(N +l1 N1) =  (N +I N1) .
+	op _-l1_ : OperacionUInt256 OperacionUInt256 -> OperacionUInt256 .
+	eq(N -l1 N1) =  (N -I N1) .
+	***falta el menos unario
+	op _*l1_ : OperacionUInt256 OperacionUInt256 -> OperacionUInt256 .
+	eq(N *l1 N1) =  (N *I N1) .
+	op _/l1_ : OperacionUInt256 OperacionUInt256 -> OperacionUInt256 .
+	eq(N /l1 N1) =  (N /I N1) .
+	op _%l1_ : OperacionUInt256 OperacionUInt256 -> OperacionUInt256 .
+	eq(N %l1 N1) =  (N %I N1) .
+	op _**l1_ : OperacionUInt256 OperacionUInt256 -> OperacionUInt256 .
+	eq(N **l1 N1) =  (N **I N1) .
+endfm 
+fmod TP is 
+	pr TIPOS .
+	sorts FP Visibilidad .
+	ops public private : -> Visibilidad [ctor] .
+	op _,_ : Float Visibilidad -> FP [ctor] .
+endfm 
+fmod Diccionarios is
+	pr TIPOS .
+	pr BOOLEAN .
+	pr MAP{String, String} .
+	pr MAP{String, Bool} .
+	pr MAP{String, Int } .
+	***pr MAP{String, Nat} .
+	pr MAP{String, Float} .
+	***pr MAP{String, FP } .
+	vars S : String .
+	vars N : Nat .
+	var MS : Map{String , String} .
+	var M128 M256 : Map{String , Int} .
+	var MF : Map{String , Float} .
+	*** subsort Map{String, String} Map{String , Nat} Map{String, Float} < Mapas .
+	****op _! : MAP{String, Float} -> Mapas [ctor] .
+	***op add_,_,_ : String Nat Map{String, Int} -> Map{String, Int} .
+	***eq (add S , N, MS ) = insert(S,N,MS)  .
+	***op get_,_ : String  Map{String, Int} -> Bool .
+	***eq (get S , M ) = $hasMapping(M,S)  .
+	****op existeVariable(_,_,_,_,_) : String Map{String, String} Map{String, Int} Map{String, Int} Map{String, Float} -> Bool .
+	****eq(existeVariable(S,MS,M128,M256,MF)) = $hasMapping(MS,S) and $hasMapping(M128,S) and $hasMapping(M256,S) and $hasMapping(MF,S) . 
+endfm
+fmod DECIMAL is
+	pr FLOAT .
+	pr TIPOS .
+	pr MAP{String, Float} .
+	sort DeclaracionDecimal Decim .
+	subsort Float  < Decim . ***string tambien deberia estar aui
+	vars M M1 : Decim .
+	op __=_ : Decimal String Float -> DeclaracionDecimal [ctor] .
+	
+    ***op _+_ : Decim Decim -> Decim .
+	***eq (M + M1 ) = M + M1 .
+endfm 
+	ops ZEROADDRESS EMPTYBYTES32 MAXINT128 MININT128 MAXDECIMAL MINDECIMAL MAXUINT256 : -> Constante [ctor] .
+	op [_,_] : Constante Direccion -> ConstanteValor [ctor] .
+	op [_,_] : Constante Bytes32 -> ConstanteValor [ctor] .
+	op [_,_] : Constante Int  -> ConstanteValor [ctor] .
+	op [_,_] : Constante Float -> ConstanteValor [ctor] .
+
+
+
+
+op [ZEROADDRESS, _] : Direccion -> ConstanteValor [ctor] .
+	op [EMPTYBYTES32,_] : Bytes32 -> ConstanteValor [ctor] .
+	op [MAXINT128, _] : Int  -> ConstanteValor [ctor] .
+	op [MININT128, _] : Int -> ConstanteValor [ctor] .
+	op [MAXDECIMAL,_] : Float -> ConstanteValor [ctor] .
+	op [MINDECIMAL,_] : Float -> ConstanteValor [ctor] .
+	op [MAXUINT256,_] : Int -> ConstanteValor [ctor] .
+
+fmod TIPOS is
+	pr STRING .
+	pr BOOLEAN .
+	pr FLOAT .
+	pr INT .
+	pr AddressType .
+	pr BYTES32 .
+	pr BYTES .
+	sorts Boolean Integer128 Integer256 Decimal Address B32 Str Byts Stct HMap HashMapT .
+	subsort  Boolean Integer128 Integer256 Decimal Address String < HashMapT .
+	var B : ValuesB .  
+	op bool : -> Boolean [ctor] .
+	op int128 : -> Integer128 [ctor] .
+	op uint256 : -> Integer256 [ctor] .
+	op decimal : -> Decimal [ctor] .
+	op address : -> Address [ctor] .
+	op bytes32 : -> B32 [ctor] .
+	op String : -> Str [ctor] .
+	op Bytes : -> Byts [ctor] .
+	op struct : -> Stct [ctor] .
+	op HashMap : -> HMap [ctor] .
+	***FUNCIONES INICIALES
+	op empty(address) : -> Direccion .
+	eq empty(address) = initAddress .
+	op empty(int128) : -> Int .
+	eq empty(int128) = 0 .
+	op empty(uint256) : -> Int .
+	eq empty(uint256) = 0 .
+	op empty(bool) : -> ValuesB .
+	eq empty(bool) = False .
+	op empty(bytes32) : -> Bytes32 .
+	eq empty(bytes32) = initB32 .
+	op empty(decimal) : -> Float .
+	eq empty(decimal) = 0.0 .
+	***convert
+	op convert(_,decimal) : ValuesB -> Float .
+	eq (convert(B,decimal)) =  if B == True
+							   then 1.0
+							   else 0.0 
+							   fi .
+	op convert(_,int128) : ValuesB -> Int .
+	eq (convert(B,int128)) =  if B == True
+							   then 1
+							   else 0
+							   fi .
+	op convert(_,uint256) : ValuesB -> Int .
+	eq (convert(B,uint256)) =  if B == True
+							   then 1
+							   else 0
+							   fi .
+	***op convert(_,bytes32) : ValuesB -> Int .
+	***eq (convert(B,bytes32)) =  if B == True
+	***						   then 0x000000000
+	***						   else 0
+	***						   fi .  
+endfm
+fmod DeclaracionVariables is
+	pr BOOLEAN .
+	pr TIPOS .
+	***pr MAP{String, Nat} .
+	sorts Declaracion DeclaracionLista DeclaracionConstante DcStruct DcHashMap DCInt128 DCUInt256 DCDecimal DCAddress DCBytes32 Declaraciones .
+	subsort Declaracion DeclaracionLista DeclaracionConstante DcStruct DcHashMap DCInt128 DCUInt256 DCDecimal DCAddress DCBytes32  < Declaraciones .
+	***subsort Declaraciones Mapas < DeclaracionAlmacenamiento
+	***subsort  STRING-NAT-MAP < MAPITA .
+	op _:_ : String Tipos -> Declaracion [ctor] .
+	op _:_[_] : String Tipos Nat -> DeclaracionLista [ctor] .
+	op _: constant(_) = _ : String Tipos BasicB -> DcBooleana [ctor] .
+
+
+
+	op _: constant(_) = _ : String Tipos Int -> DCInt128 [ctor] .
+
+
+
+	op _: constant(_) = _ : String Tipos Nat -> DCUInt256 [ctor] .
+
+
+	op _: constant(_) = _ : String Tipos Float -> DCDecimal [ctor] .
+
+
+	op _: constant(_) = _ : String Tipos Direccion -> DCAddress [ctor] .
+
+	op _: constant(_) = _ : String Tipos Bytes32  -> DCBytes32 [ctor] .
+
+
+
+	op __:_ : Tipos String Declaraciones -> DcStruct [ctor] . *** he puesto que tienes declaraciones pero incluye demasaidas cosas 
+	op _:_[_,_] : String Tipos Tipos Tipos -> DcHashMap [ctor] . 
+	op _:_[_,_] : String Tipos Tipos String -> DcHashMap [ctor] .
+	op _:_[_,_[_]] : String Tipos Tipos String Nat -> DcHashMap [ctor] .
+	op dc : -> Declaraciones [ctor] .
+	op __ : Declaraciones Declaraciones -> Declaraciones [comm ctor id: dc] .
+***op _,_,_,_,_ : Declaraciones Map{String, String} Map{String , Int } Map{String , Int } Map{String, Float} -> DeclaracionAlmacenamiento [ctor] .
+endfm
+fmod DeclaracionVariables is
+	pr BOOLEAN .
+	pr TIPOS .
+	***pr MAP{String, Nat} .
+	sorts Declaraciones DcBooleana DcInt128 DcUInt256 DcDecimal DcAddress DcString DcBytes32 DcBytes DcStruct DcHashMap .
+	subsort DcBooleana DcInt128 DcUInt256 DcDecimal DcAddress DcString DcBytes32 DcBytes DcStruct DcHashMap  < Declaraciones .
+	***subsort Declaraciones Mapas < DeclaracionAlmacenamiento
+	***subsort  STRING-NAT-MAP < MAPITA .
+	op _:_ : String Boolean -> DcBooleana [ctor] .
+	op _:_[_] : String Boolean Nat -> DcBooleana [ctor] .
+	op _: constant(_) = _ : String Boolean BasicB -> DcBooleana [ctor] .
+
+	op _:_ : String Integer128 -> DcInt128 [ctor] .
+	op _:_[_] : String Integer128 Nat -> DcInt128 [ctor] .
+	op _: constant(_) = _ : String Integer128 Int -> DcInt128 [ctor] .
+
+	op _:_ : String Integer256 -> DcUInt256 [ctor] .
+	op _:_[_] : String Integer256 Nat -> DcUInt256 [ctor] .
+	op _: constant(_) = _ : String Integer256 Nat -> DcUInt256 [ctor] .
+
+	op _:_ : String Decimal -> DcDecimal [ctor] .
+	op _:_[_] : String Decimal Nat -> DcDecimal [ctor] .
+	op _: constant(_) = _ : String Decimal Float -> DcDecimal [ctor] .
+
+	op _:_ : String Address -> DcAddress [ctor] .
+	op _: constant(_) = _ : String Address Direccion -> DcAddress [ctor] .
+
+	op _:_ : String B32 -> DcBytes32 [ctor] .
+	op _: constant(_) = _ : String B32 Bytes32  -> DcBytes32 [ctor] .
+
+	op _:_[_] : String Str Nat -> DcString [ctor] .
+
+	op _:_[_] : String Byts Nat -> DcBytes [ctor] .
+
+	op __:_ : Stct String Declaraciones -> DcStruct [ctor] . *** he puesto que tienes declaraciones pero incluye demasaidas cosas 
+	op _:_[_,_] : String HMap HashMapT HashMapT -> DcHashMap [ctor] . 
+	op _:_[_,_] : String HMap HashMapT String -> DcHashMap [ctor] .
+
+	op dc : -> Declaraciones [ctor] .
+	op __ : Declaraciones Declaraciones -> Declaraciones [comm ctor id: dc] .
+***op _,_,_,_,_ : Declaraciones Map{String, String} Map{String , Int } Map{String , Int } Map{String, Float} -> DeclaracionAlmacenamiento [ctor] .
+endfm
+ crl [loadComm] :
+    gotLine(example, stdin, Text)
+    | example ! 0 ! "" |  
+ => | example ! 1 ! "hola" | 
+   openFile(fileManager, example, Source, "r")
+  if Q := tokenize(Text) /\
+     Source := printTokens(Q) .
+	 
+ rl [loadCommERROR] :
+    gotLine(example, stdin, Text)
+    | example ! 0 ! "" |  
+ => | example ! 1 ! "adios" | .
+
+ rl [openedFile] :
+    openedFile(example, fileManager, FHIn)
+	| example ! 0 ! "" | 
+ => | example ! 0 ! "w" | 
+    getLine(FHIn, example) .
+
+ crl [pp] :
+    gotLine(example, stdin, Text)
+    < example : EXAMPLE | prueba: | example ! 0 ! "" | , Attrs >
+ => < example : EXAMPLE | prueba: | example ! 5 ! Text | , Attrs >
+    openFile(fileManager, example, Source, "r")
+  if Q := tokenize(Text) /\
+     Source := printTokens(Q) .
+
+
+***parte del doble
+	  rl [loadComm] :
+    gotLine(example, stdin, Text)
+    | example ! 0 ! "" |  
+ => | example ! 1 ! "hola" | .
+
+
+ eq run =
+    ***<> < example : EXAMPLE | file: noFile, read: "", state: idle, terms: empty,  prueba: | 0 ! "" |  >
+    <> | example ! 0 ! "" | 
+	getLine(stdin, example, "Introduce un numero ") . 
+
+
+****
+ crl [loadComm] :
+    gotLine(example, stdin, Text)
+    | example ! 0 ! "" |  
+ => | example ! 1 ! "hola" | 
+   openFile(fileManager, example, Source, "r")
+  if Q := tokenize(Text) /\
+     Source := printTokens(Q) .
+	 
+ rl [loadCommERROR] :
+    gotLine(example, stdin, Text)
+    | example ! 0 ! "" |  
+ => | example ! 1 ! "adios" | .
+
+ rl [openedFile] :
+    openedFile(example, fileManager, FHIn)
+    < example : EXAMPLE | file: noFile, state: idle, Attrs >
+ => < example : EXAMPLE | file: FHIn, state: reading, prueba: | example ! 8 ! "que paso" | , Attrs >
+    getLine(FHIn, example) .
+
+ crl [p1] :
+    gotLine(example, stdin, Text)
+    < example : EXAMPLE | prueba: | example ! 3 ! "" | , Attrs >
+ => < example : EXAMPLE | prueba: | example ! 5 ! Text | , Attrs >
+    openFile(fileManager, example, Source, "r")
+  if Q := tokenize(Text) /\
+     Source := printTokens(Q) .
+
+ rl [p2] :
+    gotLine(example, stdin, Text)
+    < example : EXAMPLE | prueba: | example ! 2.0 ! "" | , Attrs >
+ => < example : EXAMPLE | prueba: | example ! float( Text ) ! Text | , Attrs >
+    openFile(fileManager, example, Source, "r")
+ eq run =
+    <> < example : EXAMPLE | file: noFile, read: "", state: idle, terms: empty,  prueba: | example ! 2.0 ! "" |  >
+    ***<> | example ! 0 ! "" | 
+	getLine(stdin, example, "Introduce un numero ") . 
+endm 
+ ***vaaya 
+ crl [loadComm] :
+    gotLine(example, stdin, Text)
+    | example ! 0.2 ! "" |  
+ => | example ! 1.2 ! "hola" | 
+   openFile(fileManager, example, Source, "r")
+  if Q := tokenize(Text) /\
+     Source := printTokens(Q) .
+	 
+ rl [loadCommERROR] :
+    gotLine(example, stdin, Text)
+    | example ! 0.2 ! "" |  
+ => | example ! 1.2 ! "adios" | .
+
+ rl [openedFile] :
+    openedFile(example, fileManager, FHIn)
+    < example : EXAMPLE | file: noFile, state: idle, Attrs >
+ => < example : EXAMPLE | file: FHIn, state: reading, prueba: | example ! 8.3 ! "que paso" | , Attrs >
+    getLine(FHIn, example) .
+
+ crl [p1] :
+    gotLine(example, stdin, Text)
+    < example : EXAMPLE | prueba: | example ! 3.3 ! "" | , Attrs >
+ => < example : EXAMPLE | prueba: | example ! 5.3 ! Text | , Attrs >
+    openFile(fileManager, example, Source, "r")
+  if Q := tokenize(Text) /\
+     Source := printTokens(Q) .

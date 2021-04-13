@@ -1,0 +1,38 @@
+fmod INT is
+	pr NAT .
+	sort Nnat Int .
+	vars N S : Nat . 
+	subsort Nnat Nat < Int .
+	op -_ : Nat -> Nnat [ctor] .
+	op _ +l _ : Int Int -> Int [assoc] .
+	eq(N +l S) = (N + S) .
+	eq(- N +l - S) = if N > S
+					then - sd(N,S)
+					else  sd(S,N)
+					fi .
+	eq(- N +l S) = if N >= S
+					then - sd(N,S)
+					else sd(S,N)
+					fi .
+	eq(N +l - S) = if N >= S
+					then sd(N,S)
+					else - sd(S,N)
+					fi .
+    op _ - _ : Int Int -> Int .
+	eq ( N - S ) = if N > S
+					then sd(N,S)
+					else  - sd(S,N)
+					fi .
+	eq (- N - - S) = if N > S
+					then - sd(N,S)
+					else  sd(S,N)
+					fi .
+	eq (- N - S) = (- N +l - S) .
+	eq (N - - S) = (N +l S) .
+endfm  
+fmod TEST is
+  pr INT .
+  op init : -> Int .
+  
+  eq init = 5 +l 3 . 
+endfm

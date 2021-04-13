@@ -1,0 +1,6 @@
+fmod PEANO is
+	sort PeanoNat .
+	op 0: -> PeanoNat [ctor] .
+	op s: PeanoNat -> PeanoNat [ctor] .
+	var N M : PeanoNat .
+endfm

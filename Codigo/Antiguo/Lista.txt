@@ -1,0 +1,38 @@
+fmod Lista is
+	pr PERSONA .
+	sorts Lista ListaOrd .
+	subsort Persona < ListaOrd < Lista .
+	op lv : -> ListaOrd [ctor] .
+	op __ : Lista Lista -> Lista [ctor assoc id: lv] .
+	vars P P' : Persona .
+	vars L L' : Lista .
+	vars LO : ListaOrd .
+	cmb P P' L : ListaOrd 
+	 if P <= P' /\
+	    P' L : ListaOrd 
+	op head : Lista ~> Persona .
+	eq head(P L) : P .
+	op tail: Lista ~> Persona .
+	eq tail(P L) : L .
+	op tam : Lista -> Nat .
+	eq tam(lv) = 0 .
+	eq tam(P L) = s(tam(L)) .
+	op esta? : Lista Persona -> Bool .
+	op esta?(L P L' , P) : true .
+	op esta?(L , P) : false [owise] .
+	op ordena : Lista -> Lista .
+	ceq ordena(L P P' L') = ordena (L P' P L')
+	 if P > P' .
+	eq ordena(L) = L [owise] .
+	op inserta-ord : ListaOrd Persona -> ListaOrd .
+	eq inserta-ord(lv , P) = P .
+	eq inserta-ord(P L , P') = if P <= P'
+							   then inserta-ord(L , P')
+							   else P' P L
+							   fi .
+	op ordena-por-insercion : ListaOrd -> ListaOrd .
+	eq ordena-por-insercion(lv) = lv .
+	ceq ordena-por-insercion(P L) = inserta-ord (L' P) .
+	 if L' := ordena-por-insercion(L) .
+endfm .
+	

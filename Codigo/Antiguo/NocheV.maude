@@ -1,0 +1,205 @@
+fmod NOCHEVIEJA is
+  pr NAT .
+  pr STRING .
+  sort Estado Bolsa Persona LPersonas ColaPersonas ZonaResidencial EstadoT TiendaDeLaEsquina PlazaMayor Billy Bokencio ColaOPersonas LocalModa Recreativos Sys .
+  subsort Persona < ColaOPersonas < ColaPersonas .
+  subsort ZonaResidencial TiendaDeLaEsquina LocalModa PlazaMayor Recreativos < Sys .
+  subsort Bokencio Billy < Persona .
+  subsort Persona < LPersonas .
+  vars P P' : Persona .
+  vars L L' : ColaPersonas .
+  vars s s1 : String .
+  vars din din1 ed ed1 nc nc1 : Nat .
+  vars b b1 : Bolsa .
+  vars e e1 : Estado .
+  vars bo bo1 : Bool .
+  
+  *** Estado de persona y persona
+  ops Relajado Ebrio CansadoPeroContento Satisfecho Humillado Indiferente :  -> Estado [ctor] .
+  *** persona [nombre,dinero, edad, bolsa, estado n copas entrada]
+  op [_,_,_,_,_,_,_] : String Nat Nat Bolsa Estado Nat Bool -> Persona [ctor] .
+  
+  *** bolsa
+  op bv : -> Bolsa [ctor] .
+  op [_,_,_] : Nat Nat Nat -> Bolsa [ctor] . 
+
+  *** zona residencial 
+  op ZR<_> : LPersonas -> ZonaResidencial [ctor] .
+  *** Lista de personas
+  op lv : -> LPersonas [ctor] .
+  op __ : LPersonas LPersonas -> LPersonas [ctor assoc comm id: lv] . 
+  *** ColaPersonas
+  op cv : -> ColaOPersonas [ctor] .
+  op _;_ : ColaPersonas ColaPersonas -> ColaPersonas [ctor assoc id: cv] .	
+  
+  *** define cola ordenada 
+  cmb [s,din,ed,b,e,nc,bo];[s1,din1,ed1,b1,e1,nc1,bo1] ; L : ColaOPersonas
+   if din > din1 /\ L : ColaOPersonas .
+   
+  op sort : ColaPersonas -> ColaOPersonas .
+  ceq sort(L ; [s,din,ed,b,e,nc,bo] ; [s1,din1,ed1,b1,e1,nc1,bo1] ; L') = sort(L ; [s1,din1,ed1,b1,e1,nc1,bo1] ; [s,din,ed,b,e,nc,bo] ; L')
+   if din1 > din .
+  eq sort(L) = L [owise] .
+  
+  *** TiendaDeLaEsquina [EstadoT , BOLSAS , Precio , ColaPersonas ]
+  ops abierta cerrada : -> EstadoT [ctor] .
+  op T<_,_,_,_> : EstadoT Nat Nat LPersonas -> TiendaDeLaEsquina [ctor] .
+
+  *** billy y plaza mayor
+  op Bil[_,_] : Nat Nat -> Billy [ctor] .
+  op PM<_> : LPersonas -> PlazaMayor [ctor] .
+  
+  *** Local de moda y bokencio PERSONAS RESTANTES , PRECIOCOPA PRECIOREFRESCO
+  op LM<_,_,_,_,_> : ColaOPersonas LPersonas Nat Nat Nat -> LocalModa [ctor] .
+  op Boken[_] : Nat -> Bokencio [ctor] .
+  op R<_> : LPersonas -> Recreativos [ctor] .
+  *** sistyema
+  op __ : Sys Sys -> Sys [ctor assoc comm] .
+  
+endfm 
+
+mod REGLAS is
+  pr NOCHEVIEJA .
+  
+  vars P P' : Persona .
+  vars C : ColaPersonas .
+  vars CO : ColaOPersonas .
+  vars L L1 : LPersonas .
+  vars s s1 : String .
+  vars din din1 ed ed1 nc nc1 nBolsas pBolsas A M H A1 M1 H1 NE PE AF DB : Nat .
+  vars b b1 : Bolsa .
+  vars e e1 : Estado .
+  vars bo bo1 : Bool .
+
+*** ir a la tienda si esta en estado relajado
+	rl[Residencia-Tienda] : ZR< [s,din,ed,b,Relajado,nc,bo] L > T< abierta,nBolsas,pBolsas,L1 > => ZR< L > T< abierta,nBolsas,pBolsas,L1 [s,din,ed,b,Relajado,nc,bo] > .
+    ***search ZR<[s,20,18,bv,Relajado,0,false] L> T<abierta,5,5,lv> =>* ZR<[s,20,18,bv,Relajado,0,false]> T<abierta,5,5,[s,20,18,bv,Relajado,0,false]>
+	
+	rl[Residencia-PM] : ZR<[s,din,ed,b,Relajado,nc,bo] L > PM< L1 > => ZR< L > PM< L1 [s,din,ed,b,Relajado,nc,bo] > .
+	
+	rl[Residencia-LM] : ZR< [s,din,ed,b,Relajado,nc,bo] L > LM< CO, L1 , AF , A, M > => ZR< L > LM< sort( [s,din,ed,b,Relajado,nc,bo] ; CO), L1 , AF, A, M > .
+	
+	rl[Residencia-Recreativos] : ZR<[s,din,ed,b,Relajado,nc,bo] L > R< L1 > => ZR< L > R< L1 [s,din,ed,b,Relajado,nc,bo] > .
+	*** comprar bolsa
+	crl[ComprarBolsa] : T< abierta,s(nBolsas),pBolsas,[s,din,ed,[A,M,H],e,nc,bo] L > => T< abierta,nBolsas,pBolsas,[s,sd(din,pBolsas),ed,[s(A),s(M),s(H)],e,nc,bo] L > 
+	 if din > pBolsas . 
+	
+	***cerrar tienda
+	rl[CerrarTienda] : T< abierta,0,pBolsas,L > => T< cerrada,0,pBolsas,L > .
+	
+	***ir de tienda a plaza mayor
+	crl[Tienda-PlazaMayor] : T< abierta,nBolsas,pBolsas,[s,din,ed,[A,M,H],e,nc,bo] L > PM< L1 > => T< abierta,nBolsas,pBolsas, L > PM< L1 [s,din,ed,[A,M,H],e,nc,bo] >
+	 if din < pBolsas .
+		
+	rl[Tienda-PlazaMayor] : T< cerrada,nBolsas,pBolsas,[s,din,ed,[A,M,H],e,nc,bo] L > PM< L1 > => T< cerrada,nBolsas,pBolsas,L > PM< L1 [s,din,ed,[A,M,H],e,nc,bo] > .
+	
+	*** PLAZA MAYOR 
+	rl[beberCopa] : PM<[s,din,ed,[s(A),s(M),s(H)],e,nc,bo] L > => PM<[s,din,ed,[A,M,H],e,s(nc),bo] L > .
+	rl[beberCopaSin] : PM<[s,din,ed,[A,s(M),s(H)],e,nc,bo] L > => PM<[s,din,ed,[A,M,H],e,nc,bo] L > .
+	rl[robar] : PM<[s,din,ed,[A,M,H],e,nc,bo] [s1,din1,ed1,[A1,M1,s(H1)],e1,nc1,bo1] L > => PM<[s,din,ed,[A,M,s(H)],e,nc,bo] [s1,din1,ed1,[A1,M1,H1],e1,nc1,bo1] L > .
+	rl[robar] : PM<[s,din,ed,[A,M,H],e,nc,bo] [s1,din1,ed1,[A1,s(M1),H1],e1,nc1,bo1] L > => PM<[s,din,ed,[A,s(M),H],e,nc,bo] [s1,din1,ed1,[A1,M1,H1],e1,nc1,bo1] L > .
+	crl[emborracharse] : PM<[s,din,ed,[A,M,H],Relajado,nc,bo] L > => PM<[s,din,ed,[A,M,H],Ebrio,nc,bo] L > 
+	 if nc >= 4 .
+	crl[comprarEntrada] : PM< Bil[s(NE),PE] [s,din,ed,[A,M,H],e,nc,false] L > => PM< Bil[NE,PE + 5 ] [s,sd(din,PE),ed,[A,M,H],e,nc,true] L > 
+	 if din >= PE .
+	rl[PM-LM] : PM< P L > LM< CO,L1,AF,A,M > => PM< L > LM< sort(P ; CO) , L1 , AF, A , M > .
+	rl[PM-Tienda] : PM< P L > T< abierta,nBolsas,pBolsas,L > => PM< L > T< abierta,nBolsas,pBolsas,L P > .
+	rl[PM-Recreativos] :  PM< P L > R< L1 > => PM< L > R< L1 P > .
+	
+	*** Local Moda
+	crl[entrarDisco] : LM<[s,din,ed,[A,M,H],e,nc,true] CO,L1,s(AF),A,M > => LM< CO,L1 [s,din,ed,[0,0,0],e,nc,true],AF,A,M >
+	 if ed >= 18 .
+	crl[LM-PM] : LM<[s,din,ed,[A,M,H],e,nc,bo]CO,L1,AF,A,M >  PM< L > => LM<[s,din,ed,[A,M,H],e,nc,bo]CO,L1,AF,A,M >  PM< L [s,din,ed,[A,M,H],e,nc,bo] >
+	 if (ed < 18) or (bo == false) or (AF == 0 ) .
+	crl[consumirCopa] : LM< CO,L[s,din,ed,[A,M,H],e,nc,true] L1,AF,A1,M1 > => LM< CO,L[s,sd(din,A1),ed,[A,M,H],e,s(nc),true]L1,AF,A1,M1 > 
+	 if din >= A1 .
+	crl[consumirRefresco] : LM< CO,L[s,din,ed,[A,M,H],e,nc,true]L1,AF,A1,M1 > => LM< CO,L[s,sd(din,M1),ed,[A,M,H],e,nc,true]L1,AF,A1,M1 > 
+	 if din >= M1 . 
+	crl[emborracharseLocal] : LM< CO,[s,din,ed,[A,M,H],Relajado,nc,true] L1 ,AF,A1,M1 > => LM< CO,[s,din,ed,[A,M,H],Ebrio,nc,true] L1,AF,A1,M1 > 
+	 if nc >= 4 .
+	rl[expulsar] : LM< CO , Boken[DB] [s,din,ed,[A,M,H],Ebrio,nc,bo] L1 , AF , A1 ,M1 > ZR< L > => LM< CO, Boken[DB] L1,AF,A1,M1 > ZR< L [s,din,ed,[A,M,H],Ebrio,nc,bo]> . 
+	rl[salirLocal] : LM< CO, [s,din,ed,[A,M,H],Relajado ,nc,bo] L1,AF,A1,M1 > ZR< L > => LM< CO, L1,AF,A1,M1 > ZR< L [s,din,ed,[A,M,H],CansadoPeroContento,nc,bo] > .
+	crl[BokencioBebe] : LM< CO,L Boken[DB] L1,AF,A1,M1 > => LM< CO,L Boken[sd(DB,M1)] L1,AF,A1,M1 >
+	 if DB >= M1 .
+	 
+	*** Recreativos 
+	crl[JuegaPartida] : R<[s,din,ed,[A,M,H],e,nc,bo] [s1,din1,ed1,[A1,M1,H1],e1,nc1,bo1] L > ZR< L1 > => R< L > ZR< L1 [s,din,ed,[A,M,H],Satisfecho,nc,bo] [s1,din1,ed1,[A1,M1,H1],Humillado,nc1,bo1]> 
+     if nc < nc1 .
+	 crl[JuegaPartida] : R<[s,din,ed,[A,M,H],e,nc,bo] [s1,din1,ed1,[A1,M1,H1],e1,nc1,bo1] L > ZR< L1 > => R< L > ZR< L1 [s,din,ed,[A,M,H],Humillado,nc,bo] [s1,din1,ed1,[A1,M1,H1],Satisfecho,nc1,bo1]> 
+     if nc > nc1 .
+	crl[JuegaPartida] : R<[s,din,ed,[A,M,H],e,nc,bo] [s1,din1,ed1,[A1,M1,H1],e1,nc1,bo1] L > ZR< L1 > => R< L > ZR< L1 [s,din,ed,[A,M,H],Indiferente,nc,bo] [s1,din1,ed1,[A1,M1,H1],Indiferente,nc1,bo1]> 
+     if nc == nc1 .   	 
+endm
+
+load model-checker.maude
+
+mod PROPS is
+	pr REGLAS .
+	pr SATISFACTION .
+	subsort Sys < State .
+	vars P P' : Persona .
+	vars C : ColaPersonas .
+	vars CO : ColaOPersonas .
+	vars L L1 : LPersonas .
+	vars s s1 : String .
+	vars din din1 ed ed1 nc nc1 nBolsas pBolsas A M H A1 M1 H1 NE PE AF DB : Nat .
+	vars b b1 : Bolsa .
+	vars e e1 : Estado .
+	vars bo bo1 : Bool .
+	vars eT : EstadoT .
+	vars S : Sys .
+	
+	op hayGenteEnLM : -> Prop [ctor] .
+	eq LM< CO, L1 [s,din,ed,[A,M,H],e,nc,bo] L , AF ,A , M > S |= hayGenteEnLM = true .
+	
+	op personaEnLM : String -> Prop [ctor] .
+	eq LM< CO, L1 [s,din,ed,[A,M,H],e,nc,bo] L , AF ,A , M > S |= personaEnLM(s) = true .
+	
+	op personaTienda : String -> Prop [ctor] .
+	eq T< eT,nBolsas,pBolsas,L1 [s,din,ed,[A,M,H],e,nc,bo] L > S |= personaTienda(s) = true .
+	
+	op personaRecreativos : String -> Prop [ctor] .
+	eq R< L1 [s,din,ed,[A,M,H],e,nc,bo] L > S |= personaRecreativos(s) = true .
+	
+	op hayAlguienBorracho : -> Prop [ctor] .
+	eq R< L1 [s,din,ed,[A,M,H],Ebrio,nc,bo] L > S |= hayAlguienBorracho = true .
+	eq ZR< L1 [s,din,ed,[A,M,H],Ebrio,nc,bo] L > S |= hayAlguienBorracho = true .
+	eq T< eT, nBolsas, pBolsas,L1 [s,din,ed,[A,M,H],Ebrio ,nc,bo] L > S |= hayAlguienBorracho = true .
+	eq LM< CO,L[s,din,ed,[A,M,H],Ebrio,nc,bo]L1,AF,A1,M1 > S |= hayAlguienBorracho = true .
+	eq LM< CO [s,din,ed,[A,M,H],Ebrio,nc,bo] ,L1,AF,A1,M1 > S |= hayAlguienBorracho = true .
+	
+	op personaBorracha : String  -> Prop [ctor] . 
+	eq R< L1 [s,din,ed,[A,M,H],Ebrio,nc,bo] L > S |= personaBorracha(s) = true .
+	eq ZR< L1 [s,din,ed,[A,M,H],Ebrio,nc,bo] L > S |= personaBorracha(s) = true .
+	eq T< eT, nBolsas, pBolsas,L1 [s,din,ed,[A,M,H],Ebrio ,nc,bo] L > S |= personaBorracha(s) = true .
+	eq LM< CO,L[s,din,ed,[A,M,H],Ebrio,nc,bo]L1,AF,A1,M1 > S |= personaBorracha(s) = true .
+	eq LM< CO [s,din,ed,[A,M,H],Ebrio,nc,bo] ,L1,AF,A1,M1 > S |= personaBorracha(s) = true .
+	
+	op hayAlguienPobre : -> Prop [ctor] .
+	eq R< L1 [s,0,ed,[A,M,H],e,nc,bo] L > S |= hayAlguienPobre = true .
+	eq ZR< L1 [s,0,ed,[A,M,H],e,nc,bo] L > S |= hayAlguienPobre = true .
+	eq T< eT, nBolsas, pBolsas,L1 [s,0,ed,[A,M,H],e ,nc,bo] L > S |= hayAlguienPobre = true .
+	eq LM< CO,L[s,0,ed,[A,M,H],e,nc,bo]L1,AF,A1,M1 > S |= hayAlguienPobre = true .
+	eq LM< CO [s,0,ed,[A,M,H],e,nc,bo] ,L1,AF,A1,M1 > S |= hayAlguienPobre = true .
+	
+	op personaConEntrada : String  -> Prop [ctor] .
+	eq R< L1 [s,din,ed,[A,M,H],e,nc,true] L > S |= personaConEntrada(s) = true .
+	eq ZR< L1 [s,din,ed,[A,M,H],e,nc,true] L > S |= personaConEntrada(s) = true .
+	eq T< eT, nBolsas, pBolsas,L1 [s,din,ed,[A,M,H],e ,nc,true] L > S |= personaConEntrada(s) = true .
+	eq LM< CO,L[s,din,ed,[A,M,H],e,nc,true]L1,AF,A1,M1 > S |= personaConEntrada(s) = true .
+	eq LM< CO [s,din,ed,[A,M,H],e,nc,true] ,L1,AF,A1,M1 > S |= personaConEntrada(s) = true .
+	
+endm 
+
+mod TEST2 is
+  pr PROPS .
+  pr LTL-SIMPLIFIER .
+  pr MODEL-CHECKER .
+endm
+
+1. 
+red modelCheck(init,(<> no LM(1) -> [] no LM(1))) .
+red modelCheck(init,(<> [](~ LM )) .
+
+2. 
+red modelCheck(init,(<> []( personaBorracha("hola") )) .
