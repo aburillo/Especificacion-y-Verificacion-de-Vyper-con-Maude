@@ -1,3 +1,5 @@
+load file.maude
+
 fmod BOOLEAN is
 	pr STRING .
 	sorts  BasicB ValuesB .
@@ -27,7 +29,7 @@ fmod AddressType is
 	***cambiar esto a que direccion sea un supertipo de string
 	op  0x____________________ : Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte -> Direccion [ctor] .
 	op initAddress : -> Direccion .
-	***eq(initAddress) = 0x 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! . 
+	***eq(initAddress) = 0x 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! .
 	op _<balance> : String -> Nat .
 	***op _<codehash> : String -> bytes32 .
 	op _<codesize> : String -> Nat .
@@ -41,7 +43,7 @@ fmod BYTES32 is
 	***eq(initB32) = 0x 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! .
 	***op keccak256(_) : bytes32 -> bytes32
 	***op concat(_) : bytes32 -> bytes32
-	***op slice(_,_,_) : bytes32 Nat Nat -> bytes32 
+	***op slice(_,_,_) : bytes32 Nat Nat -> bytes32
 endfm
 fmod BYTES is
 	pr AddressType .
@@ -82,7 +84,7 @@ fmod TIPOS is
 	op convert(_,decimal) : ValuesB -> Float .
 	eq (convert(B,decimal)) =  if B == True
 							   then 1.0
-							   else 0.0 
+							   else 0.0
 							   fi .
 	op convert(_,int128) : ValuesB -> Int .
 	eq (convert(B,int128)) =  if B == True
@@ -98,7 +100,7 @@ fmod TIPOS is
 	***eq (convert(B,bytes32)) =  if B == True
 	***						   then 0x000000000
 	***						   else 0
-	***						   fi .  
+	***						   fi .
 endfm
 fmod LISTAS is
 	pr TIPOS .
@@ -118,7 +120,7 @@ fmod LISTAS is
 	op _,_ : LFloat LFloat -> LFloat [ctor id: lfv ] .
 	***op lav : -> LAddress [ctor] .
 	***op __ : LAddress LAddress -> LAddress [ctor id: lav ] .
-endfm 
+endfm
 fmod STRUCT is
 	pr TIPOS .
 	sort Struct VS VariablesStruct LStruct .
@@ -135,7 +137,7 @@ fmod STRUCT is
 	op vs : -> VariablesStruct [ctor] .
 	op __ : VariablesStruct VariablesStruct -> VariablesStruct [ctor id: vs ] .
 	*** he puesto que struct tiene memoria pero puede ser que tenga algo que sea otra cosa que solo sea declaraciones sencillas .
-	op |_,_| : String VariablesStruct -> Struct [ctor] . 
+	op |_,_| : String VariablesStruct -> Struct [ctor] .
 	op lsv : -> LStruct [ctor] .
 	op __ : LStruct LStruct -> LStruct [ctor id: lsv ] .
 endfm
@@ -151,9 +153,9 @@ fmod MAPA is
 	*** he puesto que struct tiene memoria pero puede ser que tenga algo que sea otra cosa que solo sea declaraciones sencillas .
 	op |_,_,_,_| : String Map Tipos Tipos -> Mapa [ctor] .
 	op |_,_,_,_| : String Map Tipos String -> Mapa [ctor] .
-	op |_,_,_,_,_| : String Map Tipos String Nat -> Mapa [ctor] . 
+	op |_,_,_,_,_| : String Map Tipos String Nat -> Mapa [ctor] .
 endfm
-fmod CONSTANTES is 
+fmod CONSTANTES is
 	pr TIPOS .
 	sort Constante ConstanteValor .
 	var N S : Nat .
@@ -163,7 +165,7 @@ fmod CONSTANTES is
 	op [_,_] : Constante Bytes32 -> ConstanteValor [ctor] .
 	op [_,_] : Constante Int  -> ConstanteValor [ctor] .
 	op [_,_] : Constante Float -> ConstanteValor [ctor] .
-endfm 
+endfm
 fmod SELF is
 	pr STRING .
 	sort self .
@@ -180,8 +182,8 @@ fmod TEST is
   pr BOOLEAN .
   pr LISTAS .
   op init : -> ValuesB .
-  
-  ***eq init = bool "Hola" = true . 
+
+  ***eq init = bool "Hola" = true .
 endfm
 
 *** no vale porque no puedo crear un diccionario del tipo FP
@@ -216,8 +218,8 @@ fmod DeclaracionVariables is
 
 
 
-	op __:_ : Tipos String Declaraciones -> DcStruct [ctor] . *** he puesto que tienes declaraciones pero incluye demasaidas cosas 
-	op _:_[_,_] : String Tipos Tipos Tipos -> DcHashMap [ctor] . 
+	op __:_ : Tipos String Declaraciones -> DcStruct [ctor] . *** he puesto que tienes declaraciones pero incluye demasaidas cosas
+	op _:_[_,_] : String Tipos Tipos Tipos -> DcHashMap [ctor] .
 	op _:_[_,_] : String Tipos Tipos String -> DcHashMap [ctor] .
 	op _:_[_,_[_]] : String Tipos Tipos String Nat -> DcHashMap [ctor] .
 	op dc : -> Declaraciones [ctor] .
@@ -235,7 +237,7 @@ fmod MEMORIA is
 	sorts Variable Memoria Visibilidad .
 	subsort Variable ConstanteValor < Memoria .
 	ops public private : -> Visibilidad [ctor] .
-	*** [nombreVaraible,tipodelaVariable,valor de la variable,numero de atributos,publica o priovada,true si es constante] 
+	*** [nombreVaraible,tipodelaVariable,valor de la variable,numero de atributos,publica o priovada,true si es constante]
 	op [_,_,_,_,_,_] : String Tipos LBool Nat Visibilidad Bool -> Variable [ctor] .
 	op [_,_,_,_,_,_] : String Tipos LInt Nat Visibilidad Bool -> Variable [ctor] .
 	op [_,_,_,_,_,_] : String Tipos LInt Nat Visibilidad Bool -> Variable [ctor] .
@@ -261,7 +263,7 @@ fmod FuncionesAuxiliares is
 	op _/_ : Int Int -> Int .
 	eq (N / M) = (N quo M) .
 	op _%_ : Int Int -> Int .
-	eq (N % M) = (N rem M) . 
+	eq (N % M) = (N rem M) .
 	op _**_ : Int Int -> Int .
 	eq (N ** M) = (N ^ M) .
 	***op _+_ : oz oz -> Operacion [ctor comm] .
@@ -270,10 +272,10 @@ fmod FuncionesAuxiliares is
 	***iif i < (j + 30) and (sender or (a or b ))) .
 	***and exp exp
 	***and < exp exp exp
-	***and < exp exp or exp exp 
+	***and < exp exp or exp exp
 
 	***op _ / _ : Float Float -> Float .
-endfm 
+endfm
 fmod GRAMATICA is
 	pr MEMORIA .
 	sort Operacion Var Exp .
@@ -293,7 +295,7 @@ fmod GRAMATICA is
 	op _>=._ : Exp Exp -> Operacion [ctor] .
 
 	***subsort Exp Operacion < oz .
-endfm 
+endfm
 fmod VariablesEntorno is
 	pr MEMORIA .
 	op block.coinbase : -> Direccion .
@@ -328,7 +330,7 @@ fmod Declaraciones is
 endfm
 
 fmod Funciones is
-	pr DeclaracionVariables . 
+	pr DeclaracionVariables .
 	pr Declaraciones .
 	sort DecoratorEI DecoratorMut DecoratorNR Cabecera Cuerpo Parametros initCabe defaultCabe .
 	subsort Declaracion < Parametros .
@@ -337,14 +339,14 @@ fmod Funciones is
 	*** funcion tiene decorator cabebecera y cuerpo
 	ops @external @internal : -> DecoratorEI [ctor] .
 	ops @pure @view @payable @nonpayables : -> DecoratorMut [ctor] .
-	op @nonreentrant(_) : String -> DecoratorNR [ctor] . ***tengo que guardar este string en algun lado pa que no falle 
+	op @nonreentrant(_) : String -> DecoratorNR [ctor] . ***tengo que guardar este string en algun lado pa que no falle
 	op PaV : -> Parametros [ctor] .
 	op _,_ : Parametros Parametros -> Parametros [ctor assoc comm id: PaV ] .
 	op def _(_) : String Parametros -> Cabecera [ctor] .
 	op def _(_)->_ : String Parametros Tipos -> Cabecera [ctor] .
 	op def init(_) : Parametros -> initCabe [ctor] . *** puede ser payable no puede llamar otras funciones la prijmera en ser declarada
 	op def default() : -> defaultCabe [ctor] .
-endfm 
+endfm
 fmod For is
 	pr TIPOS .
 	pr LISTAS .
@@ -355,7 +357,7 @@ fmod For is
 	op for i in _ : String -> ForCabec [ctor] .
 	op for i in [_] : LInt -> ForCabec [ctor] . ***comprobar lista no vacia
 	op for i in [_] : LFloat -> ForCabec [ctor] .
-	
+
 endfm
 mod AlmacenaVariables is
 	pr DeclaracionVariables .
@@ -366,11 +368,11 @@ mod AlmacenaVariables is
 	***var MS : Map{String , String} .
 	***var M128 M256 : Map{String , Int} .
 	***var MF : Map{String , Float} .
-	***crl[AlmacenaInt]:  S : int128 D, MS, M128, M256, MF => D, MS, insert(S,0,M128), M256, MF 
+	***crl[AlmacenaInt]:  S : int128 D, MS, M128, M256, MF => D, MS, insert(S,0,M128), M256, MF
 	***	if (existeVariable(S,MS,M128,M256,MF)) == false .
-		***crl[AlmacenaInt]:  S : int128 D, MS, M128, M256, MF => D, MS, insert(S,0,M128), M256, MF 
+		***crl[AlmacenaInt]:  S : int128 D, MS, M128, M256, MF => D, MS, insert(S,0,M128), M256, MF
 	***	if (existeVariable(S,MS,M128,M256,MF)) == false .
-	
+
 endm
 fmod Duplica is
 	pr NAT .
@@ -384,7 +386,7 @@ fmod Duplica is
 	op cha _ : String -> Float .
 	eq (cha S) = float(S) .
 
-endfm  
+endfm
 
 mod LeerArchivo is
  inc STD-STREAM .
@@ -416,19 +418,18 @@ vars Text Original Read Source S : String .
  op file:_ : Oid -> Attribute [ctor] .
  op read:_ : String -> Attribute [ctor] .
  op state:_ : State -> Attribute [ctor] .
- op prueba:_ : d -> Attribute [ctor] .
+ op prueba:_ : LS -> Attribute [ctor] .
  op terms:_ : TermList -> Attribute [ctor gather (&)] .
 
  sort State .
  ops idle reading parsing calculate : -> State [ctor] .
- sort d LS . 
+ sort d LS .
  subsort String < LS .
  op lv : -> LS [ctor] .
- op __ : LS LS -> LS [ctor id: lv] .
- op |_!_| : LS String -> d [ctor] .
+ op __ : LS LS -> LS [ctor assoc id: lv] .
 
  *** Run command
- op run : -> Configuration [ctor] . 
+ op run : -> Configuration [ctor] .
 
  ***                        ***
  ***          LOAD          ***
@@ -469,11 +470,11 @@ vars Text Original Read Source S : String .
 
 rl [newLine] :
    gotLine(example, FHIn, Text)
-   < example : EXAMPLE | file: FHIn, read: Read, state: reading, prueba: |  L ! "" | , Attrs >
+   < example : EXAMPLE | file: FHIn, read: Read, state: reading, prueba: (L ""), Attrs >
 => if Text == ""
-   then < example : EXAMPLE | file: FHIn, read: Read, state: calculate, prueba: |  L ! "LL" | , Attrs >
+   then < example : EXAMPLE | file: FHIn, read: Read, state: calculate, prueba: (L  "LL"), Attrs >
         closeFile(FHIn, example)
-   else < example : EXAMPLE | file: FHIn, read: (Read + Text), state: reading, prueba: |  L Text ! "" |, Attrs >
+   else < example : EXAMPLE | file: FHIn, read: (Read + Text), state: reading, prueba: (L Text ""), Attrs >
         getLine(FHIn, example)
    fi .
 
@@ -486,13 +487,13 @@ rl [newLine] :
 ***    {T, Ty} := metaParse(GRAMMAR, QIL, anyType) /\
  ***   < M, T' > := parse(T) [print T "\nParseado: " T'] .
 rl [calcula] :
-    < example : EXAMPLE | read: Read, state: calculate, prueba: |    S L  ! "LL" | , Attrs >
- => < example : EXAMPLE | read: Read, state: calculate, prueba: |  L  ! "dale" |, Attrs >
+    < example : EXAMPLE | read: Read, state: calculate, prueba: (S L  "LL" ), Attrs >
+ => < example : EXAMPLE | read: Read, state: calculate, prueba: (L  "dale" ), Attrs >
     write(stdout, example, "Print linea.\n") .
 
 rl [calculaUltimo] :
-    < example : EXAMPLE | read: Read, state: calculate, prueba: |  lv  ! "" | , Attrs >
- => < example : EXAMPLE | read: Read, prueba: |  lv  ! "Kelowa" |, Attrs >
+    < example : EXAMPLE | read: Read, state: calculate, prueba: (""), Attrs >
+ => < example : EXAMPLE | read: Read, prueba: ("Kelowa"), Attrs >
     write(stdout, example, "Print linea.\n") .
 
  ***                              ***
@@ -514,8 +515,8 @@ rl [calculaUltimo] :
  => < example : EXAMPLE | file: noFile, Attrs > .
 
  eq run =
-    <> < example : EXAMPLE | file: noFile, read: "", state: idle, terms: empty,  prueba: |  lv ! "" |  >
-    ***<> | example ! 0 ! "" | 
-	getLine(stdin, example, "Introduce un nombre de archivo ") . 
-endm 
+    <> < example : EXAMPLE | file: noFile, read: "", state: idle, terms: empty,  prueba: ("")  >
+    ***<> | example ! 0 ! "" |
+	getLine(stdin, example, "Introduce un nombre de archivo ") .
+endm
 erew run .
