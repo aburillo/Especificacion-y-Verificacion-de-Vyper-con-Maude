@@ -1,0 +1,59 @@
+fmod PARSING is
+ pr META-LEVEL .
+ pr CONVERSION .
+ ***pr PREPARSE .
+ sort ParsingRes .
+
+ op <_,_> : Module Term -> ParsingRes [ctor] .
+
+vars T T1 T1' T2 T2' T3 T3' : Term .
+ vars M M1 M2 M3 : Module .
+var  Ct : Constant .
+ var  S : String .
+ var  F : Float .
+ var  Q : Qid .
+ var B : Bool .
+
+ op parse : Term -> ParsingRes .
+ ***eq parse(T) = parse(upModule('MY-PROG, true), T) . llamar al otro parse
+ op parse : Module Term -> ParsingRes .
+
+ ***ceq parse(M, 'token[T]) = < M, upTerm(F) >
+  ***if Q := downQid(T) /\
+  ***   S := string(Q) . ***/\
+    *** B := Bool(S) .
+ ***parsea Bool
+ ceq parse(M, 'token[T]) = < M, T >
+  if Q := downQid(T) /\
+     S := string(Q) /\
+     isBool(S) .
+*** parsea float 
+ ceq parse(M, 'token[T]) = < M, upTerm(F) >
+  if Q := downQid(T) /\
+     S := string(Q) /\
+     F := float(S) .
+*** parsea int 
+ ceq parse(M, 'token[T]) = < M, upTerm(F) >
+  if Q := downQid(T) /\
+     S := string(Q) /\
+     rat(S, 10) :: Nat /\
+     F := float(S + ".0") .
+ ceq parse(M, 'token[T]) = < M, T >
+  if Q := downQid(T) /\
+     S := string(Q) /\
+     not (float(S) :: Float) /\
+     not (rat(S, 10) :: Nat) .
+ *** Parseando una suma .
+ ceq parse(M, '_+_[T1,T2]) = < M2, '_+._[T1', T2'] >
+    if < M1 , T1' > := parse (M,T1) /\
+       < M2 , T2' > := parse (M1,T2) .
+***PARSEO UN <
+ ceq parse(M, '_<_[T1,T2]) = < M2, '_<._[T1', T2'] >
+    if < M1 , T1' > := parse (M,T1) /\
+       < M2 , T2' > := parse (M1,T2) .
+ op downQid : Term -> [Qid] [memo] .
+ eq downQid(Ct)
+    = qid(substr(string(getName(Ct)), 1, length(string(getName(Ct))))) .
+ op isBool : String -> Bool .
+ eq isBool(S) = (S == "true") or (S == "false") .
+endfm

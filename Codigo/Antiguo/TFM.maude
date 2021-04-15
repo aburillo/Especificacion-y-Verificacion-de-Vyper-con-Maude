@@ -122,14 +122,14 @@ fmod LISTAS is
 	***op __ : LAddress LAddress -> LAddress [ctor id: lav ] .
 endfm
 fmod STRUCT is
-	pr TIPOS .
+	pr LISTAS .
 	sort Struct VS VariablesStruct LStruct .
 	subsort VS < VariablesStruct .
 	subsort Struct < LStruct .
-	op [_,_,_,_] : String Tipos Bool Nat  -> VS [ctor] .
-	op [_,_,_,_] : String Tipos Nat Nat  -> VS [ctor] .
-	op [_,_,_,_] : String Tipos Int Nat  -> VS [ctor] .
-	op [_,_,_,_] : String Tipos Float Nat  -> VS [ctor] .
+	op [_,_,_,_] : String Tipos LBool Nat  -> VS [ctor] .
+	op [_,_,_,_] : String Tipos LNat Nat  -> VS [ctor] .
+	op [_,_,_,_] : String Tipos LInt Nat  -> VS [ctor] .
+	op [_,_,_,_] : String Tipos LFloat Nat  -> VS [ctor] .
 	op [_,_,_,_] : String Tipos String Nat  -> VS [ctor] .
 	op [_,_,_,_] : String Tipos Direccion Nat  -> VS [ctor] .
 	op [_,_,_,_] : String Tipos Bytes32 Nat  -> VS [ctor] .
@@ -266,23 +266,19 @@ fmod FuncionesAuxiliares is
 	eq (N % M) = (N rem M) .
 	op _**_ : Int Int -> Int .
 	eq (N ** M) = (N ^ M) .
-	***op _+_ : oz oz -> Operacion [ctor comm] .
-	***op _<_ : oz oz -> Operacion [ctor comm] .
-	***op _and_ : oz oz -> Operacion [ctor comm] .
-	***iif i < (j + 30) and (sender or (a or b ))) .
-	***and exp exp
-	***and < exp exp exp
-	***and < exp exp or exp exp
+	***op range(_) : Nat -> range [ctor] .
+	***op range(_,_) : Nat Nat -> range [ctor] .
 
 	***op _ / _ : Float Float -> Float .
 endfm
 fmod GRAMATICA is
 	pr MEMORIA .
-	sort Operacion Var Exp .
-	subsort Qid Int < Var .
+	sort Operacion Var Exp Program .
+	subsort Qid Float Bool < Var .
 	subsort Var Operacion < Exp .
 	op _+._ : Exp Exp -> Operacion [ctor] .
 	op _-._ : Exp Exp -> Operacion [ctor] .
+	op -._ : Exp -> Operacion [ctor] .
 	op _*._ : Exp Exp -> Operacion [ctor] .
 	op _/._ : Exp Exp -> Operacion [ctor] .
 	op _**._ : Exp Exp -> Operacion [ctor] .
@@ -293,6 +289,19 @@ fmod GRAMATICA is
 	op _!=._ : Exp Exp -> Operacion [ctor] .
 	op _>._ : Exp Exp -> Operacion [ctor] .
 	op _>=._ : Exp Exp -> Operacion [ctor] .
+	op not. _ : Exp -> Operacion [ctor] .
+	op _and._ : Exp Exp -> Operacion [ctor] .
+	op _or._ : Exp Exp -> Operacion [ctor] .
+	op _=._ : Qid Exp -> Program [ctor] .
+	op if_;_else_ : Operacion Program Program -> Program [ctor] .
+	op for _ in range(_);_ : Qid Exp Program -> Program [ctor] .
+	op for _ in range(_,_);_ : Qid Exp Exp Program -> Program [ctor] . 
+	op for _ in _;_ : Qid Qid Program -> Program [ctor] .
+	op for _ in [_];_ : Qid LFloat Program -> Program [ctor] .
+	***	op assert _ : Operacion -> Program [ctor] .
+	***op assert _,_ : Operacion String -> Program [ctor] .
+	*** op raise _ : String -> Program [ctor] .
+	*** op return _ : Exp -> Program [ctor] . otro return con todos los tipos posibles
 
 	***subsort Exp Operacion < oz .
 endfm
@@ -309,7 +318,7 @@ fmod VariablesEntorno is
 	op msg.value : -> Nat . ***solo de funciones externas
 	op tx.origin : -> Direccion .
 endfm
-
+***Palabras reservadas
 fmod Declaraciones is
 	pr MEMORIA .
 	sort DeclaracionControl AfirmacionExcepcion .
@@ -328,7 +337,7 @@ fmod Declaraciones is
 	op assert _ : Bool -> AfirmacionExcepcion [ctor] .
 	op assert _,_ : Bool String -> AfirmacionExcepcion [ctor] .
 endfm
-
+***Declaracion de funciones
 fmod Funciones is
 	pr DeclaracionVariables .
 	pr Declaraciones .
@@ -347,6 +356,7 @@ fmod Funciones is
 	op def init(_) : Parametros -> initCabe [ctor] . *** puede ser payable no puede llamar otras funciones la prijmera en ser declarada
 	op def default() : -> defaultCabe [ctor] .
 endfm
+***Primera idea de declaracion de un for
 fmod For is
 	pr TIPOS .
 	pr LISTAS .
@@ -374,20 +384,21 @@ mod AlmacenaVariables is
 	***	if (existeVariable(S,MS,M128,M256,MF)) == false .
 
 endm
+***Prueba para procesar un archivo y multiplicar por dos
 fmod Duplica is
 	pr NAT .
 	pr FLOAT .
 	pr STRING .
 	pr CONVERSION .
-	var N : Nat .
+	var N : Float .
 	var S : String .
-	op doble _ : Nat -> Nat .
-	eq (doble N) = (N * 2) .
+	op doble _ : Float -> Float .
+	eq (doble N) = (N * 2.0) .
 	op cha _ : String -> Float .
 	eq (cha S) = float(S) .
 
 endfm
-
+***Reglas encargadas de leer un archivo 
 mod LeerArchivo is
  inc STD-STREAM .
  pr  CONVERSION .
@@ -488,11 +499,11 @@ rl [newLine] :
  ***   < M, T' > := parse(T) [print T "\nParseado: " T'] .
 rl [calcula] :
     < example : EXAMPLE | read: Read, state: calculate, prueba: (S L  "LL" ), Attrs >
- => < example : EXAMPLE | read: Read, state: calculate, prueba: (L  "dale" ), Attrs >
-    write(stdout, example, "Print linea.\n") .
+ => < example : EXAMPLE | read: Read, state: calculate, prueba: (L  "LL" ), Attrs >
+    write(stdout, example, string (doble float( substr(S ,0 , sd (length( S ), 2 ) ) ) ) ) .
 
 rl [calculaUltimo] :
-    < example : EXAMPLE | read: Read, state: calculate, prueba: (""), Attrs >
+    < example : EXAMPLE | read: Read, state: calculate, prueba: ( lv "LL"), Attrs >
  => < example : EXAMPLE | read: Read, prueba: ("Kelowa"), Attrs >
     write(stdout, example, "Print linea.\n") .
 
