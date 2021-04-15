@@ -189,9 +189,12 @@ endm
 red metaParse(GRAMMAR, tokenize("x : public(int128) \n"), anyType) .
 red metaParse(GRAMMAR, tokenize(" x ** y \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" def loco(PaV) \n"), anyType) .
-red metaParse(GRAMMAR, tokenize(" def loco(x : bool , y : int128 ) \n"), anyType) .
-red metaParse(GRAMMAR, tokenize(" @external def loco(x : bool , y : int128 ) \n"), anyType) .
-red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" def loco(x : bool , y : int128 ) \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" @external def loco(x : bool , y : int128 ) \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" x :  int128[3] \n"), anyType) .
+red metaParse(GRAMMAR, tokenize(" microchip : public ( comida [15]) \n"), anyType) .
+red metaParse(GRAMMAR, tokenize(" microchip : public ( HashMap [bool,int128]) \n"), anyType) .
 set print attribute on .
 
 erew run .

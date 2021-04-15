@@ -196,12 +196,12 @@ fmod GRAMMAR is
  ***op If_Then_Else_Fi : @Exp@ @Prog@ @Prog@ -> @Prog@ [ctor] .
  ***ops _*_ _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc] .
  ***op _=_; : @Token@ @Exp@ -> @Prog@ [ctor] .
-	sorts @Declaracion@ @DConstante@ @DcHashMap@ @Declaraciones@ .
-	subsort @Declaracion@ @Tipos@ @DConstante@ @DcHashMap@ < @Declaraciones@ .
+	sorts @Declaracion@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @Declaraciones@ @Tipos@ .
+	subsort @Declaracion@ @DeclaracionValor@ @DConstante@ @DcHashMap@ < @Declaraciones@ .
 	ops bool int128 uint256 decimal address bytes32 String Bytes struct HashMap : -> @Tipos@ [ctor] .
 	op _:_ : @Token@ @Tipos@ -> @Declaracion@ [ctor] .
 	op _: public( _ ) : @Token@ @Tipos@ -> @Declaracion@ [ctor] .
-	op _:_ = _ : @Token@ @Tipos@ @Token@ -> @Declaracion@ [ctor] .
+	op _:_ = _ : @Token@ @Tipos@ @Token@ -> @DeclaracionValor@ [ctor] .
 	op _: constant( _ ) = _ : @Token@ @Tipos@ @Token@ -> @DConstante@ [ctor] .
 	op _:_[_,_] :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
 	op _:_[_,_] : @Token@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
@@ -217,12 +217,24 @@ fmod GRAMMAR is
 
 	***Operaciones
 	sorts @Exp@ @Prog@ @Operacion@ .
-	subsort @Token@ @Operacion@ < @Exp@ .
-	op _+_ : @Exp@ @Exp@ -> @Operacion@ .
-	op _-_ : @Exp@ @Exp@ -> @Operacion@ .
-	op _*_ : @Exp@ @Exp@ -> @Operacion@ .
-	op _/_ : @Exp@ @Exp@ -> @Operacion@ .
-	op _**_ : @Exp@ @Exp@ -> @Operacion@ .
+	subsort @Token@  @Operacion@ < @Exp@ .
+	op _+_ : @Exp@ @Exp@ -> @Operacion@ [ctor] .
+	op _-_ : @Exp@ @Exp@ -> @Operacion@ [ctor] .
+	op _*_ : @Exp@ @Exp@ -> @Operacion@ [ctor] .
+	op _/_ : @Exp@ @Exp@ -> @Operacion@ [ctor] .
+	op _**_ : @Exp@ @Exp@ -> @Operacion@ [ctor] .
+
+	***Funciones
+	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ .
+	subsort @Declaracion@ < @Parametros@ .
+	ops @external @internal : -> @DecoratorEI@  [ctor] .
+	ops @pure @view @payable @nonpayables : -> @DecoratorMut@ [ctor] .
+	op @nonreentrant(_) : @Token@ -> @DecoratorNR@ [ctor] .
+	op PaV : -> @Parametros@ [ctor] .
+	op _,_ : @Parametros@  @Parametros@  -> @Parametros@  [ctor id: PaV ] .
+	op def _(_) : @Token@ @Parametros@ -> @Cabecera@ [ctor] .
+	op _ def _(_) : @DecoratorEI@ @Token@ @Parametros@ -> @Cabecera@ [ctor] .
+	op _ _ def _(_) : @DecoratorEI@ @DecoratorMut@ @Token@ @Parametros@  -> @Cabecera@ [ctor] .
  ***a=[1,2,3]
 endfm
 fmod DeclaracionVariables is
@@ -390,8 +402,8 @@ fmod Funciones is
 	op @nonreentrant(_) : String -> DecoratorNR [ctor] . ***tengo que guardar este string en algun lado pa que no falle
 	op PaV : -> Parametros [ctor] .
 	op _,_ : Parametros Parametros -> Parametros [ctor assoc comm id: PaV ] .
-	op def _(_) : String Parametros -> Cabecera [ctor] .
-	op def _(_)->_ : String Parametros Tipos -> Cabecera [ctor] .
+	op def _(_) : Qid Parametros -> Cabecera [ctor] .
+	op def _(_)->_ : Qid Parametros Tipos -> Cabecera [ctor] .
 	op def init(_) : Parametros -> initCabe [ctor] . *** puede ser payable no puede llamar otras funciones la prijmera en ser declarada
 	op def default() : -> defaultCabe [ctor] .
 endfm

@@ -18,7 +18,7 @@ var  Ct : Constant .
  var B : Bool .
 
  op parse : Term -> ParsingRes .
- eq parse(T) = parse(upModule('MY-PROG, true), T) . ***llamar al otro parse
+ ***eq parse(T) = parse(upModule('MY-PROG, true), T) . ***llamar al otro parse
  ***op parse : Module Term -> ParsingRes .
 
  ***ceq parse(M, 'token[T]) = < M, upTerm(F) >
@@ -187,7 +187,11 @@ endm
 
 ***red metaParse(GRAMMAR, tokenize("x : public(int128) \n y : uint256 = true \n z : HashMap[bool , bool] \n"), anyType) .
 red metaParse(GRAMMAR, tokenize("x : public(int128) \n"), anyType) .
-red metaParse(GRAMMAR, tokenize(" (3 - y) + 5 \n"), anyType) .
+red metaParse(GRAMMAR, tokenize(" x ** y \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" def loco(PaV) \n"), anyType) .
+red metaParse(GRAMMAR, tokenize(" def loco(x : bool , y : int128 ) \n"), anyType) .
+red metaParse(GRAMMAR, tokenize(" @external def loco(x : bool , y : int128 ) \n"), anyType) .
+red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) \n"), anyType) .
 set print attribute on .
 
 erew run .
