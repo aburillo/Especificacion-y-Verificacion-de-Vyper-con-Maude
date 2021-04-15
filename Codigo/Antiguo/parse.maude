@@ -1,10 +1,13 @@
+load file.maude
+load TFM.maude
+
 fmod PARSING is
  pr META-LEVEL .
  pr CONVERSION .
  ***pr PREPARSE .
  sort ParsingRes .
 
- op <_,_> : Module Term -> ParsingRes [ctor] .
+ op <_> : Term -> ParsingRes [ctor] .
 
 vars T T1 T1' T2 T2' T3 T3' : Term .
  vars M M1 M2 M3 : Module .
@@ -15,45 +18,181 @@ var  Ct : Constant .
  var B : Bool .
 
  op parse : Term -> ParsingRes .
- ***eq parse(T) = parse(upModule('MY-PROG, true), T) . llamar al otro parse
- op parse : Module Term -> ParsingRes .
+ eq parse(T) = parse(upModule('MY-PROG, true), T) . ***llamar al otro parse
+ ***op parse : Module Term -> ParsingRes .
 
  ***ceq parse(M, 'token[T]) = < M, upTerm(F) >
   ***if Q := downQid(T) /\
   ***   S := string(Q) . ***/\
     *** B := Bool(S) .
  ***parsea Bool
- ceq parse(M, 'token[T]) = < M, T >
+ ceq parse('token[T]) = < T >
   if Q := downQid(T) /\
      S := string(Q) /\
-     isBool(S) .
+     isBool(S) [print "ecuacion1" Q].
+
 *** parsea float 
- ceq parse(M, 'token[T]) = < M, upTerm(F) >
+ ceq parse('token[T]) = < upTerm(F) >
   if Q := downQid(T) /\
      S := string(Q) /\
      F := float(S) .
 *** parsea int 
- ceq parse(M, 'token[T]) = < M, upTerm(F) >
+ ceq parse('token[T]) = < upTerm(F) >
   if Q := downQid(T) /\
      S := string(Q) /\
      rat(S, 10) :: Nat /\
      F := float(S + ".0") .
- ceq parse(M, 'token[T]) = < M, T >
-  if Q := downQid(T) /\
-     S := string(Q) /\
-     not (float(S) :: Float) /\
-     not (rat(S, 10) :: Nat) .
+*** parsea tipos
+ ***eq parse(T.@Tipos@) = < T > .
+ ceq parse('_:_[T1,T2]) = <'_:_[T1', T2'] >
+    if < T1' > := parse (T1) /\
+       < T2' > := parse (T2) .
  *** Parseando una suma .
- ceq parse(M, '_+_[T1,T2]) = < M2, '_+._[T1', T2'] >
-    if < M1 , T1' > := parse (M,T1) /\
-       < M2 , T2' > := parse (M1,T2) .
+---  ceq parse('_+_[T1,T2]) = <'_+._[T1', T2'] >
+---     if < T1' > := parse (T1) /\
+---        < T2' > := parse (T2) .
+
 ***PARSEO UN <
- ceq parse(M, '_<_[T1,T2]) = < M2, '_<._[T1', T2'] >
-    if < M1 , T1' > := parse (M,T1) /\
-       < M2 , T2' > := parse (M1,T2) .
+---  ceq parse('_<_[T1,T2]) = < '_<._[T1', T2'] >
+---     if < T1' > := parse (T1) /\
+---        < T2' > := parse (T2) .
+   
  op downQid : Term -> [Qid] [memo] .
  eq downQid(Ct)
     = qid(substr(string(getName(Ct)), 1, length(string(getName(Ct))))) .
  op isBool : String -> Bool .
  eq isBool(S) = (S == "true") or (S == "false") .
 endfm
+
+mod MTP is
+ inc STD-STREAM .
+ pr  CONVERSION .
+ pr META-SIGN .
+ pr  LEXICAL .
+ pr PARSING .
+ inc FILE .
+
+ vars Text Original Read Source : String .
+ var  Attrs : AttributeSet .
+ vars FHIn FHOut : Oid .
+ var  QIL : QidList .
+ vars T T' : Term .
+ var  M : Module .
+ vars N N' : Nat .
+ var  Ty : Type .
+ var  Q : Qid .
+
+ *** Object and class definition
+ op EXAMPLE : -> Cid [ctor] .
+ op example : -> Oid [ctor] .
+
+ op noFile : -> Oid [ctor] .
+
+ *** Attributes
+ op file:_ : Oid -> Attribute [ctor] .
+ op read:_ : String -> Attribute [ctor] .
+ op state:_ : State -> Attribute [ctor] .
+ op terms:_ : TermList -> Attribute [ctor gather (&)] .
+
+ sort State .
+ ops idle reading parsing : -> State [ctor] .
+
+ *** Run command
+ op run : -> Configuration [ctor] .
+
+ ***                        ***
+ ***          LOAD          ***
+ ***                        ***
+
+ crl [loadComm] :
+    gotLine(example, stdin, Text)
+    < example : EXAMPLE | Attrs >
+ => < example : EXAMPLE | Attrs >
+    openFile(fileManager, example, Source, "r")
+  if Q := tokenize(Text) /\
+     Source := printTokens(Q) .
+
+ crl [loadCommERROR] :
+    gotLine(example, stdin, Text)
+    < example : EXAMPLE | Attrs >
+ => < example : EXAMPLE | Attrs >
+    write(stdout, example, "File name incorrect.\n")
+  if Q QIL := tokenize(Text) /\
+     QIL =/= nil .
+
+ rl [openedFile] :
+    openedFile(example, fileManager, FHIn)
+    < example : EXAMPLE | file: noFile, state: idle, Attrs >
+ => < example : EXAMPLE | file: FHIn, state: reading, Attrs >
+    getLine(FHIn, example) .
+
+ rl [openFileError] :
+    fileError(example, fileManager, Text)
+    < example : EXAMPLE | Attrs >
+ => < example : EXAMPLE | Attrs >
+    write(stdout, example, Text + "\n") .
+
+ ***                           ***
+ ***          GotLine          ***
+ ***                           ***
+
+
+rl [newLine] :
+   gotLine(example, FHIn, Text)
+   < example : EXAMPLE | file: FHIn, read: Read, state: reading, Attrs >
+=> if Text == ""
+   then < example : EXAMPLE | file: FHIn, read: Read, state: parsing, Attrs >
+        closeFile(FHIn, example)
+   else < example : EXAMPLE | file: FHIn, read: (Read + Text), state: reading, Attrs >
+        getLine(FHIn, example)
+   fi .
+
+crl [parsing] :
+    < example : EXAMPLE | read: Read, state: parsing, Attrs >
+ => < example : EXAMPLE | read: "", Attrs >
+    write(stdout, example, "Parsed.\n")
+ if Read =/= "" /\
+    QIL := tokenize(Read) /\
+    {T, Ty} := metaParse(GRAMMAR, QIL, anyType) /\
+    < T' > := parse(T) [print T "\nParseado: " T'] .
+
+ ***                              ***
+ ***          closedFile          ***
+ ***                              ***
+
+ rl [closedFile] :
+    closedFile(example, FHIn)
+    < example : EXAMPLE | file: FHIn, Attrs >
+ => < example : EXAMPLE | file: noFile, Attrs > .
+
+ ***                          ***
+ ***          WROTE           ***
+ ***                          ***
+
+ rl [wrote] :
+    wrote(example, stdout)
+    < example : EXAMPLE | file: noFile, Attrs >
+ => < example : EXAMPLE | file: noFile, Attrs > .
+
+ ***                        ***
+ ***          RUN           ***
+ ***                        ***
+
+ eq run =
+    <> < example : EXAMPLE | file: noFile, read: "", state: idle, terms: empty >
+    getLine(stdin, example, "Introduce file name> ") .
+endm
+
+
+
+***red metaParse(GRAMMAR, tokenize("x : public(int128) \n y : uint256 = true \n z : HashMap[bool , bool] \n"), anyType) .
+red metaParse(GRAMMAR, tokenize("x : public(int128) \n"), anyType) .
+red metaParse(GRAMMAR, tokenize(" (3 - y) + 5 \n"), anyType) .
+set print attribute on .
+
+erew run .
+--- PreguntaS lAURA
+--- COMO PARSEAR EL TIPOS y las cosas con @.
+--- Los fallos que me dan al ejecutar porque son ?
+--- linea 21 llama a myprog pero yo no tengo nada que se llame asi!
+---PORQUE NO ME PARSEA SUMAS RESTAS?

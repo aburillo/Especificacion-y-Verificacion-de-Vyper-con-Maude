@@ -1,5 +1,4 @@
 load file.maude
-
 fmod BOOLEAN is
 	pr STRING .
 	sorts  BasicB ValuesB .
@@ -126,14 +125,14 @@ fmod STRUCT is
 	sort Struct VS VariablesStruct LStruct .
 	subsort VS < VariablesStruct .
 	subsort Struct < LStruct .
-	op [_,_,_,_] : String Tipos LBool Nat  -> VS [ctor] .
-	op [_,_,_,_] : String Tipos LNat Nat  -> VS [ctor] .
-	op [_,_,_,_] : String Tipos LInt Nat  -> VS [ctor] .
-	op [_,_,_,_] : String Tipos LFloat Nat  -> VS [ctor] .
-	op [_,_,_,_] : String Tipos String Nat  -> VS [ctor] .
-	op [_,_,_,_] : String Tipos Direccion Nat  -> VS [ctor] .
-	op [_,_,_,_] : String Tipos Bytes32 Nat  -> VS [ctor] .
-	op [_,_,_,_] : String Tipos bytes Nat  -> VS [ctor] .
+	op [_,_,_,_] : Qid Tipos LBool Nat  -> VS [ctor] .
+	op [_,_,_,_] : Qid Tipos LNat Nat  -> VS [ctor] .
+	op [_,_,_,_] : Qid Tipos LInt Nat  -> VS [ctor] .
+	op [_,_,_,_] : Qid Tipos LFloat Nat  -> VS [ctor] .
+	op [_,_,_,_] : Qid Tipos String Nat  -> VS [ctor] .
+	op [_,_,_,_] : Qid Tipos Direccion Nat  -> VS [ctor] .
+	op [_,_,_,_] : Qid Tipos Bytes32 Nat  -> VS [ctor] .
+	op [_,_,_,_] : Qid Tipos bytes Nat  -> VS [ctor] .
 	op vs : -> VariablesStruct [ctor] .
 	op __ : VariablesStruct VariablesStruct -> VariablesStruct [ctor id: vs ] .
 	*** he puesto que struct tiene memoria pero puede ser que tenga algo que sea otra cosa que solo sea declaraciones sencillas .
@@ -151,6 +150,8 @@ fmod MAPA is
 	op mapv : -> Map [ctor] .
 	op __ : Map Map -> Map [ctor] .
 	*** he puesto que struct tiene memoria pero puede ser que tenga algo que sea otra cosa que solo sea declaraciones sencillas .
+	***seguramente tenga que quitar el nombre del mapa porque ya lo almacenno en la memoria
+	***[nombre,mapa propio, tipo de la clave , tipo del valor]
 	op |_,_,_,_| : String Map Tipos Tipos -> Mapa [ctor] .
 	op |_,_,_,_| : String Map Tipos String -> Mapa [ctor] .
 	op |_,_,_,_,_| : String Map Tipos String Nat -> Mapa [ctor] .
@@ -188,6 +189,42 @@ endfm
 
 *** no vale porque no puedo crear un diccionario del tipo FP
 ***unificar en un tipo!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+fmod GRAMMAR is
+ sorts @Token@ @Bubble@ @NeTokenList@ .
+
+
+ ***op If_Then_Else_Fi : @Exp@ @Prog@ @Prog@ -> @Prog@ [ctor] .
+ ***ops _*_ _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc] .
+ ***op _=_; : @Token@ @Exp@ -> @Prog@ [ctor] .
+	sorts @Declaracion@ @DConstante@ @DcHashMap@ @Declaraciones@ .
+	subsort @Declaracion@ @Tipos@ @DConstante@ @DcHashMap@ < @Declaraciones@ .
+	ops bool int128 uint256 decimal address bytes32 String Bytes struct HashMap : -> @Tipos@ [ctor] .
+	op _:_ : @Token@ @Tipos@ -> @Declaracion@ [ctor] .
+	op _: public( _ ) : @Token@ @Tipos@ -> @Declaracion@ [ctor] .
+	op _:_ = _ : @Token@ @Tipos@ @Token@ -> @Declaracion@ [ctor] .
+	op _: constant( _ ) = _ : @Token@ @Tipos@ @Token@ -> @DConstante@ [ctor] .
+	op _:_[_,_] :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
+	op _:_[_,_] : @Token@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
+	op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
+	***Nose si hay que meter esto cuando literalmente va a ser igual
+	--- op _: constant(_) = _ : Qid Tipos Int -> DCInt128 [ctor] .
+	--- op _: constant(_) = _ : Qid Tipos Nat -> DCUInt256 [ctor] .
+	--- op _: constant(_) = _ : Qid Tipos Float -> DCDecimal [ctor] .
+	--- op _: constant(_) = _ : Qid Tipos Direccion -> DCAddress [ctor] .
+	--- op _: constant(_) = _ : Qid Tipos Bytes32  -> DCBytes32 [ctor] .
+	op dc : -> @Declaraciones@  [ctor] .
+	op __ : @Declaracion@ @Declaracion@ -> @Declaraciones@  [ctor comm id: dc] .
+
+	***Operaciones
+	sorts @Exp@ @Prog@ @Operacion@ .
+	subsort @Token@ @Operacion@ < @Exp@ .
+	op _+_ : @Exp@ @Exp@ -> @Operacion@ .
+	op _-_ : @Exp@ @Exp@ -> @Operacion@ .
+	op _*_ : @Exp@ @Exp@ -> @Operacion@ .
+	op _/_ : @Exp@ @Exp@ -> @Operacion@ .
+	op _**_ : @Exp@ @Exp@ -> @Operacion@ .
+ ***a=[1,2,3]
+endfm
 fmod DeclaracionVariables is
 	pr BOOLEAN .
 	pr TIPOS .
@@ -197,36 +234,38 @@ fmod DeclaracionVariables is
 	subsort Declaracion DeclaracionLista DcBooleana DcStruct DcHashMap DCInt128 DCUInt256 DCDecimal DCAddress DCBytes32  < Declaraciones .
 	***subsort Declaraciones Mapas < DeclaracionAlmacenamiento
 	***subsort  STRING-NAT-MAP < MAPITA .
-	op _:_ : String Tipos -> Declaracion [ctor] .
-	op _:_ = _ : String Tipos Int -> Declaracion [ctor] .
-	op _:_[_] : String Tipos Nat -> DeclaracionLista [ctor] .
-	op _: constant(_) = _ : String Tipos BasicB -> DcBooleana [ctor] .
+	op _:_ : Qid Tipos -> Declaracion [ctor] .
+	op _: public( _ ) : Qid Tipos -> Declaracion [ctor] .
+	op _:_ = _ : Qid Tipos Int -> Declaracion [ctor] .
+	op _:_[_] : Qid Tipos Nat -> DeclaracionLista [ctor] .
+	op _: constant(_) = _ : Qid Tipos BasicB -> DcBooleana [ctor] .
 
-	op _: constant(_) = _ : String Tipos Int -> DCInt128 [ctor] .
-
-
-
-	op _: constant(_) = _ : String Tipos Nat -> DCUInt256 [ctor] .
-
-
-	op _: constant(_) = _ : String Tipos Float -> DCDecimal [ctor] .
-
-
-	op _: constant(_) = _ : String Tipos Direccion -> DCAddress [ctor] .
-
-	op _: constant(_) = _ : String Tipos Bytes32  -> DCBytes32 [ctor] .
+	op _: constant(_) = _ : Qid Tipos Int -> DCInt128 [ctor] .
 
 
 
-	op __:_ : Tipos String Declaraciones -> DcStruct [ctor] . *** he puesto que tienes declaraciones pero incluye demasaidas cosas
-	op _:_[_,_] : String Tipos Tipos Tipos -> DcHashMap [ctor] .
-	op _:_[_,_] : String Tipos Tipos String -> DcHashMap [ctor] .
-	op _:_[_,_[_]] : String Tipos Tipos String Nat -> DcHashMap [ctor] .
+	op _: constant(_) = _ : Qid Tipos Nat -> DCUInt256 [ctor] .
+
+
+	op _: constant(_) = _ : Qid Tipos Float -> DCDecimal [ctor] .
+
+
+	op _: constant(_) = _ : Qid Tipos Direccion -> DCAddress [ctor] .
+
+	op _: constant(_) = _ : Qid Tipos Bytes32  -> DCBytes32 [ctor] .
+
+
+
+	op __:_ : Tipos Qid Declaraciones -> DcStruct [ctor] . *** he puesto que tienes declaraciones pero incluye demasaidas cosas
+	op _:_[_,_] : Qid Tipos Tipos Tipos -> DcHashMap [ctor] .
+	op _:_[_,_] : Qid Tipos Tipos Qid -> DcHashMap [ctor] .
+	op _:_[_,_[_]] : Qid Tipos Tipos Qid Nat -> DcHashMap [ctor] .
 	op dc : -> Declaraciones [ctor] .
 	op __ : Declaraciones Declaraciones -> Declaraciones [comm ctor id: dc] .
+	
 	*** VALORES
-	op _=_ : String Nat ->  DeclaracionValor [ctor] .
-	op _=_ : self Nat -> DeclaracionValor [ctor] .
+	***op _=_ : String Nat ->  DeclaracionValor [ctor] .
+	***op _=_ : self Nat -> DeclaracionValor [ctor] .
 endfm
 fmod MEMORIA is
 	pr DeclaracionVariables .
@@ -238,16 +277,16 @@ fmod MEMORIA is
 	subsort Variable ConstanteValor < Memoria .
 	ops public private : -> Visibilidad [ctor] .
 	*** [nombreVaraible,tipodelaVariable,valor de la variable,numero de atributos,publica o priovada,true si es constante]
-	op [_,_,_,_,_,_] : String Tipos LBool Nat Visibilidad Bool -> Variable [ctor] .
-	op [_,_,_,_,_,_] : String Tipos LInt Nat Visibilidad Bool -> Variable [ctor] .
-	op [_,_,_,_,_,_] : String Tipos LInt Nat Visibilidad Bool -> Variable [ctor] .
-	op [_,_,_,_,_,_] : String Tipos LFloat Nat Visibilidad Bool -> Variable [ctor] .
-	op [_,_,_,_,_,_] : String Tipos String Nat Visibilidad Bool -> Variable [ctor] .
-	op [_,_,_,_,_,_] : String Tipos Direccion Nat Visibilidad Bool -> Variable [ctor] .
-	op [_,_,_,_,_,_] : String Tipos Bytes32 Nat Visibilidad Bool -> Variable [ctor] .
-	op [_,_,_,_,_,_] : String Tipos bytes Nat Visibilidad Bool -> Variable [ctor] .
-	op [_,_,_,_,_,_] : String Tipos LStruct Nat Visibilidad Bool -> Variable [ctor] .
-	op [_,_,_,_,_,_] : String Tipos Mapa Nat Visibilidad Bool -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid Tipos LBool Nat Visibilidad Bool -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid Tipos LInt Nat Visibilidad Bool -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid Tipos LInt Nat Visibilidad Bool -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid Tipos LFloat Nat Visibilidad Bool -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid Tipos String Nat Visibilidad Bool -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid Tipos Direccion Nat Visibilidad Bool -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid Tipos Bytes32 Nat Visibilidad Bool -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid Tipos bytes Nat Visibilidad Bool -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid Tipos LStruct Nat Visibilidad Bool -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid Tipos Mapa Nat Visibilidad Bool -> Variable [ctor] .
 	op mv : -> Memoria [ctor] .
 	op __ : Memoria Memoria -> Memoria [ctor assoc comm id: mv] .
 	op inicMemoria : -> Memoria .
@@ -289,7 +328,7 @@ fmod GRAMATICA is
 	op _!=._ : Exp Exp -> Operacion [ctor] .
 	op _>._ : Exp Exp -> Operacion [ctor] .
 	op _>=._ : Exp Exp -> Operacion [ctor] .
-	op not. _ : Exp -> Operacion [ctor] .
+	op not._ : Exp -> Operacion [ctor] .
 	op _and._ : Exp Exp -> Operacion [ctor] .
 	op _or._ : Exp Exp -> Operacion [ctor] .
 	op _=._ : Qid Exp -> Program [ctor] .
@@ -301,7 +340,7 @@ fmod GRAMATICA is
 	***	op assert _ : Operacion -> Program [ctor] .
 	***op assert _,_ : Operacion String -> Program [ctor] .
 	*** op raise _ : String -> Program [ctor] .
-	*** op return _ : Exp -> Program [ctor] . otro return con todos los tipos posibles
+	op return _ : Exp -> Program [ctor] . *** otro return con todos los tipos posibles
 
 	***subsort Exp Operacion < oz .
 endfm
@@ -385,149 +424,152 @@ mod AlmacenaVariables is
 
 endm
 ***Prueba para procesar un archivo y multiplicar por dos
-fmod Duplica is
-	pr NAT .
-	pr FLOAT .
-	pr STRING .
-	pr CONVERSION .
-	var N : Float .
-	var S : String .
-	op doble _ : Float -> Float .
-	eq (doble N) = (N * 2.0) .
-	op cha _ : String -> Float .
-	eq (cha S) = float(S) .
+--- fmod Duplica is
+--- 	pr NAT .
+--- 	pr FLOAT .
+--- 	pr STRING .
+--- 	pr CONVERSION .
+--- 	var N : Float .
+--- 	var S : String .
+--- 	op doble _ : Float -> Float .
+--- 	eq (doble N) = (N * 2.0) .
+--- 	op cha _ : String -> Float .
+--- 	eq (cha S) = float(S) .
 
-endfm
-***Reglas encargadas de leer un archivo 
-mod LeerArchivo is
- inc STD-STREAM .
- pr  CONVERSION .
- pr META-SIGN .
- pr  LEXICAL .
- pr Duplica .
-*** pr PARSING .
- inc FILE .
+--- endfm
+--- ***Reglas encargadas de leer un archivo 
+--- mod LeerArchivo is
+---  inc STD-STREAM .
+---  pr  CONVERSION .
+---  pr META-SIGN .
+---  pr  LEXICAL .
+---  pr Duplica .
+--- *** pr PARSING .
+---  inc FILE .
 
-vars Text Original Read Source S : String .
- var  Attrs : AttributeSet .
- vars FHIn FHOut : Oid .
- var  QIL : QidList .
- vars T T' : Term .
- var  M : Module .
- vars N N' : Nat .
- var  Ty : Type .
- var  Q : Qid .
- var F : Float .
- var L : LS .
-  *** Object and class definition
- op EXAMPLE : -> Cid [ctor] .
- op example : -> Oid [ctor] .
+--- vars Text Original Read Source S : String .
+---  var  Attrs : AttributeSet .
+---  vars FHIn FHOut : Oid .
+---  var  QIL : QidList .
+---  vars T T' : Term .
+---  var  M : Module .
+---  vars N N' : Nat .
+---  var  Ty : Type .
+---  var  Q : Qid .
+---  var F : Float .
+---  var L : LS .
+---   *** Object and class definition
+---  op EXAMPLE : -> Cid [ctor] .
+---  op example : -> Oid [ctor] .
 
- op noFile : -> Oid [ctor] .
+---  op noFile : -> Oid [ctor] .
 
- *** Attributes
- op file:_ : Oid -> Attribute [ctor] .
- op read:_ : String -> Attribute [ctor] .
- op state:_ : State -> Attribute [ctor] .
- op prueba:_ : LS -> Attribute [ctor] .
- op terms:_ : TermList -> Attribute [ctor gather (&)] .
+---  *** Attributes
+---  op file:_ : Oid -> Attribute [ctor] .
+---  op read:_ : String -> Attribute [ctor] .
+---  op state:_ : State -> Attribute [ctor] .
+---  op prueba:_ : LS -> Attribute [ctor] .
+---  op terms:_ : TermList -> Attribute [ctor gather (&)] .
 
- sort State .
- ops idle reading parsing calculate : -> State [ctor] .
- sort d LS .
- subsort String < LS .
- op lv : -> LS [ctor] .
- op __ : LS LS -> LS [ctor assoc id: lv] .
+---  sort State .
+---  ops idle reading parsing calculate : -> State [ctor] .
+---  sort d LS .
+---  subsort String < LS .
+---  op lv : -> LS [ctor] .
+---  op __ : LS LS -> LS [ctor assoc id: lv] .
 
- *** Run command
- op run : -> Configuration [ctor] .
+---  *** Run command
+---  op run : -> Configuration [ctor] .
 
- ***                        ***
- ***          LOAD          ***
- ***                        ***
+---  ***                        ***
+---  ***          LOAD          ***
+---  ***                        ***
 
- crl [loadComm] :
-    gotLine(example, stdin, Text)
-    < example : EXAMPLE | Attrs >
- => < example : EXAMPLE | Attrs >
-    openFile(fileManager, example, Source, "r")
-  if Q := tokenize(Text) /\
-     Source := printTokens(Q) .
+---  crl [loadComm] :
+---     gotLine(example, stdin, Text)
+---     < example : EXAMPLE | Attrs >
+---  => < example : EXAMPLE | Attrs >
+---     openFile(fileManager, example, Source, "r")
+---   if Q := tokenize(Text) /\
+---      Source := printTokens(Q) .
 
- crl [loadCommERROR] :
-    gotLine(example, stdin, Text)
-    < example : EXAMPLE | Attrs >
- => < example : EXAMPLE | Attrs >
-    write(stdout, example, "File name incorrect.\n")
-  if Q QIL := tokenize(Text) /\
-     QIL =/= nil .
+---  crl [loadCommERROR] :
+---     gotLine(example, stdin, Text)
+---     < example : EXAMPLE | Attrs >
+---  => < example : EXAMPLE | Attrs >
+---     write(stdout, example, "File name incorrect.\n")
+---   if Q QIL := tokenize(Text) /\
+---      QIL =/= nil .
 
- rl [openedFile] :
-    openedFile(example, fileManager, FHIn)
-    < example : EXAMPLE | file: noFile, state: idle, Attrs >
- => < example : EXAMPLE | file: FHIn, state: reading, Attrs >
-    getLine(FHIn, example) .
+---  rl [openedFile] :
+---     openedFile(example, fileManager, FHIn)
+---     < example : EXAMPLE | file: noFile, state: idle, Attrs >
+---  => < example : EXAMPLE | file: FHIn, state: reading, Attrs >
+---     getLine(FHIn, example) .
 
- rl [openFileError] :
-    fileError(example, fileManager, Text)
-    < example : EXAMPLE | Attrs >
- => < example : EXAMPLE | Attrs >
-    write(stdout, example, Text + "\n") .
+---  rl [openFileError] :
+---     fileError(example, fileManager, Text)
+---     < example : EXAMPLE | Attrs >
+---  => < example : EXAMPLE | Attrs >
+---     write(stdout, example, Text + "\n") .
 
- ***                           ***
- ***          GotLine          ***
- ***                           ***
+---  ***                           ***
+---  ***          GotLine          ***
+---  ***                           ***
 
 
-rl [newLine] :
-   gotLine(example, FHIn, Text)
-   < example : EXAMPLE | file: FHIn, read: Read, state: reading, prueba: (L ""), Attrs >
-=> if Text == ""
-   then < example : EXAMPLE | file: FHIn, read: Read, state: calculate, prueba: (L  "LL"), Attrs >
-        closeFile(FHIn, example)
-   else < example : EXAMPLE | file: FHIn, read: (Read + Text), state: reading, prueba: (L Text ""), Attrs >
-        getLine(FHIn, example)
-   fi .
+--- rl [newLine] :
+---    gotLine(example, FHIn, Text)
+---    < example : EXAMPLE | file: FHIn, read: Read, state: reading, prueba: (L ""), Attrs >
+--- => if Text == ""
+---    then < example : EXAMPLE | file: FHIn, read: Read, state: calculate, prueba: (L  "LL"), Attrs >
+---         closeFile(FHIn, example)
+---    else < example : EXAMPLE | file: FHIn, read: (Read + Text), state: reading, prueba: (L Text ""), Attrs >
+---         getLine(FHIn, example)
+---    fi .
 
-***crl [parsing] :
-***    < example : EXAMPLE | read: Read, state: parsing, Attrs >
-*** => < example : EXAMPLE | read: "", Attrs >
-***    write(stdout, example, "Parsed.\n")
-*** if Read =/= "" /\
-***    QIL := tokenize(Read) /\
-***    {T, Ty} := metaParse(GRAMMAR, QIL, anyType) /\
- ***   < M, T' > := parse(T) [print T "\nParseado: " T'] .
-rl [calcula] :
-    < example : EXAMPLE | read: Read, state: calculate, prueba: (S L  "LL" ), Attrs >
- => < example : EXAMPLE | read: Read, state: calculate, prueba: (L  "LL" ), Attrs >
-    write(stdout, example, string (doble float( substr(S ,0 , sd (length( S ), 2 ) ) ) ) ) .
+--- ***crl [parsing] :
+--- ***    < example : EXAMPLE | read: Read, state: parsing, Attrs >
+--- *** => < example : EXAMPLE | read: "", Attrs >
+--- ***    write(stdout, example, "Parsed.\n")
+--- *** if Read =/= "" /\
+--- ***    QIL := tokenize(Read) /\
+--- ***    {T, Ty} := metaParse(GRAMMAR, QIL, anyType) /\
+---  ***   < M, T' > := parse(T) [print T "\nParseado: " T'] .
+--- rl [calcula] :
+---     < example : EXAMPLE | read: Read, state: calculate, prueba: (S L  "LL" ), Attrs >
+---  => < example : EXAMPLE | read: Read, state: calculate, prueba: (L  "LL" ), Attrs >
+---     write(stdout, example, string (doble float( substr(S ,0 , sd (length( S ), 2 ) ) ) ) ) .
 
-rl [calculaUltimo] :
-    < example : EXAMPLE | read: Read, state: calculate, prueba: ( lv "LL"), Attrs >
- => < example : EXAMPLE | read: Read, prueba: ("Kelowa"), Attrs >
-    write(stdout, example, "Print linea.\n") .
+--- rl [calculaUltimo] :
+---     < example : EXAMPLE | read: Read, state: calculate, prueba: ( lv "LL"), Attrs >
+---  => < example : EXAMPLE | read: Read, prueba: ("Kelowa"), Attrs >
+---     write(stdout, example, "Print linea.\n") .
 
- ***                              ***
- ***          closedFile          ***
- ***                              ***
+---  ***                              ***
+---  ***          closedFile          ***
+---  ***                              ***
 
- rl [closedFile] :
-    closedFile(example, FHIn)
-    < example : EXAMPLE | file: FHIn, Attrs >
-  => < example : EXAMPLE | file: noFile, Attrs > .
+---  rl [closedFile] :
+---     closedFile(example, FHIn)
+---     < example : EXAMPLE | file: FHIn, Attrs >
+---   => < example : EXAMPLE | file: noFile, Attrs > .
 
- ***                          ***
- ***          WROTE           ***
- ***                          ***
+---  ***                          ***
+---  ***          WROTE           ***
+---  ***                          ***
 
- rl [wrote] :
-    wrote(example, stdout)
-    < example : EXAMPLE | file: noFile, Attrs >
- => < example : EXAMPLE | file: noFile, Attrs > .
+---  rl [wrote] :
+---     wrote(example, stdout)
+---     < example : EXAMPLE | file: noFile, Attrs >
+---  => < example : EXAMPLE | file: noFile, Attrs > .
 
- eq run =
-    <> < example : EXAMPLE | file: noFile, read: "", state: idle, terms: empty,  prueba: ("")  >
-    ***<> | example ! 0 ! "" |
-	getLine(stdin, example, "Introduce un nombre de archivo ") .
-endm
-erew run .
+---  eq run =
+---     <> < example : EXAMPLE | file: noFile, read: "", state: idle, terms: empty,  prueba: ("")  >
+---     ***<> | example ! 0 ! "" |
+--- 	getLine(stdin, example, "Introduce un nombre de archivo ") .
+--- endm
+--- red metaParse(GRAMMAR, tokenize("x : int128 y : uint256 = true y : HashMap[bool , bool] \n"), anyType) .
+--- ***red metaParse(GRAMMAR, tokenize("If xxw\nThen 4 = 4 + w ;\nElse z = 4.5 ;\nFi"), anyType) .
+--- set print attribute on .
+--- erew run .
