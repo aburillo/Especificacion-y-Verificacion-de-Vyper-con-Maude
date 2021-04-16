@@ -190,7 +190,7 @@ endfm
 *** no vale porque no puedo crear un diccionario del tipo FP
 ***unificar en un tipo!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 fmod GRAMMAR is
- sorts @Token@ @Bubble@ @NeTokenList@ .
+ sorts @Token@ @Bubble@ @NeTokenList@ @LToken@ .
 
 
  ***op If_Then_Else_Fi : @Exp@ @Prog@ @Prog@ -> @Prog@ [ctor] .
@@ -203,6 +203,7 @@ fmod GRAMMAR is
 	***declaracion
 	
 	op _:_ : @Token@ @Tipos@ -> @Declaracion@ [ctor] .
+	****op _:_ : @Token@ @Token@ -> @Declaracion@ [ctor] .
 	op _: public( _ ) : @Token@ @Tipos@ -> @Declaracion@ [ctor] . *** ! al ser declaracion se podria meter en los parametros de una fun
 	
 	***declarar Lista
@@ -222,7 +223,9 @@ fmod GRAMMAR is
 	op _:_[_,_] : @Token@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
 	op _: public(_[_,_]) : @Token@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
 	op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
+	op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
 	op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
+	op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
 	***Declarar Struct
 	***subsort @Declaracion@ @DeclaracionLista@ < @ParamStruct@ .
 	***op __ : @ParamStruct@ @ParamStruct@ -> @ParamStruct@ [ctor] .
@@ -237,14 +240,19 @@ fmod GRAMMAR is
 	op __ : @Declaraciones@ @Declaraciones@ -> @Declaraciones@  [ctor comm id: dc] .
 
 	***Operaciones
-	sorts @Exp@ @Prog@ @Operacion@ .
-	subsort @Token@  @Operacion@ < @Exp@ .
-	op _+_ : @Exp@ @Exp@ -> @Operacion@ [ctor] .
-	op _-_ : @Exp@ @Exp@ -> @Operacion@ [ctor] .
-	op _*_ : @Exp@ @Exp@ -> @Operacion@ [ctor] .
-	op _/_ : @Exp@ @Exp@ -> @Operacion@ [ctor] .
-	op _**_ : @Exp@ @Exp@ -> @Operacion@ [ctor] .
-
+	sorts @Exp@ @Prog@ .
+	subsort @Token@ < @Exp@ .
+	op _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc] .
+	op _-_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
+	op _*_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc] .
+	op _/_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
+	op _**_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
+	
+	*** LISTAS
+	subsort @Token@ < @LToken@ .
+	op ltk : -> @LToken@ [ctor] .
+	op _,_ : @LToken@ @LToken@ -> @LToken@ [ctor comm id: ltk ] .
+	
 	***Funciones
 	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ .
 	subsort @Declaracion@ < @Parametros@ .
@@ -307,7 +315,9 @@ fmod DeclaracionVariables is
 	op _:_[_,_] : Qid Tipos Tipos Qid -> DcHashMap [ctor] .
 	op _:public(_[_,_]) : Qid Tipos Tipos Qid -> DcHashMap [ctor] .
 	op _:_[_,_[_]] : Qid Tipos Tipos Qid Nat -> DcHashMap [ctor] .
+	op _:_[_,_[_]] : Qid Tipos Tipos Tipos Nat -> DcHashMap [ctor] .
 	op _:public(_[_,_[_]]) : Qid Tipos Tipos Qid Nat -> DcHashMap [ctor] .
+	op _:public(_[_,_[_]]) : Qid Tipos Tipos Tipos Nat -> DcHashMap [ctor] .
 	op dc : -> Declaraciones [ctor] .
 	op __ : Declaraciones Declaraciones -> Declaraciones [comm ctor id: dc] .
 	

@@ -196,16 +196,38 @@ fmod GRAMMAR is
  ***op If_Then_Else_Fi : @Exp@ @Prog@ @Prog@ -> @Prog@ [ctor] .
  ***ops _*_ _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc] .
  ***op _=_; : @Token@ @Exp@ -> @Prog@ [ctor] .
-	sorts @Declaracion@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @Declaraciones@ @Tipos@ .
-	subsort @Declaracion@ @DeclaracionValor@ @DConstante@ @DcHashMap@ < @Declaraciones@ .
+	sorts @Declaracion@ @DeclaracionLista@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @DcStruct@ @Declaraciones@ @Tipos@ @ParamStruct@ .
+	***subsort @Declaracion@ @DeclaracionLista@ < @ParamStruct@ .
+	subsort @Declaracion@ @DeclaracionLista@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @DcStruct@ < @Declaraciones@ .
 	ops bool int128 uint256 decimal address bytes32 String Bytes struct HashMap : -> @Tipos@ [ctor] .
+	***declaracion
+	
 	op _:_ : @Token@ @Tipos@ -> @Declaracion@ [ctor] .
-	op _: public( _ ) : @Token@ @Tipos@ -> @Declaracion@ [ctor] .
+	op _:_ : @Token@ @Token@ -> @Declaracion@ [ctor] .
+	op _: public( _ ) : @Token@ @Tipos@ -> @Declaracion@ [ctor] . *** ! al ser declaracion se podria meter en los parametros de una fun
+	
+	***declarar Lista
+	op _:_[_] : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
+	op _: public(_[_]) : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
+	op _:_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
+	op _: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
+	***Declarar dando una valor
 	op _:_ = _ : @Token@ @Tipos@ @Token@ -> @DeclaracionValor@ [ctor] .
+	
+	***Declarar un valor constante	
 	op _: constant( _ ) = _ : @Token@ @Tipos@ @Token@ -> @DConstante@ [ctor] .
+	
+	*** Declara HashMap
 	op _:_[_,_] :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
+	op _: public(_[_,_]) :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
 	op _:_[_,_] : @Token@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
+	op _: public(_[_,_]) : @Token@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
 	op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
+	op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
+	***Declarar Struct
+	***subsort @Declaracion@ @DeclaracionLista@ < @ParamStruct@ .
+	***op __ : @ParamStruct@ @ParamStruct@ -> @ParamStruct@ [ctor] .
+	***op __:_ : @Tipos@ @Token@  @ParamStruct@ -> @DcStruct@ [ctor] .
 	***Nose si hay que meter esto cuando literalmente va a ser igual
 	--- op _: constant(_) = _ : Qid Tipos Int -> DCInt128 [ctor] .
 	--- op _: constant(_) = _ : Qid Tipos Nat -> DCUInt256 [ctor] .
@@ -213,28 +235,37 @@ fmod GRAMMAR is
 	--- op _: constant(_) = _ : Qid Tipos Direccion -> DCAddress [ctor] .
 	--- op _: constant(_) = _ : Qid Tipos Bytes32  -> DCBytes32 [ctor] .
 	op dc : -> @Declaraciones@  [ctor] .
-	op __ : @Declaracion@ @Declaracion@ -> @Declaraciones@  [ctor comm id: dc] .
+	op __ : @Declaraciones@ @Declaraciones@ -> @Declaraciones@  [ctor comm id: dc] .
 
 	***Operaciones
-	sorts @Exp@ @Prog@ @Operacion@ .
-	subsort @Token@  @Operacion@ < @Exp@ .
-	op _+_ : @Exp@ @Exp@ -> @Operacion@ [ctor] .
-	op _-_ : @Exp@ @Exp@ -> @Operacion@ [ctor] .
-	op _*_ : @Exp@ @Exp@ -> @Operacion@ [ctor] .
-	op _/_ : @Exp@ @Exp@ -> @Operacion@ [ctor] .
-	op _**_ : @Exp@ @Exp@ -> @Operacion@ [ctor] .
+	sorts @Exp@ @Prog@ .
+	subsort @Token@ < @Exp@ .
+	op _+_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
+	op _-_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
+	op _*_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
+	op _/_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
+	op _**_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
 
 	***Funciones
 	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ .
 	subsort @Declaracion@ < @Parametros@ .
+	***Decoradores
 	ops @external @internal : -> @DecoratorEI@  [ctor] .
 	ops @pure @view @payable @nonpayables : -> @DecoratorMut@ [ctor] .
 	op @nonreentrant(_) : @Token@ -> @DecoratorNR@ [ctor] .
+	***Parametros de una funcion pueden ser vacios
 	op PaV : -> @Parametros@ [ctor] .
 	op _,_ : @Parametros@  @Parametros@  -> @Parametros@  [ctor id: PaV ] .
+
+	*** Declaracion de funciones 
 	op def _(_) : @Token@ @Parametros@ -> @Cabecera@ [ctor] .
 	op _ def _(_) : @DecoratorEI@ @Token@ @Parametros@ -> @Cabecera@ [ctor] .
 	op _ _ def _(_) : @DecoratorEI@ @DecoratorMut@ @Token@ @Parametros@  -> @Cabecera@ [ctor] .
+
+	***
+	op def _(_)->_ : @Token@ @Parametros@ @Tipos@ -> @Cabecera@ [ctor] .
+	op _ def _(_)->_ : @DecoratorEI@ @Token@ @Parametros@ @Tipos@ -> @Cabecera@ [ctor] .
+	op _ _ def _(_)->_ : @DecoratorEI@ @DecoratorMut@ @Token@ @Parametros@ @Tipos@ -> @Cabecera@ [ctor] .
  ***a=[1,2,3]
 endfm
 fmod DeclaracionVariables is
@@ -249,7 +280,10 @@ fmod DeclaracionVariables is
 	op _:_ : Qid Tipos -> Declaracion [ctor] .
 	op _: public( _ ) : Qid Tipos -> Declaracion [ctor] .
 	op _:_ = _ : Qid Tipos Int -> Declaracion [ctor] .
-	op _:_[_] : Qid Tipos Nat -> DeclaracionLista [ctor] .
+	op _:_[_] : Qid Tipos Nat -> DeclaracionLista [ctor] . 
+	op _:public(_[_]) : Qid Tipos Nat -> DeclaracionLista [ctor] . 
+	op _:_[_] : Qid Qid Nat -> DeclaracionLista [ctor] .
+	op _:public(_[_]) : Qid Qid Nat -> DeclaracionLista [ctor] .
 	op _: constant(_) = _ : Qid Tipos BasicB -> DcBooleana [ctor] .
 
 	op _: constant(_) = _ : Qid Tipos Int -> DCInt128 [ctor] .
@@ -270,8 +304,11 @@ fmod DeclaracionVariables is
 
 	op __:_ : Tipos Qid Declaraciones -> DcStruct [ctor] . *** he puesto que tienes declaraciones pero incluye demasaidas cosas
 	op _:_[_,_] : Qid Tipos Tipos Tipos -> DcHashMap [ctor] .
+	op _:public(_[_,_]) : Qid Tipos Tipos Tipos -> DcHashMap [ctor] .
 	op _:_[_,_] : Qid Tipos Tipos Qid -> DcHashMap [ctor] .
+	op _:public(_[_,_]) : Qid Tipos Tipos Qid -> DcHashMap [ctor] .
 	op _:_[_,_[_]] : Qid Tipos Tipos Qid Nat -> DcHashMap [ctor] .
+	op _:public(_[_,_[_]]) : Qid Tipos Tipos Qid Nat -> DcHashMap [ctor] .
 	op dc : -> Declaraciones [ctor] .
 	op __ : Declaraciones Declaraciones -> Declaraciones [comm ctor id: dc] .
 	
