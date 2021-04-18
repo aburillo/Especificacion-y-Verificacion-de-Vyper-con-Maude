@@ -46,7 +46,9 @@ var  Ct : Constant .
   if Q := downQid(T) /\
      S := string(Q) /\
      not (float(S) :: Float) /\
-     not (rat(S, 10) :: Nat) .
+     not (rat(S, 10) :: Nat) [print "ecuacion1" Q] .
+
+ eq parse('T.@Tipos@) = < T > .
 *** parsea tipos
  ***eq parse( _._ ) = < T > .
  *** PARSEA DECLARACIONES 
@@ -243,8 +245,9 @@ endm
 ***red metaParse(GRAMMAR, tokenize("x : public(int128) \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize("x : constant(int128) = 2 \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize("x : int128[5] \n"), anyType) .
-red metaParse(GRAMMAR, tokenize("x : HashMap[int128, address] \n"), anyType) .
-red metaParse(GRAMMAR, tokenize("x : HashMap[int128, loco[12] ] \n"), anyType) .
+red metaParse(GRAMMAR, tokenize("3 : int128 \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize("x : HashMap[int128, address] \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize("x : HashMap[int128, loco[12] ] \n"), anyType) .
 red metaParse(GRAMMAR, tokenize(" x : bool \n"), anyType) .
 red metaParse(GRAMMAR, tokenize(" x + 4 \n"), anyType) .
 red metaParse(GRAMMAR, tokenize(" x + 4 + 3 \n"), anyType) .
