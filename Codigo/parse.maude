@@ -1,6 +1,6 @@
 load file.maude
 load TFM.maude
-
+***load io.maude
 fmod PARSING is
  pr META-LEVEL .
  pr CONVERSION .
@@ -48,7 +48,7 @@ var  Ct : Constant .
      not (float(S) :: Float) /\
      not (rat(S, 10) :: Nat) [print "ecuacion1" Q] .
 
- eq parse('T.@Tipos@) = < T > .
+ eq parse('T.@Tipos@) = < 'T  > [print "ecuacion3"  ] .
 *** parsea tipos
  ***eq parse( _._ ) = < T > .
  *** PARSEA DECLARACIONES 
@@ -76,7 +76,7 @@ var  Ct : Constant .
        < T2' > := parse (T2) /\
        < T3' > := parse (T3) [print "ecuacion:" T1 ] .
 ***Declaracion hashmap qid o tipos
- ceq parse('_:_`[_`,_`][T1,T2,T3,T4]) = < '_:_[T1', T2', T3', T4'] > ***!el T2 tiene que ser hasmap si o si
+ ceq parse('_:_`[_`,_`] [T1,T2,T3,T4]) = < '_:_[T1', T2', T3', T4'] > ***!el T2 tiene que ser hasmap si o si
     if < T1' > := parse (T1) /\
        < T2' > := parse (T2) /\
        < T3' > := parse (T3) /\
@@ -246,7 +246,7 @@ endm
 ***red metaParse(GRAMMAR, tokenize("x : constant(int128) = 2 \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize("x : int128[5] \n"), anyType) .
 red metaParse(GRAMMAR, tokenize("3 : int128 \n"), anyType) .
-***red metaParse(GRAMMAR, tokenize("x : HashMap[int128, address] \n"), anyType) .
+red metaParse(GRAMMAR, tokenize("x : HashMap[int128, address] \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize("x : HashMap[int128, loco[12] ] \n"), anyType) .
 red metaParse(GRAMMAR, tokenize(" x : bool \n"), anyType) .
 red metaParse(GRAMMAR, tokenize(" x + 4 \n"), anyType) .
@@ -260,8 +260,12 @@ red metaParse(GRAMMAR, tokenize(" x ** y \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" @external def loco(x : bool , y : int128 ) \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" x :  int128[3] \n"), anyType) .
-red metaParse(GRAMMAR, tokenize(" microchip : public ( comida [15]) \n"), anyType) .
-red metaParse(GRAMMAR, tokenize(" microchip : public ( HashMap [ bool, int128 ] ) \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" microchip : public ( comida [15]) \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" microchip : public ( HashMap [ bool, int128 ] ) \n"), anyType) .
+****red metaParse(GRAMMAR, tokenize(" self.x3333 \n"), anyType) .
+red metaParse(GRAMMAR, tokenize(" [ x , y , z , 3 ] \n"), anyType) .
+red metaParse(GRAMMAR, tokenize(" for j in range(z); bv \n"), anyType) .
+
 set print attribute on .
 
 erew run .

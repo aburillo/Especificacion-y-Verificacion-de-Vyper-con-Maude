@@ -1,4 +1,3 @@
-load file.maude
 fmod BOOLEAN is
 	pr STRING .
 	sorts  BasicB ValuesB .
@@ -168,15 +167,15 @@ fmod CONSTANTES is
 	op [_,_] : Constante Float -> ConstanteValor [ctor] .
 endfm
 fmod SELF is
-	pr STRING .
+	pr QID .
 	sort self .
 	*** direccion y saldo del contrato actual
 	op self.address : -> self [ctor] .
 	op self.balance : -> self [ctor] .
 	***llamada a una variable de estado
-	op self._ : String -> self [ctor] .
+	op self._ : Qid -> self [ctor] .
 	***llamada a las  funciones inernas
-	op self._() : String -> self [ctor] .
+	op self._() : Qid -> self [ctor] .
 	***op self._(_) : String Parametros -> self [ctor] .
 endfm
 fmod TEST is
@@ -240,18 +239,29 @@ fmod GRAMMAR is
 	op __ : @Declaraciones@ @Declaraciones@ -> @Declaraciones@  [ctor comm id: dc] .
 
 	***Operaciones
-	sorts @Exp@ @Prog@ .
+	sorts @Exp@ @Body@ @asig@ .
 	subsort @Token@ < @Exp@ .
 	op _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc] .
 	op _-_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
 	op _*_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc] .
 	op _/_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
 	op _**_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
+	op _=_ : @Token@ @Exp@ -> @asig@ [ctor] .
+	op _[_] = _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
 	
 	*** LISTAS
+	sort @Lista@ .
 	subsort @Token@ < @LToken@ .
 	op ltk : -> @LToken@ [ctor] .
 	op _,_ : @LToken@ @LToken@ -> @LToken@ [ctor comm id: ltk ] .
+	op [_] : @LToken@ -> @Lista@ [ctor] . ***prueba
+	
+	***Self
+	sort @self@ .
+	op self : -> @self@ [ctor] .
+	op self.balance : -> @self@ [ctor] .
+	op self._ : @Token@ -> @self@ [ctor] .
+	op self._() : @Token@ -> @self@ [ctor] .
 	
 	***Funciones
 	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ .
@@ -273,6 +283,14 @@ fmod GRAMMAR is
 	op def _(_)->_ : @Token@ @Parametros@ @Tipos@ -> @Cabecera@ [ctor] .
 	op _ def _(_)->_ : @DecoratorEI@ @Token@ @Parametros@ @Tipos@ -> @Cabecera@ [ctor] .
 	op _ _ def _(_)->_ : @DecoratorEI@ @DecoratorMut@ @Token@ @Parametros@ @Tipos@ -> @Cabecera@ [ctor] .
+
+	*** for
+	sort @For@ .
+	op bv : -> @Body@ [ctor] . ***prueba
+	op for _ in range(_);_ : @Token@ @Exp@ @Body@ -> @For@ [ctor] .
+	op for _ in range(_,_);_ : @Token@  @Exp@  @Exp@ @Body@ -> @For@ [ctor] . 
+	op for _ in _;_ : @Token@ @Token@ @Body@ -> @For@ [ctor] .
+	op for _ in [_];_ : @Token@ @LToken@ @Body@ -> @For@ [ctor] .
  ***a=[1,2,3]
 endfm
 fmod DeclaracionVariables is
@@ -370,27 +388,27 @@ fmod FuncionesAuxiliares is
 endfm
 fmod GRAMATICA is
 	pr MEMORIA .
-	sort Operacion Var Exp Program .
+	sort Var Exp Program .
 	subsort Qid Float Bool < Var .
-	subsort Var Operacion < Exp .
-	op _+._ : Exp Exp -> Operacion [ctor] .
-	op _-._ : Exp Exp -> Operacion [ctor] .
-	op -._ : Exp -> Operacion [ctor] .
-	op _*._ : Exp Exp -> Operacion [ctor] .
-	op _/._ : Exp Exp -> Operacion [ctor] .
-	op _**._ : Exp Exp -> Operacion [ctor] .
-	op _%._ : Exp Exp -> Operacion [ctor] .
-	op _<._ : Exp Exp -> Operacion [ctor] .
-	op _<=._ : Exp Exp -> Operacion [ctor] .
-	op _==._ : Exp Exp -> Operacion [ctor] .
-	op _!=._ : Exp Exp -> Operacion [ctor] .
-	op _>._ : Exp Exp -> Operacion [ctor] .
-	op _>=._ : Exp Exp -> Operacion [ctor] .
-	op not._ : Exp -> Operacion [ctor] .
-	op _and._ : Exp Exp -> Operacion [ctor] .
-	op _or._ : Exp Exp -> Operacion [ctor] .
+	subsort Var < Exp .
+	op _+._ : Exp Exp -> Exp [ctor] .
+	op _-._ : Exp Exp -> Exp [ctor] .
+	op -._ : Exp -> Exp [ctor] .
+	op _*._ : Exp Exp -> Exp [ctor] .
+	op _/._ : Exp Exp -> Exp [ctor] .
+	op _**._ : Exp Exp -> Exp [ctor] .
+	op _%._ : Exp Exp -> Exp [ctor] .
+	op _<._ : Exp Exp -> Exp [ctor] .
+	op _<=._ : Exp Exp -> Exp [ctor] .
+	op _==._ : Exp Exp -> Exp [ctor] .
+	op _!=._ : Exp Exp -> Exp [ctor] .
+	op _>._ : Exp Exp -> Exp [ctor] .
+	op _>=._ : Exp Exp -> Exp [ctor] .
+	op not._ : Exp -> Exp [ctor] .
+	op _and._ : Exp Exp -> Exp [ctor] .
+	op _or._ : Exp Exp -> Exp [ctor] .
 	op _=._ : Qid Exp -> Program [ctor] .
-	op if_;_else_ : Operacion Program Program -> Program [ctor] .
+	op if_;_else_ : Exp Program Program -> Program [ctor] .
 	op for _ in range(_);_ : Qid Exp Program -> Program [ctor] .
 	op for _ in range(_,_);_ : Qid Exp Exp Program -> Program [ctor] . 
 	op for _ in _;_ : Qid Qid Program -> Program [ctor] .
