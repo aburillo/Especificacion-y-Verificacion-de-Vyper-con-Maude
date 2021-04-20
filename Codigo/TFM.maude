@@ -189,16 +189,18 @@ endfm
 *** no vale porque no puedo crear un diccionario del tipo FP
 ***unificar en un tipo!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 fmod GRAMMAR is
+ pr STRING .
  sorts @Token@ @Bubble@ @NeTokenList@ @LToken@ .
 
 
  ***op If_Then_Else_Fi : @Exp@ @Prog@ @Prog@ -> @Prog@ [ctor] .
  ***ops _*_ _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc] .
  ***op _=_; : @Token@ @Exp@ -> @Prog@ [ctor] .
-	sorts @Declaracion@ @DeclaracionLista@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @DcStruct@ @Declaraciones@ @Tipos@ @ParamStruct@ .
+	sorts @Declaracion@ @DeclaracionLista@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @DcStruct@ @Declaraciones@ @Tipos@ @ParamStruct@ @TiposToken@ .
 	***subsort @Declaracion@ @DeclaracionLista@ < @ParamStruct@ .
 	subsort @Declaracion@ @DeclaracionLista@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @DcStruct@ < @Declaraciones@ .
 	ops bool int128 uint256 decimal address bytes32 String Bytes struct HashMap : -> @Tipos@ [ctor] .
+	***subsort @Tipos@ @Token@ < @TiposToken@ .
 	***declaracion
 	
 	op _:_ : @Token@ @Tipos@ -> @Declaracion@ [ctor] .
@@ -235,26 +237,35 @@ fmod GRAMMAR is
 	--- op _: constant(_) = _ : Qid Tipos Float -> DCDecimal [ctor] .
 	--- op _: constant(_) = _ : Qid Tipos Direccion -> DCAddress [ctor] .
 	--- op _: constant(_) = _ : Qid Tipos Bytes32  -> DCBytes32 [ctor] .
-	op dc : -> @Declaraciones@  [ctor] .
+	op dc : -> @Declaraciones@  [ctor] . *** descomentar
 	op __ : @Declaraciones@ @Declaraciones@ -> @Declaraciones@  [ctor comm id: dc] .
 
 	***Operaciones
 	sorts @Exp@ @Body@ @asig@ .
 	subsort @Token@ < @Exp@ .
-	op _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc] .
+	***op _+_ : @Token@ @Token@ -> @asig@ [ctor comm assoc] . *** esto si funciona
+	***op _+_ : @Token@ @Token@ -> @Token@ [ctor comm assoc] . *** esto no funciona
+	op _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc] . ***esto no funciona
 	op _-_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
 	op _*_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc] .
 	op _/_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
 	op _**_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
+	op _/_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
+	op _>_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
+	op _>=_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
+	op _<_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
+	op _<=_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
+	op _==_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
+	op _!=_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
 	op _=_ : @Token@ @Exp@ -> @asig@ [ctor] .
 	op _[_] = _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
-	
+	***si que funciona si empre y cuanndo use los operadores dentro de otra funcion
 	*** LISTAS
-	sort @Lista@ .
-	subsort @Token@ < @LToken@ .
-	op ltk : -> @LToken@ [ctor] .
-	op _,_ : @LToken@ @LToken@ -> @LToken@ [ctor comm id: ltk ] .
-	op [_] : @LToken@ -> @Lista@ [ctor] . ***prueba
+	***sort @Lista@ .
+	***subsort @Token@ < @LToken@ .
+	***op ltk : -> @LToken@ [ctor] .
+	***op _,_ : @LToken@ @LToken@ -> @LToken@ [ctor comm id: ltk ] .
+	***op [_] : @LToken@ -> @Lista@ [ctor] . ***prueba
 	
 	***Self
 	sort @self@ .
@@ -279,7 +290,7 @@ fmod GRAMMAR is
 	op _ def _(_) : @DecoratorEI@ @Token@ @Parametros@ -> @Cabecera@ [ctor] .
 	op _ _ def _(_) : @DecoratorEI@ @DecoratorMut@ @Token@ @Parametros@  -> @Cabecera@ [ctor] .
 
-	***
+	*** x : int128 , y : int128 , 
 	op def _(_)->_ : @Token@ @Parametros@ @Tipos@ -> @Cabecera@ [ctor] .
 	op _ def _(_)->_ : @DecoratorEI@ @Token@ @Parametros@ @Tipos@ -> @Cabecera@ [ctor] .
 	op _ _ def _(_)->_ : @DecoratorEI@ @DecoratorMut@ @Token@ @Parametros@ @Tipos@ -> @Cabecera@ [ctor] .
@@ -291,7 +302,80 @@ fmod GRAMMAR is
 	op for _ in range(_,_);_ : @Token@  @Exp@  @Exp@ @Body@ -> @For@ [ctor] . 
 	op for _ in _;_ : @Token@ @Token@ @Body@ -> @For@ [ctor] .
 	op for _ in [_];_ : @Token@ @LToken@ @Body@ -> @For@ [ctor] .
+
+	***Control flow
+	sort @DeclaracionControl@ .
+	ops break continue pass : -> @DeclaracionControl@ [ctor] .
+	op raise _ : @Token@ -> @DeclaracionControl@ [ctor] . ***desencadena una expecion y revierte la llamada
+	op assert _ : @Exp@ -> @DeclaracionControl@ [ctor] .
+	op assert _,_ : @Exp@ String -> @DeclaracionControl@ [ctor] . *** si es falso se revierte la transaccion
+	op return _ : @Exp@ -> @DeclaracionControl@ [ctor] .
+	***op return _ : @Lista@ -> @DeclaracionControl@ [ctor] .
+
+	subsort @For@ @DeclaracionControl@ < @Body@ . 
+	op __ : @Body@ @Body@ -> @Body@ [ctor assoc comm] .
+	
  ***a=[1,2,3]
+endfm
+fmod META-SIGN is
+ including GRAMMAR .
+ pr META-LEVEL .
+
+ op BUBBLES : -> FModule .
+ op GRAMMAR : -> FModule [memo] .
+
+ eq BUBBLES
+    = (fmod 'GRAMMAR is
+        including 'QID-LIST .
+        sorts none .
+        none
+        op 'token : 'Qid -> '@Token@
+             [special(
+               (id-hook('Bubble, '1 '1)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)))] .
+        op 'bubble : 'QidList -> '@Bubble@
+             [special(
+               (id-hook('Bubble, '1 '-1 '`( '`))
+                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
+                id-hook('Exclude, 'eq 'ceq 'rl 'crl 'mb 'cmb 'sd 'csd
+                                  'var 'vars 'forall 'exists
+                                  'sorts 'subsort 'subsorts 'op 'ops
+                                  'protecting 'pr 'including 'inc 'extending
+                                  'ctor 'assoc 'comm '== '/\ 'spec* 'spec!)))] .
+        op 'neTokenList : 'QidList -> '@NeTokenList@
+             [special(
+               (id-hook('Bubble, '1 '-1 '`( '`))
+                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
+                id-hook('Exclude, '. ': '`[ 'forall 'exists)))] .
+        none
+        none
+     endfm) .
+ eq GRAMMAR = addImports(BUBBLES, (including 'GRAMMAR .)) .
+
+ var  SSDS : SubsortDeclSet .
+ vars IL IL' : ImportList .
+ var  EqS : EquationSet .
+ var  ODS : OpDeclSet .
+ var  MAS : MembAxSet .
+ var  RS : RuleSet .
+ var  M : Module .
+ var  SS : SortSet .
+ var  H : Header .
+
+ op setImports : Module ImportList -> Module .
+ eq setImports(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, IL')
+    = fmod H is IL' sorts SS . SSDS ODS MAS EqS endfm .
+ eq setImports(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, IL')
+    = mod H is IL' sorts SS . SSDS ODS MAS EqS RS endm .
+ eq setImports(fth H is IL sorts SS . SSDS ODS MAS EqS endfth, IL')
+    = fth H is IL' sorts SS . SSDS ODS MAS EqS endfth .
+ eq setImports(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, IL')
+    = th H is IL' sorts SS . SSDS ODS MAS EqS RS endth .
+
+ op addImports : Module ImportList -> Module .
+ eq addImports(M, IL) = setImports(M, (getImports(M) IL)) .
 endfm
 fmod DeclaracionVariables is
 	pr BOOLEAN .

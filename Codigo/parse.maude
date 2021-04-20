@@ -1,9 +1,11 @@
 load file.maude
+***load carga.maude
 load TFM.maude
 ***load io.maude
 fmod PARSING is
  pr META-LEVEL .
  pr CONVERSION .
+ pr META-SIGN .
  ***pr PREPARSE .
  sort ParsingRes .
 
@@ -46,9 +48,10 @@ var  Ct : Constant .
   if Q := downQid(T) /\
      S := string(Q) /\
      not (float(S) :: Float) /\
-     not (rat(S, 10) :: Nat) [print "ecuacion1" Q] .
+     not (rat(S, 10) :: Nat) /\ 
+     not isBool(S) [print "ecuacion4" ] .
 
- eq parse('T.@Tipos@) = < 'T  > [print "ecuacion3"  ] .
+ eq parse('T.@Tipos@) = < 'T  > [print "ecuacion3" ] .
 *** parsea tipos
  ***eq parse( _._ ) = < T > .
  *** PARSEA DECLARACIONES 
@@ -245,16 +248,16 @@ endm
 ***red metaParse(GRAMMAR, tokenize("x : public(int128) \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize("x : constant(int128) = 2 \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize("x : int128[5] \n"), anyType) .
-red metaParse(GRAMMAR, tokenize("3 : int128 \n"), anyType) .
-red metaParse(GRAMMAR, tokenize("x : HashMap[int128, address] \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize("3 : int128 "), anyType) .
+red metaParse(GRAMMAR, tokenize("x : int128 [ int128 , int128 ] "), anyType) .
 ***red metaParse(GRAMMAR, tokenize("x : HashMap[int128, loco[12] ] \n"), anyType) .
-red metaParse(GRAMMAR, tokenize(" x : bool \n"), anyType) .
-red metaParse(GRAMMAR, tokenize(" x + 4 \n"), anyType) .
-red metaParse(GRAMMAR, tokenize(" x + 4 + 3 \n"), anyType) .
-red metaParse(GRAMMAR, tokenize(" x - y \n"), anyType) .
-red metaParse(GRAMMAR, tokenize(" x * y \n"), anyType) .
-red metaParse(GRAMMAR, tokenize(" x / y \n"), anyType) .
-red metaParse(GRAMMAR, tokenize(" x ** y \n"), anyType) .
+red metaParse(GRAMMAR, tokenize(" x : bool "), anyType) .
+red metaParse(GRAMMAR, tokenize(" 3 +! x "), anyType) .
+red metaParse(GRAMMAR, tokenize(" x + 4 + 3 "), anyType) .
+red metaParse(GRAMMAR, tokenize(" x - y "), anyType) .
+red metaParse(GRAMMAR, tokenize(" x * y "), anyType) .
+red metaParse(GRAMMAR, tokenize(" x / y "), anyType) .
+red metaParse(GRAMMAR, tokenize(" x ** y "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" def loco(PaV) \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" def loco(x : bool , y : int128 ) \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" @external def loco(x : bool , y : int128 ) \n"), anyType) .
@@ -263,13 +266,22 @@ red metaParse(GRAMMAR, tokenize(" x ** y \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" microchip : public ( comida [15]) \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" microchip : public ( HashMap [ bool, int128 ] ) \n"), anyType) .
 ****red metaParse(GRAMMAR, tokenize(" self.x3333 \n"), anyType) .
-red metaParse(GRAMMAR, tokenize(" [ x , y , z , 3 ] \n"), anyType) .
-red metaParse(GRAMMAR, tokenize(" for j in range(z); bv \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" [ x , y , z , 3 ] \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" for j in range(z); bv \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" x[3] = 2 "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" x = 4 + y * 2 "), anyType) . *** MO Funciona
+***red metaParse(GRAMMAR, tokenize(" pass "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" raise errorGordo "), anyType) . 
+***red metaParse(GRAMMAR, tokenize(" assert x "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" assert 5 + 2  "), anyType) .  *** MO Funciona
+***red metaParse(GRAMMAR, tokenize(" assert 5 > y ,  \" losm uertos \"  "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" return x "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" return x + y  "), anyType) .  *** MO Funciona
+***red metaParse(GRAMMAR, tokenize(" return [ 2 , 4 , 7 , x ]  "), anyType) . *** MO Funciona
+***red metaParse(GRAMMAR, tokenize(" for x in y ; pass "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" for x in y ; continue for x in y ; pass "), anyType) .
+
 
 set print attribute on .
 
 erew run .
---- PreguntaS lAURA
---- COMO PARSEAR EL TIPOS y las cosas con @.
---- porque no me lee el archivo!
---- cosas como los + y -
