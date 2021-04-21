@@ -188,7 +188,7 @@ endfm
 
 *** no vale porque no puedo crear un diccionario del tipo FP
 ***unificar en un tipo!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-fmod GRAMMAR is
+fmod VYPER-GRAMMAR is
  pr STRING .
  sorts @Token@ @Bubble@ @NeTokenList@ @LToken@ .
 
@@ -199,34 +199,34 @@ fmod GRAMMAR is
 	sorts @Declaracion@ @DeclaracionLista@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @DcStruct@ @Declaraciones@ @Tipos@ @ParamStruct@ @TiposToken@ .
 	***subsort @Declaracion@ @DeclaracionLista@ < @ParamStruct@ .
 	subsort @Declaracion@ @DeclaracionLista@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @DcStruct@ < @Declaraciones@ .
-	ops bool int128 uint256 decimal address bytes32 String Bytes struct HashMap : -> @Tipos@ [ctor] .
+	***ops bool int128 uint256 decimal address bytes32 String Bytes struct HashMap : -> @Tipos@ [ctor] .
 	***subsort @Tipos@ @Token@ < @TiposToken@ .
 	***declaracion
 	
-	op _:_ : @Token@ @Tipos@ -> @Declaracion@ [ctor] .
-	****op _:_ : @Token@ @Token@ -> @Declaracion@ [ctor] .
-	op _: public( _ ) : @Token@ @Tipos@ -> @Declaracion@ [ctor] . *** ! al ser declaracion se podria meter en los parametros de una fun
+	op _:_ : @Token@ @Token@ -> @Declaracion@ [ctor] .
+	****op _:_ : @Token@ @Token@ -> @Declaracion@ [ctor] . 
+	op _: public( _ ) : @Token@ @Token@ -> @Declaracion@ [ctor] . *** ! al ser declaracion se podria meter en los parametros de una fun
 	
 	***declarar Lista
-	op _:_[_] : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
-	op _: public(_[_]) : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
-	op _:_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
-	op _: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
+	op _:_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] . *** op _:_[_] : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
+	op _: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] . *** op _: public(_[_]) : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
+	***op _:_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
+	***op _: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
 	***Declarar dando una valor
-	op _:_ = _ : @Token@ @Tipos@ @Token@ -> @DeclaracionValor@ [ctor] .
+	op _:_ = _ : @Token@ @Token@ @Token@ -> @DeclaracionValor@ [ctor] . *** op _:_ = _ : @Token@ @Tipos@ @Token@ -> @DeclaracionValor@ [ctor] .
 	
 	***Declarar un valor constante	
-	op _: constant( _ ) = _ : @Token@ @Tipos@ @Token@ -> @DConstante@ [ctor] .
+	op _: constant( _ ) = _ : @Token@ @Token@ @Token@ -> @DConstante@ [ctor] . *** op _: constant( _ ) = _ : @Token@ @Tipos@ @Token@ -> @DConstante@ [ctor] .
 	
 	*** Declara HashMap
-	op _:_[_,_] :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
-	op _: public(_[_,_]) :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
-	op _:_[_,_] : @Token@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
-	op _: public(_[_,_]) : @Token@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
-	op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
-	op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
-	op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
-	op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
+	op _:_[_,_] :  @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@ [ctor] . ***op _:_[_,_] :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
+	op _: public(_[_,_]) :  @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@ [ctor] . *** op _: public(_[_,_]) :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
+	***op _:_[_,_] : @Token@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
+	***op _: public(_[_,_]) : @Token@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
+	op _:_[_,_ [ _ ] ] : @Token@ @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@  [ctor] . *** op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
+	***op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
+	op _: public(_[_,_ [ _ ] ]) : @Token@ @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@  [ctor] . *** op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
+	***op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
 	***Declarar Struct
 	***subsort @Declaracion@ @DeclaracionLista@ < @ParamStruct@ .
 	***op __ : @ParamStruct@ @ParamStruct@ -> @ParamStruct@ [ctor] .
@@ -306,26 +306,26 @@ fmod GRAMMAR is
 	***Control flow
 	sort @DeclaracionControl@ .
 	ops break continue pass : -> @DeclaracionControl@ [ctor] .
-	op raise _ : @Token@ -> @DeclaracionControl@ [ctor] . ***desencadena una expecion y revierte la llamada
+	op raise _ : String -> @DeclaracionControl@ [ctor] . ***desencadena una expecion y revierte la llamada
 	op assert _ : @Exp@ -> @DeclaracionControl@ [ctor] .
 	op assert _,_ : @Exp@ String -> @DeclaracionControl@ [ctor] . *** si es falso se revierte la transaccion
 	op return _ : @Exp@ -> @DeclaracionControl@ [ctor] .
 	***op return _ : @Lista@ -> @DeclaracionControl@ [ctor] .
 
-	subsort @For@ @DeclaracionControl@ < @Body@ . 
+	subsort @For@ @DeclaracionControl@ @asig@ < @Body@ . 
 	op __ : @Body@ @Body@ -> @Body@ [ctor assoc comm] .
 	
  ***a=[1,2,3]
 endfm
 fmod META-SIGN is
- including GRAMMAR .
+ including VYPER-GRAMMAR .
  pr META-LEVEL .
 
  op BUBBLES : -> FModule .
- op GRAMMAR : -> FModule [memo] .
+ op VYPER-GRAMMAR : -> FModule [memo] .
 
  eq BUBBLES
-    = (fmod 'GRAMMAR is
+    = (fmod 'VYPER-GRAMMAR is
         including 'QID-LIST .
         sorts none .
         none
@@ -352,7 +352,7 @@ fmod META-SIGN is
         none
         none
      endfm) .
- eq GRAMMAR = addImports(BUBBLES, (including 'GRAMMAR .)) .
+ eq VYPER-GRAMMAR = addImports(BUBBLES, (including 'VYPER-GRAMMAR .)) .
 
  var  SSDS : SubsortDeclSet .
  vars IL IL' : ImportList .
