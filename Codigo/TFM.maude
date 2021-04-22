@@ -198,48 +198,49 @@ fmod VYPER-GRAMMAR is
  ***op _=_; : @Token@ @Exp@ -> @Prog@ [ctor] .
 	sorts @Declaracion@ @DeclaracionLista@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @DcStruct@ @Declaraciones@ @ParamStruct@  .
 	*** pa los eventos
-	sort @DeclaracionIndexada@ @DeclaracionEvento@ .
+	sort @DeclaracionIndexada@ @DeclaracionEvento@ @RegistrarEventos@ .
 	***subsort @Declaracion@ @DeclaracionLista@ < @ParamStruct@ .
 	subsort @Declaracion@ @DeclaracionLista@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @DcStruct@ @DeclaracionIndexada@  < @Declaraciones@ .
 	***ops bool int128 uint256 decimal address bytes32 String Bytes struct HashMap : -> @Tipos@ [ctor] .
 	***subsort @Tipos@ @Token@ < @TiposToken@ .
 	***declaracion
 
-	op _:_ : @Token@ @Token@ -> @Declaracion@ [ctor prec 25 ] .
+	op _:_ : @Token@ @Token@ -> @Declaracion@ [ctor prec 22 ] .
 	****op _:_ : @Token@ @Token@ -> @Declaracion@ [ctor] .
-	op _: public( _ ) : @Token@ @Token@ -> @Declaracion@ [ctor prec 25 ] . *** ! al ser declaracion se podria meter en los parametros de una fun
+	op _: public( _ ) : @Token@ @Token@ -> @Declaracion@ [ctor prec 22 ] . *** ! al ser declaracion se podria meter en los parametros de una fun
 
 	***declarar Lista
-	op _:_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 25] . *** op _:_[_] : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
-	op _: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 25 ] . *** op _: public(_[_]) : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
+	op _:_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 22] . *** op _:_[_] : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
+	op _: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 22 ] . *** op _: public(_[_]) : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
 	***op _:_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
 	***op _: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
 	***Declarar dando una valor
-	op _:_ = _ : @Token@ @Token@ @Token@ -> @DeclaracionValor@ [ctor prec 25  ] . *** op _:_ = _ : @Token@ @Tipos@ @Token@ -> @DeclaracionValor@ [ctor] .
+	op _:_ = _ : @Token@ @Token@ @Token@ -> @DeclaracionValor@ [ctor prec 22  ] . *** op _:_ = _ : @Token@ @Tipos@ @Token@ -> @DeclaracionValor@ [ctor] .
 
 	***Declarar un valor constante
-	op _: constant( _ ) = _ : @Token@ @Token@ @Token@ -> @DConstante@ [ctor prec 25 ] . *** op _: constant( _ ) = _ : @Token@ @Tipos@ @Token@ -> @DConstante@ [ctor] .
+	op _: constant( _ ) = _ : @Token@ @Token@ @Token@ -> @DConstante@ [ctor prec 22 ] . *** op _: constant( _ ) = _ : @Token@ @Tipos@ @Token@ -> @DConstante@ [ctor] .
 
 	*** Declara HashMap
-	op _:_[_,_] :  @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@ [ctor prec 25  ] . ***op _:_[_,_] :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
-	op _: public(_[_,_]) :  @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@ [ctor prec 25  ] . *** op _: public(_[_,_]) :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
+	op _:_[_,_] :  @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@ [ctor prec 22  ] . ***op _:_[_,_] :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
+	op _: public(_[_,_]) :  @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@ [ctor prec 22  ] . *** op _: public(_[_,_]) :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
 	***op _:_[_,_] : @Token@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
 	***op _: public(_[_,_]) : @Token@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
-	op _:_[_,_ [ _ ] ] : @Token@ @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@  [ctor prec 25  ] . *** op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
+	op _:_[_,_ [ _ ] ] : @Token@ @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@  [ctor prec 22  ] . *** op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
 	***op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
-	op _: public(_[_,_ [ _ ] ]) : @Token@ @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@  [ctor prec 25 ] . *** op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
+	op _: public(_[_,_ [ _ ] ]) : @Token@ @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@  [ctor prec 22 ] . *** op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
 	***op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
 	***Declarar Struct
 	***subsort @Declaracion@ @DeclaracionLista@ < @ParamStruct@ .
 	***op __ : @ParamStruct@ @ParamStruct@ -> @ParamStruct@ [ctor] .
 	***op __:_ : @Tipos@ @Token@  @ParamStruct@ -> @DcStruct@ [ctor] .
 	***declaracion indexada para Eventos
-	op _: indexed(_) : @Token@ @Token@ -> @DeclaracionIndexada@ [ctor prec 25 ]. *** suelen ser las direcciones
+	op _: indexed(_) : @Token@ @Token@ -> @DeclaracionIndexada@ [ctor prec 22 ]. *** suelen ser las direcciones
 	***Lista de declaraciones
 	op dc : -> @Declaraciones@  [ctor ] . *** descomentar
-	op __ : @Declaraciones@ @Declaraciones@ -> @Declaraciones@  [ctor id: dc prec 22 ] .
+	op __ : @Declaraciones@ @Declaraciones@ -> @Declaraciones@  [ctor assoc id: dc prec 25 ] .
 	*** eventos
 	op event _:_ : @Token@ @Declaraciones@ -> @DeclaracionEvento@ [ctor] .
+	op event _:_ : @Token@  @DeclaracionControl@ -> @DeclaracionEvento@ [ctor] .
 	***Operaciones
 	sorts @Exp@ @Body@ @asig@ .
 	subsort @Token@ < @Exp@ .
@@ -260,11 +261,11 @@ fmod VYPER-GRAMMAR is
 	op _[_] = _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
 	***si que funciona si empre y cuanndo use los operadores dentro de otra funcion
 	*** LISTAS
-	***sort @Lista@ .
-	***subsort @Token@ < @LToken@ .
-	***op ltk : -> @LToken@ [ctor] .
-	***op _,_ : @LToken@ @LToken@ -> @LToken@ [ctor comm id: ltk ] .
-	***op [_] : @LToken@ -> @Lista@ [ctor] . ***prueba
+	sort @Lista@ .
+	subsort @Token@ < @LToken@ .
+	op ltk : -> @LToken@ [ctor] .
+	op _,_ : @LToken@ @LToken@ -> @LToken@ [ctor assoc id: ltk ] .
+	op [_] : @LToken@ -> @Lista@ [ctor] . ***prueba
 
 	***Self
 	sort @self@ .
@@ -274,7 +275,7 @@ fmod VYPER-GRAMMAR is
 	op self._() : @Token@ -> @self@ [ctor] .
 
 	***Funciones
-	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ .
+	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ @Default@ @init@ .
 	subsort @Declaracion@ < @Parametros@ .
 	***Decoradores
 	ops @external @internal : -> @DecoratorEI@  [ctor] .
@@ -294,6 +295,10 @@ fmod VYPER-GRAMMAR is
 	op _ def _(_)->_ : @DecoratorEI@ @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor] .
 	op _ _ def _(_)->_ : @DecoratorEI@ @DecoratorMut@ @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor] .
 
+	***funcion default
+	op _ _ def --default--() : @DecoratorEI@ @DecoratorMut@ -> @Default@ [ctor] .
+	***funcion init
+	op def --init--(_) : @Parametros@ -> @init@ [ctor] .
 	*** for
 	sort @For@ .
 	op bv : -> @Body@ [ctor] . ***prueba
@@ -318,7 +323,8 @@ fmod VYPER-GRAMMAR is
 	op assert _,_ : @Exp@ @Token@ -> @DeclaracionControl@ [ctor] . *** si es falso se revierte la transaccion
 	op return _ : @Exp@ -> @DeclaracionControl@ [ctor] .
 	***op return _ : @Lista@ -> @DeclaracionControl@ [ctor] .
-
+	*** registrar eventos
+	op log _(_) : @Token@ @LToken@ -> @RegistrarEventos@ [ctor] .
 	subsort @For@ @DeclaracionControl@ @asig@ < @Body@ .
 	op __ : @Body@ @Body@ -> @Body@ [ctor assoc comm] .
 

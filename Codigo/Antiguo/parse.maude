@@ -9,18 +9,18 @@ fmod PARSING is
  ***pr PREPARSE .
  sort ParsingRes .
 
- op <_> : Term -> ParsingRes [ctor] .
+ op _ : Term -> ParsingRes [ctor] .
 
 vars T T1 T1' T2 T2' T3 T3' T4 T4' T5 T5' T6 T6' : Term .
 var TL TL' : TermList .
  vars M M1 M2 M3 : Module .
 var  Ct : Constant .
- var  S : String .
+ var  S S1 : String .
  var  F : Float .
- var  Q : Qid .
+ var  Q Q1 : Qid .
  var B : Bool .
 
- op parse : Term -> ParsingRes .
+ op parse : Term -> Term .
  ***eq parse(T) = parse(upModule('GRAMATICA, true), T) . ***llamar al otro parse
  ***op parse : Module Term -> ParsingRes .
 
@@ -29,99 +29,107 @@ var  Ct : Constant .
   ***   S := string(Q) . ***/\
     *** B := Bool(S) .
  ***parsea Bool
- ceq parse('token[T]) = < T >
+ ceq parse('token[T]) =  Q1 
   if Q := downQid(T) /\
      S := string(Q) /\
-     isBool(S) [print "ecuacion1" Q].
+     isBool(S) /\
+     S1 := S + ".bool" /\
+     Q1 := qid(S1) [print "ecuacionBool" S ] .
 *** parsea tipos
-  ceq parse('token[T]) = < T >
+  ceq parse('token[T]) =  Q1 
   if Q := downQid(T) /\
      S := string(Q) /\
-     isTipo(S) [print "ecuacionTipos" S] .
-*** parsea float 
- ceq parse('token[T]) = < upTerm(F) >
+     isTipo(S) /\
+     S1 := S + ".tipo" /\
+     Q1 := qid(S1) [print "ecuacion1" Q1 ] .
+*** parsea float
+ ceq parse('token[T]) =  upTerm(F) 
   if Q := downQid(T) /\
      S := string(Q) /\
      F := float(S) .
-*** parsea int 
- ceq parse('token[T]) = < upTerm(F) >
+*** parsea int
+ ceq parse('token[T]) =  upTerm(F) 
   if Q := downQid(T) /\
      S := string(Q) /\
      rat(S, 10) :: Nat /\
      F := float(S + ".0") .
 *** parsea qid!
- ceq parse('token[T]) = < T >
+ ceq parse('token[T]) =  T 
   if Q := downQid(T) /\
      S := string(Q) /\
      not (float(S) :: Float) /\
-     not (rat(S, 10) :: Nat) /\ 
-     not isBool(S) /\ 
+     not (rat(S, 10) :: Nat) /\
+     not isBool(S) /\
      not isTipo(S) [print "ecuacionQid" S ] .
 
 *** parsea tipo
- eq parse('T.@Tipos@) = < 'T  > [print "ecuacion3" ] .
+ eq parse('T.@Tipos@) =  'T   [print "ecuacion3" ] .
 *** parsea tipos
  ***eq parse( _._ ) = < T > .
- *** PARSEA DECLARACIONES 
+ *** PARSEA DECLARACIONES
  ***Declaracion basica
- ceq parse('_:_[T1,T2]) = < '_:_[T1', T2'] >
-    if < T1' > := parse (T1) /\
-       < T2' > := parse (T2) [print "ecuacion:" T1' ] .
+ ceq parse('_:_[T1,T2]) =  '_:_[T1', T2'] 
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) [print "ecuacion:" T1' ] .
 *** declaracion publica
- ceq parse('_:`public`(_`)[T1,T2]) = < '_:_[T1', T2', upTerm("public") ] >
-    if < T1' > := parse (T1) /\
-       < T2' > := parse (T2) [print "ecuacion:" T1' ] .
+ ceq parse('_:`public`(_`)[T1,T2]) =  '_:_[T1', T2', upTerm("public") ] 
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) [print "ecuacion:" T1' ] .
 ***declaracion lista qid o tipos
- ceq parse('_:_`[_`][T1,T2,T3]) = < '_:_[T1', T2', T3'] >
-    if < T1' > := parse (T1) /\
-       < T2' > := parse (T2) /\
-       < T3' > := parse (T3) [print "ecuacion:" T1 ] .
+ ceq parse('_:_`[_`][T1,T2,T3]) =  '_:_[T1', T2', T3'] 
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) /\
+        T3'  := parse (T3) [print "ecuacion:" T1 ] .
 ***DECLARACION LISTA publica
- ceq parse('_:`public`(_`[_`]`)[T1,T2,T3]) = < '_:_[T1', T2', T3' , upTerm("public") ] >
-    if < T1' > := parse (T1) /\
-       < T2' > := parse (T2) /\
-       < T3' > := parse (T3) [print "ecuacion:" T1 ] .
+ ceq parse('_:`public`(_`[_`]`)[T1,T2,T3]) =  '_:_[T1', T2', T3' , upTerm("public") ] 
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) /\
+        T3'  := parse (T3) [print "ecuacion:" T1 ] .
+***DECLARACION dando valor inicial
+ ceq parse('_:_=_[T1,T2,T3]) =  '_:_[T1', T2', T3'] 
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) /\
+        T3'  := parse (T3) [print "ecuacion valor inicial:" T1 ] .
 *** Declaracion costante sin listas
- ceq parse('_:`constant`(_`)=_[T1,T2,T3]) = < '_:_[T1', T2', T3' , upTerm("constante") ] >
-    if < T1' > := parse (T1) /\
-       < T2' > := parse (T2) /\
-       < T3' > := parse (T3) [print "ecuacion:" T1 ] .
+ ceq parse('_:`constant`(_`)=_[T1,T2,T3]) =  '_:_[T1', T2', T3' , upTerm("constante") ] 
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) /\
+        T3'  := parse (T3) [print "ecuacion:" T1 ] .
 ***Declaracion hashmap qid o tipos
- ceq parse('_:_`[_`,_`] [T1,T2,T3,T4]) = < '_:_[T1', T2', T3', T4'] > ***!el T2 tiene que ser hasmap si o si
-    if < T1' > := parse (T1) /\
-       < T2' > := parse (T2) /\
-       < T3' > := parse (T3) /\
-       < T4' > := parse (T4) [print "ecuacion:" T1 ] .
+ ceq parse('_:_`[_`,_`] [T1,T2,T3,T4]) =  '_:_[T1', T2', T3', T4']  ***!el T2 tiene que ser hasmap si o si
+    if  T1' := parse (T1) /\
+        T2' := parse (T2) /\
+        T3' := parse (T3) /\
+        T4'  := parse (T4) [print "ecuacion:" T1 ] .
 ***Declaracion nhashmap publico
-  ceq parse('_:`public`(_`[_`,_`]`)[T1,T2,T3,T4]) = < '_:_[T1', T2', T3', T4', upTerm("public")] > ***!el T2 tiene que ser hasmap si o si
-    if < T1' > := parse (T1) /\
-       < T2' > := parse (T2) /\
-       < T3' > := parse (T3) /\
-       < T4' > := parse (T4) [print "ecuacion:" T1 ] .
+  ceq parse('_:`public`(_`[_`,_`]`)[T1,T2,T3,T4]) =  '_:_[T1', T2', T3', T4', upTerm("public")]  ***!el T2 tiene que ser hasmap si o si
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) /\
+        T3'  := parse (T3) /\
+        T4'  := parse (T4) [print "ecuacion:" T1 ] .
 ***dECLARACION HASMAP CON LISTAS
-   ceq parse('_:_`[_`,_`[_`]`][T1,T2,T3,T4,T5]) = < '_:_[T1', T2', T3', T4', T5'] > ***!el T2 tiene que ser hasmap si o si
-   if < T1' > := parse (T1) /\
-      < T2' > := parse (T2) /\
-      < T3' > := parse (T3) /\
-      < T4' > := parse (T4) /\
-      < T5' > := parse (T5) [print "ecuacion:" T1 ] .
+   ceq parse('_:_`[_`,_`[_`]`][T1,T2,T3,T4,T5]) =  '_:_[T1', T2', T3', T4', T5']  ***!el T2 tiene que ser hasmap si o si
+   if  T1'  := parse (T1) /\
+       T2'  := parse (T2) /\
+       T3'  := parse (T3) /\
+       T4'  := parse (T4) /\
+       T5'  := parse (T5) [print "ecuacion:" T1 ] .
 
 ***Declaracion nhashmap con listas Y PUBLICO
-  ceq parse('_:`public`(_`[_`,_`[_`]`]`)[T1,T2,T3,T4,T5]) = < '_:_[T1', T2', T3', T4', T5', upTerm("public")] > ***!el T2 tiene que ser hasmap si o si
-    if < T1' > := parse (T1) /\
-       < T2' > := parse (T2) /\
-       < T3' > := parse (T3) /\
-       < T4' > := parse (T4) /\
-       < T5' > := parse (T5) [print "ecuacion:" T1 ] .
+  ceq parse('_:`public`(_`[_`,_`[_`]`]`)[T1,T2,T3,T4,T5]) =  '_:_[T1', T2', T3', T4', T5', upTerm("public")]  ***!el T2 tiene que ser hasmap si o si
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) /\
+        T3'  := parse (T3) /\
+        T4'  := parse (T4) /\
+        T5'  := parse (T5) [print "ecuacion:" T1 ] .
+***Parsea declaraciones
+   ceq parse('__[TL]) =  '_:_[TL'] 
+    if  TL'  := parseL (TL) [print "ecuacionDeclaraciones:" TL ] .
 *** parseando un for_in_
-   ceq parse('for_in_;_[T1,T2,TL]) = < '_:_[T1', T2', TL'] > ***!el T2 tiene que ser hasmap si o si
-   if < T1' > := parse (T1) /\
-      < T2' > := parse (T2) /\
-      TL'  := parseL (TL) .
-*** parsea Lista
-op parseL : TermList -> TermList .
-eq parseL(empty) = empty .
-***eq parseL( (T , TL) ) = parse(T) , parseL (TL) .
+   ceq parse('for_in_;_[T1,T2,TL]) =  '_:_[T1', T2', TL']  ***!el T2 tiene que ser hasmap si o si
+   if  T1'  := parse (T1) /\
+       T2'  := parse (T2) /\
+       TL'  := parseL (TL) .
  *** Parseando una suma .
 ---  ceq parse('_+_[T1,T2]) = <'_+._[T1', T2'] >
 ---     if < T1' > := parse (T1) /\
@@ -131,7 +139,11 @@ eq parseL(empty) = empty .
 ---  ceq parse('_<_[T1,T2]) = < '_<._[T1', T2'] >
 ---     if < T1' > := parse (T1) /\
 ---        < T2' > := parse (T2) .
- eq parse(T) = < T > [owise] .
+ eq parse(T) =  T  [owise] .
+*** parsea Lista
+op parseL : TermList -> TermList .
+eq parseL(empty) = empty .
+eq parseL( (T , TL) ) = parse(T) , parseL (TL) .
 
  op downQid : Term -> [Qid] [memo] .
  eq downQid(Ct)
@@ -232,8 +244,8 @@ crl [parsing] :
     write(stdout, example, "Parsed.\n")
  if Read =/= "" /\
     QIL := tokenize(Read) /\
-    {T, Ty} := metaParse(VYPER-GRAMMAR, QIL, anyType) /\
-    < T' > := parse(T) [print T "\nParseado: " T'] .
+    {T, Ty} := metaParse(GRAMMAR, QIL, anyType) /\
+     T' := parse(T) [print T "\nParseado: " T'] .
 
  ***                              ***
  ***          closedFile          ***
@@ -264,44 +276,53 @@ endm
 
 
 
-***red metaParse(VYPER-GRAMMAR, tokenize("x : public(int128) \n y : uint256 = true \n z : HashMap[bool , bool] \n"), anyType) .
-red metaParse(VYPER-GRAMMAR, tokenize("x : public(int128) \n"), anyType) .
-red metaParse(VYPER-GRAMMAR, tokenize("x : constant(int128) = 2 \n"), anyType) .
-red metaParse(VYPER-GRAMMAR, tokenize("x : int128[5] \n"), anyType) .
-red metaParse(VYPER-GRAMMAR, tokenize("3 : int128 "), anyType) .
-red metaParse(VYPER-GRAMMAR, tokenize("x : int128 [ int128 , int128 ] "), anyType) .
-red metaParse(VYPER-GRAMMAR, tokenize("x : HashMap[int128, loco[12] ] \n"), anyType) .
---- red metaParse(VYPER-GRAMMAR, tokenize(" x : bool "), anyType) .
---- red metaParse(VYPER-GRAMMAR, tokenize(" 3 +! x "), anyType) .
---- red metaParse(VYPER-GRAMMAR, tokenize(" x + 4 + 3 "), anyType) .
---- red metaParse(VYPER-GRAMMAR, tokenize(" x - y "), anyType) .
---- red metaParse(VYPER-GRAMMAR, tokenize(" x * y "), anyType) .
---- red metaParse(VYPER-GRAMMAR, tokenize(" x / y "), anyType) .
---- red metaParse(VYPER-GRAMMAR, tokenize(" x ** y "), anyType) .
-***red metaParse(VYPER-GRAMMAR, tokenize(" def loco(PaV) \n"), anyType) .
-***red metaParse(VYPER-GRAMMAR, tokenize(" def loco(x : bool , y : int128 ) \n"), anyType) .
-***red metaParse(VYPER-GRAMMAR, tokenize(" @external def loco(x : bool , y : int128 ) \n"), anyType) .
-***red metaParse(VYPER-GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) \n"), anyType) .
-***red metaParse(VYPER-GRAMMAR, tokenize(" x :  int128[3] \n"), anyType) .
-***red metaParse(VYPER-GRAMMAR, tokenize(" microchip : public ( comida [15]) \n"), anyType) .
-***red metaParse(VYPER-GRAMMAR, tokenize(" microchip : public ( HashMap [ bool, int128 ] ) \n"), anyType) .
-****red metaParse(VYPER-GRAMMAR, tokenize(" self.x3333 \n"), anyType) .
-***red metaParse(VYPER-GRAMMAR, tokenize(" [ x , y , z , 3 ] \n"), anyType) .
-***red metaParse(VYPER-GRAMMAR, tokenize(" for j in range(z); bv \n"), anyType) .
-***red metaParse(VYPER-GRAMMAR, tokenize(" x[3] = 2 "), anyType) .
-***red metaParse(VYPER-GRAMMAR, tokenize(" x = 4 + y * 2 "), anyType) . *** MO Funciona
-***red metaParse(VYPER-GRAMMAR, tokenize(" pass "), anyType) .
-red metaParse(VYPER-GRAMMAR, tokenize(" raise \" losm uertos \" "), anyType) . 
-***red metaParse(VYPER-GRAMMAR, tokenize(" assert x "), anyType) .
-***red metaParse(VYPER-GRAMMAR, tokenize(" assert 5 + 2  "), anyType) .  *** MO Funciona
-***red metaParse(VYPER-GRAMMAR, tokenize(" assert 5 > y ,  \" losm uertos \"  "), anyType) .
-***red metaParse(VYPER-GRAMMAR, tokenize(" return x "), anyType) .
-***red metaParse(VYPER-GRAMMAR, tokenize(" return x + y  "), anyType) .  *** MO Funciona
-***red metaParse(VYPER-GRAMMAR, tokenize(" return [ 2 , 4 , 7 , x ]  "), anyType) . *** MO Funciona
-red metaParse(VYPER-GRAMMAR, tokenize(" for x in y ; pass x  = 2  "), anyType) .
-***red metaParse(VYPER-GRAMMAR, tokenize(" for x in y ; continue for x in y ; pass "), anyType) .
-
-
+red metaParse(GRAMMAR, tokenize("x : public(int128) \n y : uint256 = true \n z : HashMap[bool , bool] \n"), anyType) .
+red metaParse(GRAMMAR, tokenize("y : uint256 = true \n "), anyType) .
+--- red metaParse(GRAMMAR, tokenize("x : public(int128) \n"), anyType) .
+--- red metaParse(GRAMMAR, tokenize("x : constant(int128) = 2 \n"), anyType) .
+--- red metaParse(GRAMMAR, tokenize("x : int128[5] \n"), anyType) .
+--- red metaParse(GRAMMAR, tokenize("3 : int128 "), anyType) .
+--- red metaParse(GRAMMAR, tokenize("x : int128 [ int128 , int128 ] "), anyType) .
+--- red metaParse(GRAMMAR, tokenize("x : HashMap[int128, loco[12] ] \n"), anyType) .
+red metaParse(GRAMMAR, tokenize(" x - y + 2 "), '@Exp@) .
+--- red metaParse(GRAMMAR, tokenize(" x : bool "), anyType) .
+--- red metaParse(GRAMMAR, tokenize(" 3 +! x "), anyType) .
+--- red metaParse(GRAMMAR, tokenize(" x + 4 + 3 "), anyType) .
+red metaParse(GRAMMAR, tokenize(" x - y "), anyType) .
+--- red metaParse(GRAMMAR, tokenize(" x * y "), anyType) .
+--- red metaParse(GRAMMAR, tokenize(" x / y "), anyType) .
+--- red metaParse(GRAMMAR, tokenize(" x ** y "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" def loco(PaV) \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" def loco(x : bool , y : int128 ) \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" @external def loco(x : bool , y : int128 ) \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" x :  int128[3] \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" microchip : public ( comida [15]) \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" microchip : public ( HashMap [ bool, int128 ] ) \n"), anyType) .
+****red metaParse(GRAMMAR, tokenize(" self.x3333 \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" [ x , y , z , 3 ] \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" for j in range(z); bv \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" x[3] = 2 "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" x = 4 + y * 2 "), anyType) . *** MO Funciona
+***red metaParse(GRAMMAR, tokenize(" pass "), anyType) .
+red metaParse(GRAMMAR, tokenize(" raise \" losm uertos \" "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" assert x "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" assert 5 + 2  "), anyType) .  *** MO Funciona
+***red metaParse(GRAMMAR, tokenize(" assert 5 > y ,  \" losm uertos \"  "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" return x "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" return x + y  "), anyType) .  *** MO Funciona
+***red metaParse(GRAMMAR, tokenize(" return [ 2 , 4 , 7 , x ]  "), anyType) . *** MO Funciona
+***for 
+***red metaParse(GRAMMAR, tokenize(" for x in y ; pass x  = 2  "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" for x in y ; continue for x in y ; pass "), anyType) .
+***if else
+***red metaParse(GRAMMAR, tokenize(" elif x == 2 : continue pass "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" if x == 2 : pass else: continue "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" if x == 2 : pass elif x == 2 : pass elif x == 2 : continue else: continue "), anyType) .
+***eventos
+***red metaParse(GRAMMAR, tokenize(" sender : indexed(address) "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" event mism : sender : indexed(address) "), anyType) .   
+red metaParse(GRAMMAR, tokenize(" event mism : sender : indexed(address) a : int128 "), anyType) .   
 set print attribute on .
 
 erew run .
