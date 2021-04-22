@@ -189,75 +189,74 @@ endfm
 *** no vale porque no puedo crear un diccionario del tipo FP
 ***unificar en un tipo!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 fmod VYPER-GRAMMAR is
- pr STRING .
+ *** pr STRING .
  sorts @Token@ @Bubble@ @NeTokenList@ @LToken@ .
 
 
  ***op If_Then_Else_Fi : @Exp@ @Prog@ @Prog@ -> @Prog@ [ctor] .
  ***ops _*_ _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc] .
  ***op _=_; : @Token@ @Exp@ -> @Prog@ [ctor] .
-	sorts @Declaracion@ @DeclaracionLista@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @DcStruct@ @Declaraciones@ @Tipos@ @ParamStruct@ @TiposToken@ .
+	sorts @Declaracion@ @DeclaracionLista@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @DcStruct@ @Declaraciones@ @ParamStruct@  .
+	*** pa los eventos
+	sort @DeclaracionIndexada@ @DeclaracionEvento@ .
 	***subsort @Declaracion@ @DeclaracionLista@ < @ParamStruct@ .
-	subsort @Declaracion@ @DeclaracionLista@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @DcStruct@ < @Declaraciones@ .
+	subsort @Declaracion@ @DeclaracionLista@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @DcStruct@ @DeclaracionIndexada@  < @Declaraciones@ .
 	***ops bool int128 uint256 decimal address bytes32 String Bytes struct HashMap : -> @Tipos@ [ctor] .
 	***subsort @Tipos@ @Token@ < @TiposToken@ .
 	***declaracion
-	
-	op _:_ : @Token@ @Token@ -> @Declaracion@ [ctor] .
-	****op _:_ : @Token@ @Token@ -> @Declaracion@ [ctor] . 
-	op _: public( _ ) : @Token@ @Token@ -> @Declaracion@ [ctor] . *** ! al ser declaracion se podria meter en los parametros de una fun
-	
+
+	op _:_ : @Token@ @Token@ -> @Declaracion@ [ctor prec 25 ] .
+	****op _:_ : @Token@ @Token@ -> @Declaracion@ [ctor] .
+	op _: public( _ ) : @Token@ @Token@ -> @Declaracion@ [ctor prec 25 ] . *** ! al ser declaracion se podria meter en los parametros de una fun
+
 	***declarar Lista
-	op _:_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] . *** op _:_[_] : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
-	op _: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] . *** op _: public(_[_]) : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
+	op _:_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 25] . *** op _:_[_] : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
+	op _: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 25 ] . *** op _: public(_[_]) : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
 	***op _:_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
 	***op _: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
 	***Declarar dando una valor
-	op _:_ = _ : @Token@ @Token@ @Token@ -> @DeclaracionValor@ [ctor] . *** op _:_ = _ : @Token@ @Tipos@ @Token@ -> @DeclaracionValor@ [ctor] .
-	
-	***Declarar un valor constante	
-	op _: constant( _ ) = _ : @Token@ @Token@ @Token@ -> @DConstante@ [ctor] . *** op _: constant( _ ) = _ : @Token@ @Tipos@ @Token@ -> @DConstante@ [ctor] .
-	
+	op _:_ = _ : @Token@ @Token@ @Token@ -> @DeclaracionValor@ [ctor prec 25  ] . *** op _:_ = _ : @Token@ @Tipos@ @Token@ -> @DeclaracionValor@ [ctor] .
+
+	***Declarar un valor constante
+	op _: constant( _ ) = _ : @Token@ @Token@ @Token@ -> @DConstante@ [ctor prec 25 ] . *** op _: constant( _ ) = _ : @Token@ @Tipos@ @Token@ -> @DConstante@ [ctor] .
+
 	*** Declara HashMap
-	op _:_[_,_] :  @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@ [ctor] . ***op _:_[_,_] :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
-	op _: public(_[_,_]) :  @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@ [ctor] . *** op _: public(_[_,_]) :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
+	op _:_[_,_] :  @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@ [ctor prec 25  ] . ***op _:_[_,_] :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
+	op _: public(_[_,_]) :  @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@ [ctor prec 25  ] . *** op _: public(_[_,_]) :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
 	***op _:_[_,_] : @Token@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
 	***op _: public(_[_,_]) : @Token@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
-	op _:_[_,_ [ _ ] ] : @Token@ @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@  [ctor] . *** op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
+	op _:_[_,_ [ _ ] ] : @Token@ @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@  [ctor prec 25  ] . *** op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
 	***op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
-	op _: public(_[_,_ [ _ ] ]) : @Token@ @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@  [ctor] . *** op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
+	op _: public(_[_,_ [ _ ] ]) : @Token@ @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@  [ctor prec 25 ] . *** op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
 	***op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
 	***Declarar Struct
 	***subsort @Declaracion@ @DeclaracionLista@ < @ParamStruct@ .
 	***op __ : @ParamStruct@ @ParamStruct@ -> @ParamStruct@ [ctor] .
 	***op __:_ : @Tipos@ @Token@  @ParamStruct@ -> @DcStruct@ [ctor] .
-	***Nose si hay que meter esto cuando literalmente va a ser igual
-	--- op _: constant(_) = _ : Qid Tipos Int -> DCInt128 [ctor] .
-	--- op _: constant(_) = _ : Qid Tipos Nat -> DCUInt256 [ctor] .
-	--- op _: constant(_) = _ : Qid Tipos Float -> DCDecimal [ctor] .
-	--- op _: constant(_) = _ : Qid Tipos Direccion -> DCAddress [ctor] .
-	--- op _: constant(_) = _ : Qid Tipos Bytes32  -> DCBytes32 [ctor] .
-	op dc : -> @Declaraciones@  [ctor] . *** descomentar
-	op __ : @Declaraciones@ @Declaraciones@ -> @Declaraciones@  [ctor comm id: dc] .
-
+	***declaracion indexada para Eventos
+	op _: indexed(_) : @Token@ @Token@ -> @DeclaracionIndexada@ [ctor prec 25 ]. *** suelen ser las direcciones
+	***Lista de declaraciones
+	op dc : -> @Declaraciones@  [ctor ] . *** descomentar
+	op __ : @Declaraciones@ @Declaraciones@ -> @Declaraciones@  [ctor id: dc prec 22 ] .
+	*** eventos
+	op event _:_ : @Token@ @Declaraciones@ -> @DeclaracionEvento@ [ctor] .
 	***Operaciones
 	sorts @Exp@ @Body@ @asig@ .
 	subsort @Token@ < @Exp@ .
 	***op _+_ : @Token@ @Token@ -> @asig@ [ctor comm assoc] . *** esto si funciona
 	***op _+_ : @Token@ @Token@ -> @Token@ [ctor comm assoc] . *** esto no funciona
-	op _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc] . ***esto no funciona
-	op _-_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
-	op _*_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc] .
-	op _/_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
-	op _**_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
-	op _/_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
-	op _>_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
-	op _>=_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
-	op _<_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
-	op _<=_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
-	op _==_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
-	op _!=_ : @Exp@ @Exp@ -> @Exp@ [ctor] .
-	op _=_ : @Token@ @Exp@ -> @asig@ [ctor] .
+	op _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc prec 30] . ***esto no funciona
+	op _-_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 5] .
+	op _*_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc prec 30] .
+	op _/_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op _**_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op _>_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op _>=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op _<_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op _<=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op _==_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op _!=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op _=_ : @Token@ @Exp@ -> @asig@ [ctor prec 30] .
 	op _[_] = _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
 	***si que funciona si empre y cuanndo use los operadores dentro de otra funcion
 	*** LISTAS
@@ -266,14 +265,14 @@ fmod VYPER-GRAMMAR is
 	***op ltk : -> @LToken@ [ctor] .
 	***op _,_ : @LToken@ @LToken@ -> @LToken@ [ctor comm id: ltk ] .
 	***op [_] : @LToken@ -> @Lista@ [ctor] . ***prueba
-	
+
 	***Self
 	sort @self@ .
 	op self : -> @self@ [ctor] .
 	op self.balance : -> @self@ [ctor] .
 	op self._ : @Token@ -> @self@ [ctor] .
 	op self._() : @Token@ -> @self@ [ctor] .
-	
+
 	***Funciones
 	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ .
 	subsort @Declaracion@ < @Parametros@ .
@@ -285,47 +284,54 @@ fmod VYPER-GRAMMAR is
 	op PaV : -> @Parametros@ [ctor] .
 	op _,_ : @Parametros@  @Parametros@  -> @Parametros@  [ctor id: PaV ] .
 
-	*** Declaracion de funciones 
+	*** Declaracion de funciones
 	op def _(_) : @Token@ @Parametros@ -> @Cabecera@ [ctor] .
 	op _ def _(_) : @DecoratorEI@ @Token@ @Parametros@ -> @Cabecera@ [ctor] .
 	op _ _ def _(_) : @DecoratorEI@ @DecoratorMut@ @Token@ @Parametros@  -> @Cabecera@ [ctor] .
 
-	*** x : int128 , y : int128 , 
-	op def _(_)->_ : @Token@ @Parametros@ @Tipos@ -> @Cabecera@ [ctor] .
-	op _ def _(_)->_ : @DecoratorEI@ @Token@ @Parametros@ @Tipos@ -> @Cabecera@ [ctor] .
-	op _ _ def _(_)->_ : @DecoratorEI@ @DecoratorMut@ @Token@ @Parametros@ @Tipos@ -> @Cabecera@ [ctor] .
+	*** x : int128 , y : int128 ,
+	op def _(_)->_ : @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor] .
+	op _ def _(_)->_ : @DecoratorEI@ @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor] .
+	op _ _ def _(_)->_ : @DecoratorEI@ @DecoratorMut@ @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor] .
 
 	*** for
 	sort @For@ .
 	op bv : -> @Body@ [ctor] . ***prueba
 	op for _ in range(_);_ : @Token@ @Exp@ @Body@ -> @For@ [ctor] .
-	op for _ in range(_,_);_ : @Token@  @Exp@  @Exp@ @Body@ -> @For@ [ctor] . 
+	op for _ in range(_,_);_ : @Token@ @Exp@ @Exp@ @Body@ -> @For@ [ctor] .
 	op for _ in _;_ : @Token@ @Token@ @Body@ -> @For@ [ctor] .
 	op for _ in [_];_ : @Token@ @LToken@ @Body@ -> @For@ [ctor] .
-
+	*** if else
+	sort @ifElse@ @elseif@ @ListElseif@ .
+	subsort @elseif@ < @ListElseif@ .
+	***op if_:_else:_ : @Exp@ @Body@ @Body@ -> @ifElse@ [ctor] .
+	op elif_:_ : @Exp@ @Body@ -> @elseif@ [ctor] .
+	op elifVacio : -> @ListElseif@ [ctor] .
+	op __ : @ListElseif@ @ListElseif@  -> @ListElseif@  [ctor] .
+	op if_:_else:_ : @Exp@ @Body@ @Body@ -> @ifElse@ [ctor] .
+	op if_:__else:_ : @Exp@ @Body@ @ListElseif@ @Body@ -> @ifElse@ [ctor] . 
 	***Control flow
 	sort @DeclaracionControl@ .
 	ops break continue pass : -> @DeclaracionControl@ [ctor] .
-	op raise _ : String -> @DeclaracionControl@ [ctor] . ***desencadena una expecion y revierte la llamada
+	op raise _ : @Token@ -> @DeclaracionControl@ [ctor] . ***desencadena una expecion y revierte la llamada
 	op assert _ : @Exp@ -> @DeclaracionControl@ [ctor] .
-	op assert _,_ : @Exp@ String -> @DeclaracionControl@ [ctor] . *** si es falso se revierte la transaccion
+	op assert _,_ : @Exp@ @Token@ -> @DeclaracionControl@ [ctor] . *** si es falso se revierte la transaccion
 	op return _ : @Exp@ -> @DeclaracionControl@ [ctor] .
 	***op return _ : @Lista@ -> @DeclaracionControl@ [ctor] .
 
-	subsort @For@ @DeclaracionControl@ @asig@ < @Body@ . 
+	subsort @For@ @DeclaracionControl@ @asig@ < @Body@ .
 	op __ : @Body@ @Body@ -> @Body@ [ctor assoc comm] .
-	
+
  ***a=[1,2,3]
 endfm
 fmod META-SIGN is
- including VYPER-GRAMMAR .
  pr META-LEVEL .
 
  op BUBBLES : -> FModule .
- op VYPER-GRAMMAR : -> FModule [memo] .
+ op GRAMMAR : -> FModule [memo] .
 
  eq BUBBLES
-    = (fmod 'VYPER-GRAMMAR is
+    = (fmod 'GRAMMAR is
         including 'QID-LIST .
         sorts none .
         none
@@ -338,11 +344,7 @@ fmod META-SIGN is
                (id-hook('Bubble, '1 '-1 '`( '`))
                 op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
                 op-hook('qidSymbol, '<Qids>, nil, 'Qid)
-                id-hook('Exclude, 'eq 'ceq 'rl 'crl 'mb 'cmb 'sd 'csd
-                                  'var 'vars 'forall 'exists
-                                  'sorts 'subsort 'subsorts 'op 'ops
-                                  'protecting 'pr 'including 'inc 'extending
-                                  'ctor 'assoc 'comm '== '/\ 'spec* 'spec!)))] .
+                id-hook('Exclude, 'eq 'ceq 'rl)))] .
         op 'neTokenList : 'QidList -> '@NeTokenList@
              [special(
                (id-hook('Bubble, '1 '-1 '`( '`))
@@ -352,7 +354,7 @@ fmod META-SIGN is
         none
         none
      endfm) .
- eq VYPER-GRAMMAR = addImports(BUBBLES, (including 'VYPER-GRAMMAR .)) .
+ eq GRAMMAR = addImports(BUBBLES, (including 'VYPER-GRAMMAR .)) .
 
  var  SSDS : SubsortDeclSet .
  vars IL IL' : ImportList .
@@ -389,8 +391,8 @@ fmod DeclaracionVariables is
 	op _:_ : Qid Tipos -> Declaracion [ctor] .
 	op _: public( _ ) : Qid Tipos -> Declaracion [ctor] .
 	op _:_ = _ : Qid Tipos Int -> Declaracion [ctor] .
-	op _:_[_] : Qid Tipos Nat -> DeclaracionLista [ctor] . 
-	op _:public(_[_]) : Qid Tipos Nat -> DeclaracionLista [ctor] . 
+	op _:_[_] : Qid Tipos Nat -> DeclaracionLista [ctor] .
+	op _:public(_[_]) : Qid Tipos Nat -> DeclaracionLista [ctor] .
 	op _:_[_] : Qid Qid Nat -> DeclaracionLista [ctor] .
 	op _:public(_[_]) : Qid Qid Nat -> DeclaracionLista [ctor] .
 	op _: constant(_) = _ : Qid Tipos BasicB -> DcBooleana [ctor] .
@@ -422,7 +424,7 @@ fmod DeclaracionVariables is
 	op _:public(_[_,_[_]]) : Qid Tipos Tipos Tipos Nat -> DcHashMap [ctor] .
 	op dc : -> Declaraciones [ctor] .
 	op __ : Declaraciones Declaraciones -> Declaraciones [comm ctor id: dc] .
-	
+
 	*** VALORES
 	***op _=_ : String Nat ->  DeclaracionValor [ctor] .
 	***op _=_ : self Nat -> DeclaracionValor [ctor] .
@@ -494,7 +496,7 @@ fmod GRAMATICA is
 	op _=._ : Qid Exp -> Program [ctor] .
 	op if_;_else_ : Exp Program Program -> Program [ctor] .
 	op for _ in range(_);_ : Qid Exp Program -> Program [ctor] .
-	op for _ in range(_,_);_ : Qid Exp Exp Program -> Program [ctor] . 
+	op for _ in range(_,_);_ : Qid Exp Exp Program -> Program [ctor] .
 	op for _ in _;_ : Qid Qid Program -> Program [ctor] .
 	op for _ in [_];_ : Qid LFloat Program -> Program [ctor] .
 	***	op assert _ : Operacion -> Program [ctor] .
@@ -597,7 +599,7 @@ endm
 --- 	eq (cha S) = float(S) .
 
 --- endfm
---- ***Reglas encargadas de leer un archivo 
+--- ***Reglas encargadas de leer un archivo
 --- mod LeerArchivo is
 ---  inc STD-STREAM .
 ---  pr  CONVERSION .
