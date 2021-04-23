@@ -261,11 +261,11 @@ fmod VYPER-GRAMMAR is
 	op _[_] = _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
 	***si que funciona si empre y cuanndo use los operadores dentro de otra funcion
 	*** LISTAS
-	sort @Lista@ .
-	subsort @Token@ < @LToken@ .
-	op ltk : -> @LToken@ [ctor] .
-	op _,_ : @LToken@ @LToken@ -> @LToken@ [ctor assoc id: ltk ] .
-	op [_] : @LToken@ -> @Lista@ [ctor] . ***prueba
+	--- sort @Lista@ .
+	--- subsort @Token@ < @LToken@ .
+	--- op ltk : -> @LToken@ [ctor] .
+	--- op _,_ : @LToken@ @LToken@ -> @LToken@ [ctor assoc id: ltk ] .
+	--- op [_] : @LToken@ -> @Lista@ [ctor] . ***prueba
 
 	***Self
 	sort @self@ .
@@ -275,7 +275,7 @@ fmod VYPER-GRAMMAR is
 	op self._() : @Token@ -> @self@ [ctor] .
 
 	***Funciones
-	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ @Default@ @init@ .
+	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ @valorDevuelto@ @Default@ @Init@ @Funcion@ .
 	subsort @Declaracion@ < @Parametros@ .
 	***Decoradores
 	ops @external @internal : -> @DecoratorEI@  [ctor] .
@@ -283,8 +283,10 @@ fmod VYPER-GRAMMAR is
 	op @nonreentrant(_) : @Token@ -> @DecoratorNR@ [ctor] .
 	***Parametros de una funcion pueden ser vacios
 	op PaV : -> @Parametros@ [ctor] .
-	op _,_ : @Parametros@  @Parametros@  -> @Parametros@  [ctor id: PaV ] .
-
+	op _,_ : @Parametros@  @Parametros@  -> @Parametros@  [ctor assoc id: PaV prec 25 ] .
+	*** valores de vuelta
+	***op ->_ : @Token@ -> @valorDevuelto@ [ctor] .
+	***op ->(_: _ ) : @Token@ -> @valorDevuelto@ [ctor] .  
 	*** Declaracion de funciones
 	op def _(_) : @Token@ @Parametros@ -> @Cabecera@ [ctor] .
 	op _ def _(_) : @DecoratorEI@ @Token@ @Parametros@ -> @Cabecera@ [ctor] .
@@ -294,18 +296,26 @@ fmod VYPER-GRAMMAR is
 	op def _(_)->_ : @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor] .
 	op _ def _(_)->_ : @DecoratorEI@ @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor] .
 	op _ _ def _(_)->_ : @DecoratorEI@ @DecoratorMut@ @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor] .
+	***
+	op def _(_)->(_:_) : @Token@ @Parametros@ @Token@ @Token@  -> @Cabecera@ [ctor] .
+	op _ def _(_)->(_:_) : @DecoratorEI@ @Token@ @Parametros@ @Token@ @Token@ -> @Cabecera@ [ctor] .
+	op _ _ def _(_)->(_:_) : @DecoratorEI@ @DecoratorMut@ @Token@ @Parametros@ @Token@ @Token@ -> @Cabecera@ [ctor] .
 
 	***funcion default
-	op _ _ def --default--() : @DecoratorEI@ @DecoratorMut@ -> @Default@ [ctor] .
+	*** esto comprobarlo en el parse y tener solo las funciones de arriba
+	***op _ _ def --default--() : @DecoratorEI@ @DecoratorMut@ -> @Default@ [ctor] . *** soilo pude ser external payable
 	***funcion init
-	op def --init--(_) : @Parametros@ -> @init@ [ctor] .
+	***op def --init--(_) : @Parametros@ -> @Init@ [ctor ] . *** me da ambiguo con funciones
+
+	*** declaracion de funciones 
+	op _:_ end : @Cabecera@ @Body@ -> @Funcion@ [ctor] . *** ejemplo end
 	*** for
 	sort @For@ .
 	op bv : -> @Body@ [ctor] . ***prueba
-	op for _ in range(_);_ : @Token@ @Exp@ @Body@ -> @For@ [ctor] .
-	op for _ in range(_,_);_ : @Token@ @Exp@ @Exp@ @Body@ -> @For@ [ctor] .
-	op for _ in _;_ : @Token@ @Token@ @Body@ -> @For@ [ctor] .
-	op for _ in [_];_ : @Token@ @LToken@ @Body@ -> @For@ [ctor] .
+	op for _ in range(_);_ end : @Token@ @Exp@ @Body@ -> @For@ [ctor] .
+	op for _ in range(_,_);_ end : @Token@ @Exp@ @Exp@ @Body@ -> @For@ [ctor] .
+	op for _ in _;_ end : @Token@ @Token@ @Body@ -> @For@ [ctor] .
+	op for _ in [_];_ end : @Token@ @Bubble@ @Body@ -> @For@ [ctor] .
 	*** if else
 	sort @ifElse@ @elseif@ @ListElseif@ .
 	subsort @elseif@ < @ListElseif@ .
@@ -313,19 +323,25 @@ fmod VYPER-GRAMMAR is
 	op elif_:_ : @Exp@ @Body@ -> @elseif@ [ctor] .
 	op elifVacio : -> @ListElseif@ [ctor] .
 	op __ : @ListElseif@ @ListElseif@  -> @ListElseif@  [ctor] .
-	op if_:_else:_ : @Exp@ @Body@ @Body@ -> @ifElse@ [ctor] .
-	op if_:__else:_ : @Exp@ @Body@ @ListElseif@ @Body@ -> @ifElse@ [ctor] . 
+	op if_:_else:_ end : @Exp@ @Body@ @Body@ -> @ifElse@ [ctor] .
+	op if_:__else:_ end : @Exp@ @Body@ @ListElseif@ @Body@ -> @ifElse@ [ctor] . 
 	***Control flow
 	sort @DeclaracionControl@ .
 	ops break continue pass : -> @DeclaracionControl@ [ctor] .
 	op raise _ : @Token@ -> @DeclaracionControl@ [ctor] . ***desencadena una expecion y revierte la llamada
 	op assert _ : @Exp@ -> @DeclaracionControl@ [ctor] .
 	op assert _,_ : @Exp@ @Token@ -> @DeclaracionControl@ [ctor] . *** si es falso se revierte la transaccion
-	op return _ : @Exp@ -> @DeclaracionControl@ [ctor] .
-	***op return _ : @Lista@ -> @DeclaracionControl@ [ctor] .
+	op return _ : @Exp@ -> @DeclaracionControl@ [ctor] . 
+	op return _,_ : @Exp@ @Exp@ -> @DeclaracionControl@ [ctor] . ***se puede devolver una tupla
+	op return [_] : @Bubble@ -> @DeclaracionControl@ [ctor] .
+
+	***igualr una tupla
+	sort @asigTupla@ .
+	op (_ , _ ) = _(_) : @Token@ @Token@ @Token@ @Bubble@ -> @asigTupla@ [ctor] .
+	op _ , _  = _(_) : @Token@ @Token@ @Token@ @Bubble@ -> @asigTupla@ [ctor] .
 	*** registrar eventos
-	op log _(_) : @Token@ @LToken@ -> @RegistrarEventos@ [ctor] .
-	subsort @For@ @DeclaracionControl@ @asig@ < @Body@ .
+	op log _(_) : @Token@ @Bubble@ -> @RegistrarEventos@ [ctor] .
+	subsort @For@ @DeclaracionControl@ @asig@ @asigTupla@ < @Body@ .
 	op __ : @Body@ @Body@ -> @Body@ [ctor assoc comm] .
 
  ***a=[1,2,3]
