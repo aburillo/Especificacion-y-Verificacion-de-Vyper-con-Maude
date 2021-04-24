@@ -77,8 +77,11 @@ var  Ct : Constant .
      not isTipo(S)  /\
      not isVariableEntorno(S) [print "ecuacionQid" S ] .
 *** parsea bubble!
+***['__[''2.Qid,''`,.Qid,''x.Qid]]
+ ceq parse('bubble['__[TL]]) =  TL' 
+  if TL' := parseB(TL) [print "ecuacionBubble" TL ] .
  ceq parse('bubble[TL]) =  TL' 
-  if TL' := parseL(TL) [print "ecuacionBubble" TL ] .
+  if TL' := parseB(TL) [print "ecuacionBubbleiNDIVIDUAL" TL ] .
 
 *** PARSEA EXPRESSIONES
 *** parsea asignacion
@@ -151,7 +154,7 @@ var  Ct : Constant .
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) [print "ecuacioniNDEXADA:" T1 ] .
 ***Parsea declaraciones
-   ceq parse('__[TL]) =  '_:_[TL'] 
+   ceq parse('__[TL]) =  'Dec[TL'] 
     if  TL'  := parseL (TL) [print "ecuacionDeclaraciones:" TL ] .
 *** parseando un for_in_
    ceq parse('for_in_;_end[T1,T2,TL]) =  'for[T1', T2', TL'] 
@@ -170,10 +173,10 @@ var  Ct : Constant .
        T3'  := parse (T3) /\
        TL'  := parseL (TL) .
 *** parseando un for_in list(_,_) quizas esta es igual que la primera de for
-   ceq parse('for_in`[_`];_end[T1,T2,TL]) =  'for[T1', T2', TL'] 
+   ceq parse('for_in`[_`];_end[T1,T2,TL]) =  'for[T1', TL2', TL'] 
   if  T1'  := parse (T1) /\
-       T2'  := parse (T2) /\
-       TL'  := parseL (TL) .
+       TL2'  := parse (T2) /\
+       TL'  := parseL (TL) [print "ecuacionForListas:" TL ] .
  *** Parseando una suma .
 ---  ceq parse('_+_[T1,T2]) = <'_+._[T1', T2'] >
 ---     if < T1' > := parse (T1) /\
@@ -188,6 +191,10 @@ var  Ct : Constant .
 op parseL : TermList -> TermList .
 eq parseL(empty) = empty .
 eq parseL( (T , TL) ) = parse(T) , parseL (TL) .
+***PARsea interior de un bubble
+op parseB : TermList -> TermList .
+eq parseB(empty) = empty .
+eq parseB( (T , TL) ) = parse('token[T]) , parseB (TL) .
 
  op downQid : Term -> [Qid] [memo] .
  eq downQid(Ct)
@@ -377,7 +384,8 @@ red metaParse(GRAMMAR, tokenize(" return [ 2 , 4 , 7 , x ]  "), anyType) . *** M
 ***red metaParse(GRAMMAR, tokenize(" for x in y ; pass x  = 2 "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" for x in y ; continue for x in y ; pass "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" for x in range(y, y + 2) ; continue for x in y ; pass "), anyType) . *** mp funcionma
-red metaParse(GRAMMAR, tokenize(" for x in range(y, y + 2) ; continue end "), anyType) . *** mp funcionma
+***red metaParse(GRAMMAR, tokenize(" for x in range(y, y + 2) ; continue end "), anyType) . *** mp funcionma
+red metaParse(GRAMMAR, tokenize(" for x in [ 2 , x ] ; continue end "), anyType) .
 ***if else
 ***red metaParse(GRAMMAR, tokenize(" elif x == 2 : continue pass "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" if x == 2 : pass else: continue "), anyType) .

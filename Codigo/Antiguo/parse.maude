@@ -76,6 +76,9 @@ var  Ct : Constant .
      not isBool(S) /\
      not isTipo(S)  /\
      not isVariableEntorno(S) [print "ecuacionQid" S ] .
+*** parsea bubble!
+ ceq parse('bubble[TL]) =  TL' 
+  if TL' := parseL(TL) [print "ecuacionBubble" TL ] .
 
 *** PARSEA EXPRESSIONES
 *** parsea asignacion
@@ -112,7 +115,7 @@ var  Ct : Constant .
         T2'  := parse (T2) /\
         T3'  := parse (T3) [print "ecuacion valor inicial:" T1 ] .
 *** Declaracion costante sin listas
- ceq parse('_:`constant`(_`)=_[T1,T2,T3]) =  '_:_[T1', T2', T3' , upTerm("constante") ] 
+ ceq parse('_:`constant`(_`)=_[T1,T2,T3]) =  '_:_[T1', T2', T3' , upTerm("constant") ] 
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) /\
         T3'  := parse (T3) [print "ecuacion:" T1 ] .
@@ -143,23 +146,33 @@ var  Ct : Constant .
         T3'  := parse (T3) /\
         T4'  := parse (T4) /\
         T5'  := parse (T5) [print "ecuacion:" T1 ] .
+*** Parsea declaracion indexada
+  ceq parse('_:`indexed`(_`)[T1,T2]) =  '_:_[T1', T2', upTerm("indexed")]  
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) [print "ecuacioniNDEXADA:" T1 ] .
 ***Parsea declaraciones
    ceq parse('__[TL]) =  '_:_[TL'] 
     if  TL'  := parseL (TL) [print "ecuacionDeclaraciones:" TL ] .
 *** parseando un for_in_
-   ceq parse('for_in_;_[T1,TL2,TL]) =  'for[T1', TL2', TL'] 
+   ceq parse('for_in_;_end[T1,T2,TL]) =  'for[T1', T2', TL'] 
    if  T1'  := parse (T1) /\
-       TL2'  := parseL (TL2) /\
+       T2'  := parse (T2) /\
        TL'  := parseL (TL) .
-   ceq parse('for_in`range`(_`);_[T1,T2,TL]) =  'for[T1', T2', TL'] 
+***parseando range
+   ceq parse('for_in`range`(_`);_end[T1,T2,TL]) =  'for[T1', T2', TL'] 
    if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
        TL'  := parseL (TL) .
 *** parseando un for_in range(_,_)
-   ceq parse('for_in`range`(_`,_`);_[T1,T2,T3,TL]) =  'for[T1', T2', T3, TL'] 
+   ceq parse('for_in`range`(_`,_`);_end[T1,T2,T3,TL]) =  'for[T1', T2', T3, TL'] 
    if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
        T3'  := parse (T3) /\
+       TL'  := parseL (TL) .
+*** parseando un for_in list(_,_) quizas esta es igual que la primera de for
+   ceq parse('for_in`[_`];_end[T1,T2,TL]) =  'for[T1', T2', TL'] 
+  if  T1'  := parse (T1) /\
+       T2'  := parse (T2) /\
        TL'  := parseL (TL) .
  *** Parseando una suma .
 ---  ceq parse('_+_[T1,T2]) = <'_+._[T1', T2'] >
@@ -325,18 +338,6 @@ red metaParse(GRAMMAR, tokenize("y : uint256 = true \n "), anyType) .
 --- red metaParse(GRAMMAR, tokenize("3 : int128 "), anyType) .
 --- red metaParse(GRAMMAR, tokenize("x : int128 [ int128 , int128 ] "), anyType) .
 --- red metaParse(GRAMMAR, tokenize("x : HashMap[int128, loco[12] ] \n"), anyType) .
-red metaParse(GRAMMAR, tokenize(" x - y + 2 "), '@Exp@) .
---- red metaParse(GRAMMAR, tokenize(" x : bool "), anyType) .
---- red metaParse(GRAMMAR, tokenize(" 3 +! x "), anyType) .
---- red metaParse(GRAMMAR, tokenize(" x + 4 + 3 "), anyType) .
-red metaParse(GRAMMAR, tokenize(" x - y "), anyType) .
---- red metaParse(GRAMMAR, tokenize(" x * y "), anyType) .
---- red metaParse(GRAMMAR, tokenize(" x / y "), anyType) .
---- red metaParse(GRAMMAR, tokenize(" x ** y "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" def loco(PaV) \n"), anyType) .
-***red metaParse(GRAMMAR, tokenize(" def loco(x : bool , y : int128 ) \n"), anyType) .
-***red metaParse(GRAMMAR, tokenize(" @external def loco(x : bool , y : int128 ) \n"), anyType) .
-***red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" x :  int128[3] \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" microchip : public ( comida [15]) \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" microchip : public ( HashMap [ bool, int128 ] ) \n"), anyType) .
@@ -345,6 +346,23 @@ red metaParse(GRAMMAR, tokenize(" x - y "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" for j in range(z); bv \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" x[3] = 2 "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" x = 4 + y * 2 "), anyType) . *** MO Funciona
+red metaParse(GRAMMAR, tokenize(" x - y + 2 "), '@Exp@) .
+--- red metaParse(GRAMMAR, tokenize(" x : bool "), anyType) .
+--- red metaParse(GRAMMAR, tokenize(" 3 +! x "), anyType) .
+--- red metaParse(GRAMMAR, tokenize(" x + 4 + 3 "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" x - y "), anyType) .
+--- red metaParse(GRAMMAR, tokenize(" x * y "), anyType) .
+--- red metaParse(GRAMMAR, tokenize(" x / y "), anyType) .
+--- red metaParse(GRAMMAR, tokenize(" x ** y "), anyType) .
+***funciones
+***red metaParse(GRAMMAR, tokenize(" def loco(PaV) \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" def loco(x : bool , y : int128 ) \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" @external def loco(x : bool , y : int128 ) \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" @external @payable def --default--() "), anyType) .
+red metaParse(GRAMMAR, tokenize(" def --init--(_a : int128 , b : bool , c : decimal ) "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) -> bool : continue \n"), anyType) .
+
 ***declaracion de control
 ***red metaParse(GRAMMAR, tokenize(" pass "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" raise \" losm uertos \" "), anyType) .
@@ -353,12 +371,13 @@ red metaParse(GRAMMAR, tokenize(" x - y "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" assert 5 > y ,  \" losm uertos \"  "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" return x "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" return x + y  "), anyType) .  *** MO Funciona
-***red metaParse(GRAMMAR, tokenize(" return [ 2 , 4 , 7 , x ]  "), anyType) . *** MO Funciona
+red metaParse(GRAMMAR, tokenize(" return [ 2 , 4 , 7 , x ]  "), anyType) . *** MO Funciona
+***red metaParse(GRAMMAR, tokenize(" return 2 , 3 + x  "), anyType) . 
 ***for 
 ***red metaParse(GRAMMAR, tokenize(" for x in y ; pass x  = 2 "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" for x in y ; continue for x in y ; pass "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" for x in range(y, y + 2) ; continue for x in y ; pass "), anyType) . *** mp funcionma
-red metaParse(GRAMMAR, tokenize(" for x in range(y, y + 2) ; continue "), anyType) . *** mp funcionma
+red metaParse(GRAMMAR, tokenize(" for x in range(y, y + 2) ; continue end "), anyType) . *** mp funcionma
 ***if else
 ***red metaParse(GRAMMAR, tokenize(" elif x == 2 : continue pass "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" if x == 2 : pass else: continue "), anyType) .
@@ -369,7 +388,11 @@ red metaParse(GRAMMAR, tokenize(" for x in range(y, y + 2) ; continue "), anyTyp
 ***red metaParse(GRAMMAR, tokenize(" event mism : sender : indexed(address) a : int128 b : String "), anyType) .
 red metaParse(GRAMMAR, tokenize(" log as(x , y , z , 3 , 4 ) "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" event mism : pass "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" x = ZERO_ADDRESS "), anyType) .     
+***red metaParse(GRAMMAR, tokenize(" x = ZERO_ADDRESS "), anyType) .
+*** tupla
+red metaParse(GRAMMAR, tokenize("  (a , b)  = foo( a , b ) "), anyType) .
+
+
 set print attribute on .
 
 erew run .
