@@ -15,7 +15,7 @@ vars T T1 T1' T2 T2' T3 T3' T4 T4' T5 T5' T6 T6' : Term .
 var TL TL' TL2 TL2' : TermList .
  vars M M1 M2 M3 : Module .
 var  Ct : Constant .
- var  S S1 : String .
+ var  S S1 S2 : String .
  var  F : Float .
  var  Q Q1 : Qid .
  var B : Bool .
@@ -28,6 +28,13 @@ var  Ct : Constant .
   ***if Q := downQid(T) /\
   ***   S := string(Q) . ***/\
     *** B := Bool(S) .
+*** parsea comas!
+ ceq parse('token[T]) = Q1 ***QUITAR LAS COMAS EN EL POSPARSE
+  if Q := downQid(T) /\
+     S := string(Q) /\
+     S == "`," /\
+     S1 := "," + ".eliminar" /\
+     Q1 := qid(S1) [print "ecuacionComa" Q1 ] .
  ***parsea Bool
  ceq parse('token[T]) =  Q1 
   if Q := downQid(T) /\
@@ -35,6 +42,20 @@ var  Ct : Constant .
      isBool(S) /\
      S1 := S + ".bool" /\
      Q1 := qid(S1) [print "ecuacionBool" S ] .
+ ***parsea Decorador externo interno
+ ceq parse('token[T]) =  Q1 
+  if Q := downQid(T) /\
+     S := string(Q) /\
+     isDecoradorEI(S) /\
+     S1 := S + ".decoradorEI" /\
+     Q1 := qid(S1) [print "ecuacionDecoradorEI" Q1 ] .
+ ***parsea Decorador mutab
+ ceq parse('token[T]) =  Q1 
+  if Q := downQid(T) /\
+     S := string(Q) /\
+     isDecoradorMUT(S) /\
+     S1 := S + ".decoradorMUT" /\
+     Q1 := qid(S1) [print "ecuacionDecoradorMUT" Q1 ] .
 *** parsea tipos
   ceq parse('token[T]) =  Q1 
   if Q := downQid(T) /\
@@ -177,6 +198,114 @@ var  Ct : Constant .
   if  T1'  := parse (T1) /\
        TL2'  := parse (T2) /\
        TL'  := parseL (TL) [print "ecuacionForListas:" TL ] .
+***FUNCIONES!
+***Parsea parametros
+   ceq parse('_`,_[TL]) =  'Param[TL'] 
+    if  TL' := parseL (TL) [print "ecuacionParametros" TL ] .
+---   ceq parse('token[T]) =  Q1 
+---   if Q := downQid(T) /\
+---      S := string(Q) /\
+---      isTipo(S) /\
+---      S1 := S + ".tipo" /\
+---      Q1 := qid(S1) [print "ecuacionTipos" Q1 ] .
+   *** funcion init
+   ceq parse('def_`(_`)['token[T],TL]) = 'init[ TL'] 
+   if Q := downQid(T) /\
+      S := string(Q) /\
+      S == "__init__" /\
+         TL'  := parse (TL) [print "ecuacionFuncionesInit:" S ] .
+   *** funcion  default 
+   ***ceq parse(__'def_`(_`)[T1 , T2, 'token[T] ,TL]) = 'default[ T1' , T2' ] 
+    ceq parse('__def_`(_`)[T1,T2,'token[T],'PaV.@Parametros@]) = 'default[T1', T2']
+   if T1'  := parse (T1) /\
+      S1 := string(T1') /\
+      S1 == "@external.decoradorEI" /\ 
+      T2' := parse (T2) /\
+      S2 := string(T2') /\
+      S2 == "@payable.decoradorMUT" /\ 
+      Q := downQid(T) /\
+      S := string(Q) /\
+      S == "__default__" [print "ecuacionFuncionesDEFAULT:" S1 ] .
+      *** sin decoradores sin return FUN
+   ceq parse('def_`(_`)[T1,TL]) = 'fun[ T1' , TL'] 
+  if   T1'  := parse (T1) /\
+       TL'  := parse (TL) [print "ecuacionFunciones1:" TL ] .
+   *** con un decorador sin return FUN
+      ceq parse('_def_`(_`)[T1,T2,TL]) = 'fun[T1', T2', TL'] 
+  if  T1'  := parse (T1) /\
+       T2'  := parse (T2) /\
+       TL'  := parse (TL) [print "ecuacionFunciones2:" TL ] .
+   *** con dos decoradores sin return FUN
+      ceq parse('__def_`(_`)[T1,T2,T3,TL]) = 'fun[T1', T2', T3', TL'] 
+  if  T1'  := parse (T1) /\
+       T2'  := parse (T2) /\
+       T3'  := parse (T3) /\
+       TL'  := parse (TL) [print "ecuacionFunciones3:" TL ] .
+   
+   *** sin decoradores CON return FUN
+   ceq parse('def_`(_`)->_[T1,TL,T2]) = 'fun[T1' , T2 , TL' ] 
+  if  T1'  := parse (T1) /\
+       TL'  := parse (TL) /\
+       T2'  := parse (T2) [print "ecuacionFunciones4:" TL' ] .
+   *** con un decorador CON return FUN
+      ceq parse('_def_`(_`)->_[T1,T2,TL,T3]) = 'fun[T1', T2', T3' , TL'] 
+  if  T1'  := parse (T1) /\
+       T2'  := parse (T2) /\
+       TL'  := parse (TL) /\
+       T3'  := parse (T3) [print "ecuacionFunciones5:" TL' ] .
+   *** con dos decoradores CON return FUN
+      ceq parse('__def_`(_`)->_[T1,T2,T3,TL,T4]) = 'fun[T1', T2', T3' , T4' ,TL'] 
+  if  T1'  := parse (T1) /\
+       T2'  := parse (T2) /\
+       T3'  := parse (T3) /\
+       TL'  := parse (TL) /\
+       T4'  := parse (T4) [print "ecuacionFunciones6:" TL' ] .
+
+   *** sin decoradores CON return tupla FUN
+   ceq parse('def_`(_`)->`(_:_`)[T1,TL,T2,T3]) = 'fun[T1' , T2' , T3' , TL' ] 
+  if  T1'  := parse (T1) /\
+       TL'  := parse (TL) /\
+       T2'  := parse (T2) /\
+       T3'  := parse (T3) [print "ecuacionFunciones7:" TL' ] .
+   *** con un decorador CON return tupla FUN
+      ceq parse('_def_`(_`)->`(_:_`)[T1,T2,TL,T3,T4]) = 'fun[T1', T2', T3' , T4' ,TL'] 
+  if  T1'  := parse (T1) /\
+       T2'  := parse (T2) /\
+       TL'  := parse (TL) /\
+       T3'  := parse (T3) /\
+       T4'  := parse (T4) [print "ecuacionFunciones8:" TL' ] .
+   *** con dos decoradores CON return tupla FUN
+      ceq parse('__def_`(_`)->`(_:_`)[T1,T2,T3,TL, T4, T5 ]) = 'fun[T1', T2', T3', T4', T5' , TL'] 
+  if  T1'  := parse (T1) /\
+       T2'  := parse (T2) /\
+       T3'  := parse (T3) /\
+       TL'  := parse (TL)  /\
+       T4'  := parse (T4)  /\
+       T5'  := parse (T5) [print "ecuacionFunciones9:" TL' ] .
+*** TUPLA
+*** parseando una asignacion de tupla con paratensis
+   ceq parse('`(_`,_`)=_`(_`)[T1,T2,T3,TL]) = 'tup[T1', T2', T3', TL'] 
+  if  T1'  := parse (T1) /\
+       T2'  := parse (T2) /\
+       T3'  := parse (T3) /\
+       TL'  := parse (TL) [print "ecuacionAsignacionTupla:" TL ] .
+*** parseando una asignacion de tupla SIN paratensis
+   ceq parse('_`,_=_`(_`)[T1,T2,T3,TL]) = 'tup[T1', T2', T3', TL'] 
+  if  T1'  := parse (T1) /\
+       T2'  := parse (T2) /\
+       T3'  := parse (T3) /\
+       TL'  := parse (TL) [print "ecuacionAsignacionTupla:" TL ] .
+*** parseando una asignacion de tupla con paratensis SIN P 
+   ceq parse('`(_`,_`)=_`(`)[T1,T2,T3]) = 'tup[T1', T2', T3'] 
+  if  T1'  := parse (T1) /\
+       T2'  := parse (T2) /\
+       T3'  := parse (T3) [print "ecuacionAsignacionTupla:" T3' ] .
+*** parseando una asignacion de tupla SIN paratensis SIN P
+   ceq parse('_`,_=_`(`)[T1,T2,T3]) = 'tup[T1', T2', T3'] 
+  if  T1'  := parse (T1) /\
+       T2'  := parse (T2) /\
+       T3'  := parse (T3)  [print "ecuacionAsignacionTupla:" T3' ] .
+
  *** Parseando una suma .
 ---  ceq parse('_+_[T1,T2]) = <'_+._[T1', T2'] >
 ---     if < T1' > := parse (T1) /\
@@ -214,6 +343,15 @@ eq parseB( (T , TL) ) = parse('token[T]) , parseB (TL) .
  op isConstante : String -> Bool .
  eq isConstante(S) = (S == "ZERO_ADDRESS") or (S == "EMPTY_BYTES32") or (S == "MAX_INT128") or (S == "MIN_INT128") or (S == "MAX_DECIMAL") or (S == "MIN_DECIMAL")
   or (S == "MAX_UINT256")  .
+*** comprueba si es un decorador externo o interno
+ op isDecoradorEI : String -> Bool .
+ eq isDecoradorEI(S) = (S == "@external") or (S == "@internal") .
+ *** comprueba si es un decorador de mutabilidad
+ op isDecoradorMUT : String -> Bool .
+ eq isDecoradorMUT(S) = (S == "@pure") or (S == "@view") or (S == "@payable") or (S == "@nonpayables") .
+ *** comprueba si una palabra es true o false
+ ***op isExternal : String -> Bool .
+ ***eq isExternal(S) = (S == "@external") .
 endfm
 
 mod MTP is
@@ -366,9 +504,9 @@ red metaParse(GRAMMAR, tokenize(" x - y + 2 "), '@Exp@) .
 ***red metaParse(GRAMMAR, tokenize(" def loco(x : bool , y : int128 ) \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" @external def loco(x : bool , y : int128 ) \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) \n"), anyType) .
-***red metaParse(GRAMMAR, tokenize(" @external @payable def --default--() "), anyType) .
-red metaParse(GRAMMAR, tokenize(" def --init--(_a : int128 , b : bool , c : decimal ) "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) -> bool : continue \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" @external @payable def loco(x : bool , y : int128) "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" def --init--(_a : int128 , b : bool , c : decimal ) "), anyType) .
+red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) -> ( bool : bool )  \n"), anyType) .
 
 ***declaracion de control
 ***red metaParse(GRAMMAR, tokenize(" pass "), anyType) .
@@ -398,8 +536,9 @@ red metaParse(GRAMMAR, tokenize(" log as(x , y , z , 3 , 4 ) "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" event mism : pass "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" x = ZERO_ADDRESS "), anyType) .
 *** tupla
-red metaParse(GRAMMAR, tokenize("  (a , b)  = foo( a , b ) "), anyType) .
-
+***red metaParse(GRAMMAR, tokenize("  (a , b)  = foo( a , b ) "), anyType) .
+red metaParse(GRAMMAR, tokenize("  a , b  = foo( a , b ) "), anyType) .
+*** @internal def loco( x : bool , y : decimal , y : decimal , y : decimal , y : decimal ) 
 
 set print attribute on .
 
