@@ -200,7 +200,7 @@ fmod VYPER-GRAMMAR is
 	*** pa los eventos
 	sort @DeclaracionIndexada@ @DeclaracionEvento@ @RegistrarEventos@ .
 	***subsort @Declaracion@ @DeclaracionLista@ < @ParamStruct@ .
-	subsort @Declaracion@ @DeclaracionLista@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @DcStruct@ @DeclaracionIndexada@  < @Declaraciones@ .
+	subsort @Declaracion@ @DeclaracionLista@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @DcStruct@ @DeclaracionIndexada@ @DeclaracionEvento@ @DeclaracionEvento@ < @Declaraciones@ .
 	***ops bool int128 uint256 decimal address bytes32 String Bytes struct HashMap : -> @Tipos@ [ctor] .
 	***subsort @Tipos@ @Token@ < @TiposToken@ .
 	***declaracion
@@ -232,15 +232,15 @@ fmod VYPER-GRAMMAR is
 	***Declarar Struct
 	***subsort @Declaracion@ @DeclaracionLista@ < @ParamStruct@ .
 	***op __ : @ParamStruct@ @ParamStruct@ -> @ParamStruct@ [ctor] .
-	***op __:_ : @Tipos@ @Token@  @ParamStruct@ -> @DcStruct@ [ctor] .
+	op struct_:_end : @Token@ @Declaraciones@ -> @DcStruct@ [ctor prec 22] .
 	***declaracion indexada para Eventos
 	op _: indexed(_) : @Token@ @Token@ -> @DeclaracionIndexada@ [ctor prec 22 ]. *** suelen ser las direcciones
+	*** eventos
+	op event _:_end : @Token@ @Declaraciones@ -> @DeclaracionEvento@ [ctor prec 22] .
+	op event _:_end : @Token@  @DeclaracionControl@ -> @DeclaracionEvento@ [ctor prec 22] . *** solo puede ser pass
 	***Lista de declaraciones
 	op dc : -> @Declaraciones@  [ctor ] . *** descomentar
 	op __ : @Declaraciones@ @Declaraciones@ -> @Declaraciones@  [ctor assoc id: dc prec 25 ] .
-	*** eventos
-	op event _:_ : @Token@ @Declaraciones@ -> @DeclaracionEvento@ [ctor] .
-	op event _:_ : @Token@  @DeclaracionControl@ -> @DeclaracionEvento@ [ctor] .
 	***Operaciones
 	sorts @Exp@ @Body@ @asig@ .
 	subsort @Token@ < @Exp@ .
@@ -321,8 +321,9 @@ fmod VYPER-GRAMMAR is
 	subsort @elseif@ < @ListElseif@ .
 	***op if_:_else:_ : @Exp@ @Body@ @Body@ -> @ifElse@ [ctor] .
 	op elif_:_ : @Exp@ @Body@ -> @elseif@ [ctor] .
-	op elifVacio : -> @ListElseif@ [ctor] .
-	op __ : @ListElseif@ @ListElseif@  -> @ListElseif@  [ctor id: elifVacio ] .
+	***op elifVacio : -> @ListElseif@ [ctor] .
+	op __ : @ListElseif@ @ListElseif@  -> @ListElseif@  [ctor] .
+	op if_:_ end : @Exp@ @Body@ -> @ifElse@ [ctor] .
 	op if_:_else:_ end : @Exp@ @Body@ @Body@ -> @ifElse@ [ctor] .
 	op if_:__else:_ end : @Exp@ @Body@ @ListElseif@ @Body@ -> @ifElse@ [ctor] . 
 	***Control flow

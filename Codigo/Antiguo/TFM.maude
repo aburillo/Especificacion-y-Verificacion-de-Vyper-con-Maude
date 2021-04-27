@@ -283,7 +283,7 @@ fmod VYPER-GRAMMAR is
 	op @nonreentrant(_) : @Token@ -> @DecoratorNR@ [ctor] .
 	***Parametros de una funcion pueden ser vacios
 	op PaV : -> @Parametros@ [ctor] .
-	op _,_ : @Parametros@  @Parametros@  -> @Parametros@  [ctor assoc id: PaV prec 25 ] .
+	op _,_ : @Parametros@ @Parametros@  -> @Parametros@  [ctor assoc id: PaV prec 25 ] .
 	*** valores de vuelta
 	***op ->_ : @Token@ -> @valorDevuelto@ [ctor] .
 	***op ->(_: _ ) : @Token@ -> @valorDevuelto@ [ctor] .  
@@ -322,7 +322,7 @@ fmod VYPER-GRAMMAR is
 	***op if_:_else:_ : @Exp@ @Body@ @Body@ -> @ifElse@ [ctor] .
 	op elif_:_ : @Exp@ @Body@ -> @elseif@ [ctor] .
 	op elifVacio : -> @ListElseif@ [ctor] .
-	op __ : @ListElseif@ @ListElseif@  -> @ListElseif@  [ctor] .
+	op __ : @ListElseif@ @ListElseif@  -> @ListElseif@  [ctor id: elifVacio ] .
 	op if_:_else:_ end : @Exp@ @Body@ @Body@ -> @ifElse@ [ctor] .
 	op if_:__else:_ end : @Exp@ @Body@ @ListElseif@ @Body@ -> @ifElse@ [ctor] . 
 	***Control flow
@@ -343,8 +343,8 @@ fmod VYPER-GRAMMAR is
 	op _ , _  = _() : @Token@ @Token@ @Token@ -> @asigTupla@ [ctor] .
 	*** registrar eventos
 	op log _(_) : @Token@ @Bubble@ -> @RegistrarEventos@ [ctor] .
-	subsort @For@ @DeclaracionControl@ @asig@ @asigTupla@ < @Body@ .
-	op __ : @Body@ @Body@ -> @Body@ [ctor assoc comm] .
+	subsort @For@ @DeclaracionControl@ @asig@ @asigTupla@  @RegistrarEventos@ < @Body@ .
+	op __ : @Body@ @Body@ -> @Body@ [ctor assoc ] .
 
  ***a=[1,2,3]
 endfm
