@@ -555,7 +555,7 @@ red metaParse(GRAMMAR, tokenize("struct Loco : sender : address value : uint256 
 --- red metaParse(GRAMMAR, tokenize(" 3 +! x "), anyType) .
 --- red metaParse(GRAMMAR, tokenize(" x + 4 + 3 "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" x - y "), anyType) .
---- red metaParse(GRAMMAR, tokenize(" x * y "), anyType) .
+*** red metaParse(GRAMMAR, tokenize(" x * y "),  '@Exp@ ) .
 --- red metaParse(GRAMMAR, tokenize(" x / y "), anyType) .
 --- red metaParse(GRAMMAR, tokenize(" x ** y "), anyType) .
 ***funciones
@@ -601,9 +601,14 @@ red metaParse(GRAMMAR, tokenize(" log as(x , y , z , 3 , 4 ) "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" x = ZERO_ADDRESS "), anyType) .
 *** tupla
 ***red metaParse(GRAMMAR, tokenize("  (a , b)  = foo( a , b ) "), anyType) .
-red metaParse(GRAMMAR, tokenize("  a , b  = foo( a , b ) "), anyType) .
+****red metaParse(GRAMMAR, tokenize("  a , b  = foo( a , b ) "), anyType) .
 *** @internal def loco( x : bool , y : decimal , y : decimal , y : decimal , y : decimal ) 
-
+***Accesos a memoria 
+red metaParse(GRAMMAR, tokenize(" voters[target] . delegate "), anyType) .
+red metaParse(GRAMMAR, tokenize(" voters[target]"), anyType) .
+red metaParse(GRAMMAR, tokenize(" voters[target][o]"), anyType) .
+red metaParse(GRAMMAR, tokenize(" voters . x"), anyType) .
+red metaParse(GRAMMAR, tokenize(" voters . x [target]"), anyType) .
 set print attribute on .
 
 erew run .
