@@ -104,16 +104,6 @@ var  Ct : Constant .
  ceq parse('bubble[TL]) =  TL' 
   if TL' := parseB(TL) [print "ecuacionBubbleiNDIVIDUAL" TL ] .
 
-*** PARSEA EXPRESSIONES
-*** parsea asignacion
- ceq parse('_=_[T1,T2]) = '_=._[T1', T2'] 
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) [print "asignacion:" T1' ] .
-***pasignacion de array
-   ceq parse('_`[_`]=_[T1,T2,T3]) = '_=._[T1', T2',T3'] 
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) /\
-        T3'  := parse (T3) [print "asignacion:" T3' ] .
  *** PARSEA DECLARACIONES
  ***Declaracion basica
  ceq parse('_:_[T1,T2]) =  '_:_[T1', T2'] 
@@ -174,6 +164,8 @@ var  Ct : Constant .
    ceq parse('struct_:_end[T1,TL]) =  'struct[T1', TL']  
     if  T1'  := parse (T1) /\
         TL'  := parse (TL) [print "ecuacionStruct:" T1 ] .
+
+
 ***Parte de eventos
 *** Parsea declaracion indexada
   ceq parse('_:`indexed`(_`)[T1,T2]) =  '_:_[T1', T2', upTerm("indexed")]  
@@ -187,6 +179,25 @@ var  Ct : Constant .
    ceq parse('__[TL]) =  'Lista[TL'] 
     if  TL'  := parseL (TL) [print "ecuacionDeclaracionesOBody:" TL ] .
 
+
+***PARSEA ACCESOS A MEMORIA 
+ ceq parse('_`[_`][T1,T2]) = '->[T1' , T2'] 
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) [print "Acceso:" T1' ] .
+
+
+
+
+*** PARSEA Asignaciones
+*** parsea asignacion
+ ceq parse('_=_[T1,T2]) = '_=._[T1', T2'] 
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) [print "asignacion:" T1' ] .
+***pasignacion de array
+   ceq parse('_`[_`]=_[T1,T2,T3]) = '_=._[T1', T2',T3'] 
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) /\
+        T3'  := parse (T3) [print "asignacion:" T3' ] .
 
 *** PARSEA FOR
 
@@ -330,8 +341,23 @@ var  Ct : Constant .
          TL'  := parse (TL) [print "ecuacionParseaFuncion:" TL' ] .
 
 *** PARSEANDO DECLARACION DE CONTROL
-   ceq parse('raise_[T1]) = 'Raise[ upTerm("Raise") , T1'] 
+   ***RAISE
+   ceq parse('raise_[T1]) = 'Raise[ T1'] 
    if  T1'  := parse (T1)  [print "Raise:" T1 ] .
+   ***Assert
+   ceq parse('assert_[T1]) = 'Assert[ T1'] 
+   if  T1'  := parse (T1)  [print "Assert:" T1 ] .
+   ceq parse('assert_`,_[T1,T2]) = 'Assert[ T1' , T2' ] 
+   if  T1'  := parse (T1) /\
+       T2'  := parse (T2) [print "AssertString:" T1' ] .
+   ***Return
+   ceq parse('return_[T1]) = 'Return[ T1'] 
+   if  T1'  := parse (T1)  [print "Return:" T1 ] .
+   ceq parse('return_`,_[T1,T2]) = 'Return[ T1' , T2' ] 
+      if  T1'  := parse (T1) /\
+          T2'  := parse (T2) [print "Return2Valores:" T1' ] .
+   ceq parse('return`[_`][TL]) = 'Return[ TL' ] 
+      if  TL'  := parse (TL)  [print "ReturnLista:" TL' ] .
 
 
 

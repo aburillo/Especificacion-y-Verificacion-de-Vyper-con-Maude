@@ -200,7 +200,7 @@ fmod VYPER-GRAMMAR is
 	*** pa los eventos
 	sort @DeclaracionIndexada@ @DeclaracionEvento@ @RegistrarEventos@ .
 	***subsort @Declaracion@ @DeclaracionLista@ < @ParamStruct@ .
-	subsort @Declaracion@ @DeclaracionLista@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @DcStruct@ @DeclaracionIndexada@ @DeclaracionEvento@ @DeclaracionEvento@ < @Declaraciones@ .
+	subsort @Declaracion@ @DeclaracionLista@ @DConstante@ @DcHashMap@ @DcStruct@ @DeclaracionIndexada@ @DeclaracionEvento@ @DeclaracionEvento@ < @Declaraciones@ .
 	***ops bool int128 uint256 decimal address bytes32 String Bytes struct HashMap : -> @Tipos@ [ctor] .
 	***subsort @Tipos@ @Token@ < @TiposToken@ .
 	***declaracion
@@ -214,9 +214,10 @@ fmod VYPER-GRAMMAR is
 	op _: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 22 ] . *** op _: public(_[_]) : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
 	***op _:_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
 	***op _: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
-	***Declarar dando una valor
-	op _:_ = _ : @Token@ @Token@ @Token@ -> @DeclaracionValor@ [ctor prec 22  ] . *** op _:_ = _ : @Token@ @Tipos@ @Token@ -> @DeclaracionValor@ [ctor] .
 
+	***Declarar dando una valor ! mas enfocado a dentro de una funcion
+	op _:_ = _ : @Token@ @Token@ @Token@ -> @DeclaracionValor@ [ctor] . *** op _:_ = _ : @Token@ @Tipos@ @Token@ -> @DeclaracionValor@ [ctor] .
+	op _:_ = _[_] : @Token@ @Token@ @Token@ @Token@ -> @DeclaracionValor@ [ctor] . ***NOT
 	***Declarar un valor constante
 	op _: constant( _ ) = _ : @Token@ @Token@ @Token@ -> @DConstante@ [ctor prec 22 ] . *** op _: constant( _ ) = _ : @Token@ @Tipos@ @Token@ -> @DConstante@ [ctor] .
 
@@ -239,11 +240,22 @@ fmod VYPER-GRAMMAR is
 	op event _:_end : @Token@ @Declaraciones@ -> @DeclaracionEvento@ [ctor prec 22] .
 	op event _:_end : @Token@  @DeclaracionControl@ -> @DeclaracionEvento@ [ctor prec 22] . *** solo puede ser pass
 	***Lista de declaraciones
-	op dc : -> @Declaraciones@  [ctor ] . *** descomentar
+	op dc : -> @Declaraciones@  [ctor ] .
 	op __ : @Declaraciones@ @Declaraciones@ -> @Declaraciones@  [ctor assoc id: dc prec 25 ] .
+	
+	***ACCESOS A MEMORIA
+	sort @Acceso@ @Referencia@ .
+	***subsort @Token@ @Acceso@ < @Referencia@ .
+	op _[_] : @Token@ @Token@ -> @Acceso@ [ctor] .
+	op _[_][_] : @Token@ @Token@ @Token@ -> @Acceso@ [ctor] .
+	op _._ :  @Token@ @Token@ -> @Acceso@ [ctor] .
+	op _[_]._ : @Token@ @Token@ @Token@ -> @Acceso@ [ctor] .
+	op _._[_] : @Token@ @Token@ @Token@ -> @Acceso@ [ctor] .
+	
+	
 	***Operaciones
 	sorts @Exp@ @Body@ @asig@ .
-	subsort @Token@ < @Exp@ .
+	subsort @Token@ @Acceso@ < @Exp@ .
 	***op _+_ : @Token@ @Token@ -> @asig@ [ctor comm assoc] . *** esto si funciona
 	***op _+_ : @Token@ @Token@ -> @Token@ [ctor comm assoc] . *** esto no funciona
 	op _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc prec 30] . ***esto no funciona
@@ -257,8 +269,15 @@ fmod VYPER-GRAMMAR is
 	op _<=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
 	op _==_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
 	op _!=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	
+	***Asignaciones
 	op _=_ : @Token@ @Exp@ -> @asig@ [ctor prec 30] .
+	op _+=_ : @Token@ @Exp@ -> @asig@ [ctor prec 30] . ***tambien uede ser que en el preparse cambio += o - por otra cosa
+	op _-=_ : @Token@ @Exp@ -> @asig@ [ctor prec 30] . 
 	op _[_] = _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
+	op _[_] += _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
+	op _[_] -= _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
+	op _._ = _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
 	***si que funciona si empre y cuanndo use los operadores dentro de otra funcion
 	*** LISTAS
 	--- sort @Lista@ .
@@ -344,7 +363,7 @@ fmod VYPER-GRAMMAR is
 	op _ , _  = _() : @Token@ @Token@ @Token@ -> @asigTupla@ [ctor] .
 	*** registrar eventos
 	op log _(_) : @Token@ @Bubble@ -> @RegistrarEventos@ [ctor] .
-	subsort @For@ @DeclaracionControl@ @asig@ @asigTupla@  @RegistrarEventos@ < @Body@ .
+	subsort @For@ @DeclaracionControl@ @asig@ @asigTupla@  @RegistrarEventos@ @DeclaracionValor@ < @Body@ .
 	op __ : @Body@ @Body@ -> @Body@ [ctor assoc ] .
 
  ***a=[1,2,3]

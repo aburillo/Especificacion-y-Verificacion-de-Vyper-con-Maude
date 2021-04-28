@@ -255,7 +255,7 @@ fmod VYPER-GRAMMAR is
 	
 	***Operaciones
 	sorts @Exp@ @Body@ @asig@ .
-	subsort @Token@ @Acceso@ < @Exp@ .
+	subsort @Token@ < @Exp@ .
 	***op _+_ : @Token@ @Token@ -> @asig@ [ctor comm assoc] . *** esto si funciona
 	***op _+_ : @Token@ @Token@ -> @Token@ [ctor comm assoc] . *** esto no funciona
 	op _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc prec 30] . ***esto no funciona
