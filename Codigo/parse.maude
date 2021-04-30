@@ -185,6 +185,10 @@ var  Ct : Constant .
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) [print "Acceso:" T1' ] .
 
+ ceq parse('_._[T1,T2]) = '->[T1' , T2'] 
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) [print "Acceso:" T1' ] .
+
 
 
 
@@ -192,12 +196,15 @@ var  Ct : Constant .
 *** parsea asignacion
  ceq parse('_=_[T1,T2]) = '_=._[T1', T2'] 
     if  T1'  := parse (T1) /\
-        T2'  := parse (T2) [print "asignacion:" T1' ] .
-***pasignacion de array
-   ceq parse('_`[_`]=_[T1,T2,T3]) = '_=._[T1', T2',T3'] 
+        T2'  := parse (T2) [print "asignacion=:" T1' ] .
+*** parsea +=
+   ceq parse('_+=_[T1,T2]) = '_+=._[T1', T2'] 
     if  T1'  := parse (T1) /\
-        T2'  := parse (T2) /\
-        T3'  := parse (T3) [print "asignacion:" T3' ] .
+        T2'  := parse (T2) [print "asignacion+=:" T1' ] .      
+*** parsea -=
+   ceq parse('_-=_[T1,T2]) = '_-=._[T1', T2'] 
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) [print "asignacion-=:" T1' ] . 
 
 *** PARSEA FOR
 
@@ -251,6 +258,7 @@ var  Ct : Constant .
 ***Parsea parametros
    ceq parse('_`,_[TL]) =  'Param[TL'] 
     if  TL' := parseL (TL) [print "ecuacionParametros" TL ] .
+    
 ---   ceq parse('token[T]) =  Q1 
 ---   if Q := downQid(T) /\
 ---      S := string(Q) /\
@@ -259,8 +267,11 @@ var  Ct : Constant .
 ---      Q1 := qid(S1) [print "ecuacionTipos" Q1 ] .
 
    *** Cabecera init
-   ceq parse('def_`(_`)['token[T],TL]) = 'init[ TL'] 
-   if Q := downQid(T) /\
+   ceq parse('_def_`(_`)[T1,'token[T],TL]) = 'init[ TL'] 
+   if T1' := parse (T1) /\
+      S1 := string(T1') /\
+      S1 == "@external.decoradorEI" /\ 
+      Q := downQid(T) /\
       S := string(Q) /\
       S == "__init__" /\
          TL'  := parse (TL) [print "ecuacionFuncionesInit:" S ] .
@@ -524,7 +535,7 @@ rl [newLine] :
 crl [parsing] :
     < example : EXAMPLE | read: Read, state: parsing, Attrs >
  => < example : EXAMPLE | read: "", Attrs >
-    write(stdout, example, "Parsed.\n")
+    write(stdout, example, "Parsed.\n") ***'@asig@
  if Read =/= "" /\
     QIL := tokenize(Read) /\
     {T, Ty} := metaParse(GRAMMAR, QIL, anyType) /\
@@ -591,7 +602,8 @@ red metaParse(GRAMMAR, tokenize("struct Loco : sender : address value : uint256 
 ***red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) \n"), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" @external @payable def loco(x : bool , y : int128) "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" def --init--(_a : int128 , b : bool , c : decimal ) "), anyType) .
-red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) -> ( bool : bool )  \n"), anyType) .
+***red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) -> ( bool : bool )  \n"), anyType) .
+red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) : if x : pass end end  \n"), anyType) .
 
 ***declaracion de control
 ***red metaParse(GRAMMAR, tokenize(" pass "), anyType) .
@@ -610,7 +622,7 @@ red metaParse(GRAMMAR, tokenize(" return [ 2 , 4 , 7 , x ]  "), anyType) . *** M
 ***red metaParse(GRAMMAR, tokenize(" for x in range(y, y + 2) ; continue end "), anyType) . *** mp funcionma
 red metaParse(GRAMMAR, tokenize(" for x in [ 2 , x ] ; continue end "), anyType) .
 ***if else
-***red metaParse(GRAMMAR, tokenize(" elif x == 2 : continue pass "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" elif x == 2 : continue pass "), anyType) .s
 ***red metaParse(GRAMMAR, tokenize(" if x == 2 : pass else: continue end "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" if x : pass else: continue end "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" if x : pass (elif x : pass) else: continue end "), anyType) .
@@ -631,11 +643,19 @@ red metaParse(GRAMMAR, tokenize(" log as(x , y , z , 3 , 4 ) "), anyType) .
 *** @internal def loco( x : bool , y : decimal , y : decimal , y : decimal , y : decimal ) 
 ***Accesos a memoria 
 ***Accesos a memoria
-red metaParse(GRAMMAR, tokenize(" voters[target] . delegate "), '@Exp@) .
-red metaParse(GRAMMAR, tokenize(" voters[target]"), '@Exp@) .
-red metaParse(GRAMMAR, tokenize(" voters[target][o]"), '@Exp@) .
-red metaParse(GRAMMAR, tokenize(" voters . x"), '@Exp@) .
-red metaParse(GRAMMAR, tokenize(" voters . x [target]"), '@Exp@) .
+--- red metaParse(GRAMMAR, tokenize(" voters[target] . delegate "), '@Exp@) .
+--- red metaParse(GRAMMAR, tokenize(" voters[target]"), '@Exp@) .
+--- red metaParse(GRAMMAR, tokenize(" voters[target][o]"), '@Exp@) .
+--- red metaParse(GRAMMAR, tokenize(" voters . x"), '@Exp@) .
+--- red metaParse(GRAMMAR, tokenize(" voters . x [target]"), '@Exp@) .
+***aAIGNACIONES
+--- red metaParse(GRAMMAR, tokenize(" X = Q"), anyType) .
+--- red metaParse(GRAMMAR, tokenize(" x[2] += x . loco "), anyType) .
+--- red metaParse(GRAMMAR, tokenize(" x -= 22 "), anyType) .
+red metaParse(GRAMMAR, tokenize(" assert x + 2 "), anyType) .
+red metaParse(GRAMMAR, tokenize(" beneficiary : public(address) @external def __init__(_beneficiary : address, _auction_start : uint256, _bidding_time : uint256) : beneficiary = _beneficiary auctionStart = _auction_start end @external @payable def bid(PaV) : assert block.timestamp end "), anyType) .
+***red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) : assert x if x : pass end if x : pass else: pass end end  \n"), anyType) .
+red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) : beneficiary = _beneficiary beneficiary = _beneficiary end \n"), anyType) .
 set print attribute on .
 
 erew run .

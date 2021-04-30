@@ -245,17 +245,19 @@ fmod VYPER-GRAMMAR is
 	
 	***ACCESOS A MEMORIA
 	sort @Acceso@ @Referencia@ .
+	subsort @Token@ < @Acceso@ .
 	***subsort @Token@ @Acceso@ < @Referencia@ .
-	op _[_] : @Token@ @Token@ -> @Acceso@ [ctor] .
-	op _[_][_] : @Token@ @Token@ @Token@ -> @Acceso@ [ctor] .
-	op _._ :  @Token@ @Token@ -> @Acceso@ [ctor] .
-	op _[_]._ : @Token@ @Token@ @Token@ -> @Acceso@ [ctor] .
-	op _._[_] : @Token@ @Token@ @Token@ -> @Acceso@ [ctor] .
+	op _[_] : @Acceso@ @Token@ -> @Acceso@ [ctor prec 14] .
+***	op _[_][_] : @Token@ @Token@ @Token@ -> @Acceso@ [ctor prec 10] .
+	op _._ :  @Acceso@ @Acceso@ -> @Acceso@ [ctor prec 15] .
+***	op _[_]._ : @Token@ @Token@ @Token@ -> @Acceso@ [ctor prec 10] .
+***	op _._[_] : @Token@ @Token@ @Token@ -> @Acceso@ [ctor prec 10] .
+
 	
 	
 	***Operaciones
 	sorts @Exp@ @Body@ @asig@ .
-	subsort @Token@ < @Exp@ .
+	subsort @Acceso@ < @Exp@ .
 	***op _+_ : @Token@ @Token@ -> @asig@ [ctor comm assoc] . *** esto si funciona
 	***op _+_ : @Token@ @Token@ -> @Token@ [ctor comm assoc] . *** esto no funciona
 	op _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc prec 30] . ***esto no funciona
@@ -271,13 +273,16 @@ fmod VYPER-GRAMMAR is
 	op _!=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
 	
 	***Asignaciones
-	op _=_ : @Token@ @Exp@ -> @asig@ [ctor prec 30] .
-	op _+=_ : @Token@ @Exp@ -> @asig@ [ctor prec 30] . ***tambien uede ser que en el preparse cambio += o - por otra cosa
-	op _-=_ : @Token@ @Exp@ -> @asig@ [ctor prec 30] . 
-	op _[_] = _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
-	op _[_] += _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
-	op _[_] -= _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
-	op _._ = _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
+	op _=_ : @Acceso@ @Exp@ -> @asig@ [ctor] .
+	op _+=_ : @Acceso@ @Exp@ -> @asig@ [ctor] . ***tambien uede ser que en el preparse cambio += o - por otra cosa
+	op _-=_ : @Acceso@ @Exp@ -> @asig@ [ctor] .
+	--- op _=_ : @Token@ @Exp@ -> @asig@ [ctor prec 30] .
+	--- op _+=_ : @Token@ @Exp@ -> @asig@ [ctor prec 30] . ***tambien uede ser que en el preparse cambio += o - por otra cosa
+	--- op _-=_ : @Token@ @Exp@ -> @asig@ [ctor prec 30] . 
+	--- op _[_] = _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
+	--- op _[_] += _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
+	--- op _[_] -= _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
+	--- op _._ = _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
 	***si que funciona si empre y cuanndo use los operadores dentro de otra funcion
 	*** LISTAS
 	--- sort @Lista@ .

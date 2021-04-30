@@ -216,8 +216,8 @@ fmod VYPER-GRAMMAR is
 	***op _: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
 
 	***Declarar dando una valor ! mas enfocado a dentro de una funcion
-	op _:_ = _ : @Token@ @Token@ @Token@ -> @DeclaracionValor@ [ctor] . *** op _:_ = _ : @Token@ @Tipos@ @Token@ -> @DeclaracionValor@ [ctor] .
-	op _:_ = _[_] : @Token@ @Token@ @Token@ @Token@ -> @DeclaracionValor@ [ctor] . ***NOT
+	op _:_ = _ : @Token@ @Token@ @Exp@ -> @DeclaracionValor@ [ctor] . *** op _:_ = _ : @Token@ @Tipos@ @Token@ -> @DeclaracionValor@ [ctor] .
+	***op _:_ = _[_] : @Token@ @Token@ @Exp@ @Token@ -> @DeclaracionValor@ [ctor] . ***NOT
 	***Declarar un valor constante
 	op _: constant( _ ) = _ : @Token@ @Token@ @Token@ -> @DConstante@ [ctor prec 22 ] . *** op _: constant( _ ) = _ : @Token@ @Tipos@ @Token@ -> @DConstante@ [ctor] .
 
@@ -247,7 +247,7 @@ fmod VYPER-GRAMMAR is
 	sort @Acceso@ @Referencia@ .
 	subsort @Token@ < @Acceso@ .
 	***subsort @Token@ @Acceso@ < @Referencia@ .
-	op _[_] : @Acceso@ @Token@ -> @Acceso@ [ctor prec 14] .
+	op _[_] : @Acceso@ @Exp@ -> @Acceso@ [ctor prec 14] .
 ***	op _[_][_] : @Token@ @Token@ @Token@ -> @Acceso@ [ctor prec 10] .
 	op _._ :  @Acceso@ @Acceso@ -> @Acceso@ [ctor prec 15] .
 ***	op _[_]._ : @Token@ @Token@ @Token@ -> @Acceso@ [ctor prec 10] .
@@ -299,8 +299,9 @@ fmod VYPER-GRAMMAR is
 	op self._() : @Token@ -> @self@ [ctor] .
 
 	***Funciones
-	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ @valorDevuelto@ @Default@ @Init@ @Funcion@ .
+	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ @valorDevuelto@ @Default@ @Init@ @Funcion@ @Funciones@ .
 	subsort @Declaracion@ < @Parametros@ .
+	subsort @Funcion@ < @Funciones@ .
 	***Decoradores quito los decoradores y los trato en el parse
 	***ops @external @internal : -> @DecoratorEI@  [ctor] .
 	***ops @pure @view @payable @nonpayables : -> @DecoratorMut@ [ctor] .
@@ -333,6 +334,7 @@ fmod VYPER-GRAMMAR is
 
 	*** declaracion de funciones 
 	op _:_ end : @Cabecera@ @Body@ -> @Funcion@ [ctor] . *** ejemplo end
+	op __ : @Funciones@ @Funciones@ -> @Funciones@ [ctor assoc assoc prec 75 ] .
 	*** for
 	sort @For@ .
 	op bv : -> @Body@ [ctor] . ***prueba
@@ -368,8 +370,13 @@ fmod VYPER-GRAMMAR is
 	op _ , _  = _() : @Token@ @Token@ @Token@ -> @asigTupla@ [ctor] .
 	*** registrar eventos
 	op log _(_) : @Token@ @Bubble@ -> @RegistrarEventos@ [ctor] .
-	subsort @For@ @DeclaracionControl@ @asig@ @asigTupla@  @RegistrarEventos@ @DeclaracionValor@ < @Body@ .
-	op __ : @Body@ @Body@ -> @Body@ [ctor assoc ] .
+	subsort @For@ @DeclaracionControl@ @asig@ @asigTupla@ @RegistrarEventos@ @DeclaracionValor@ @ifElse@ @DeclaracionValor@ < @Body@ .
+	op __ : @Body@ @Body@ -> @Body@ [ctor assoc prec 70 ] .
+
+	***Crea un contrato
+	sort @Contrato@ .
+	op __ : @Declaraciones@ @Funciones@ -> @Contrato@ [ctor  prec 80].
+
 
  ***a=[1,2,3]
 endfm
