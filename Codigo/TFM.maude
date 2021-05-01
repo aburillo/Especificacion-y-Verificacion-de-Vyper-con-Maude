@@ -299,7 +299,7 @@ fmod VYPER-GRAMMAR is
 	op self._() : @Token@ -> @self@ [ctor] .
 
 	***Funciones
-	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ @valorDevuelto@ @Default@ @Init@ @Funcion@ @Funciones@ .
+	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ @valorDevuelto@ @Default@ @Init@ @Funcion@ @Funciones@ @Call@ .
 	subsort @Declaracion@ < @Parametros@ .
 	subsort @Funcion@ < @Funciones@ .
 	***Decoradores quito los decoradores y los trato en el parse
@@ -325,6 +325,9 @@ fmod VYPER-GRAMMAR is
 	op def _(_)-> (_:_) : @Token@ @Parametros@ @Token@ @Token@  -> @Cabecera@ [ctor] .
 	op _ def _(_)-> (_:_) : @Token@ @Token@ @Parametros@ @Token@ @Token@ -> @Cabecera@ [ctor] .
 	op _ _ def _(_)-> (_:_) : @Token@ @Token@ @Token@ @Parametros@ @Token@ @Token@ -> @Cabecera@ [ctor] .
+
+	***LLamada a una funcion
+	op _(_) : @Token@ @Bubble@ -> @Call@ [ctor] .
 
 	***funcion default
 	*** esto comprobarlo en el parse y tener solo las funciones de arriba
@@ -370,7 +373,7 @@ fmod VYPER-GRAMMAR is
 	op _ , _  = _() : @Token@ @Token@ @Token@ -> @asigTupla@ [ctor] .
 	*** registrar eventos
 	op log _(_) : @Token@ @Bubble@ -> @RegistrarEventos@ [ctor] .
-	subsort @For@ @DeclaracionControl@ @asig@ @asigTupla@ @RegistrarEventos@ @DeclaracionValor@ @ifElse@ @DeclaracionValor@ < @Body@ .
+	subsort @For@ @DeclaracionControl@ @asig@ @asigTupla@ @RegistrarEventos@ @DeclaracionValor@ @ifElse@ @DeclaracionValor@ @Call@ < @Body@ .
 	op __ : @Body@ @Body@ -> @Body@ [ctor assoc prec 70 ] .
 
 	***Crea un contrato

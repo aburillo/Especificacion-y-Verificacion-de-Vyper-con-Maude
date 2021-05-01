@@ -22,3 +22,16 @@ def bid(PaV) :
     highestBidder = msg.sender
     highestBid = msg.value
 end
+@external
+def withdraw(PaV) :
+    pending_amount : uint256 = pendingReturns[msg.sender]
+    pendingReturns[msg.sender] = 0
+    send(msg.sender, pending_amount)
+end
+@external
+def endAuction(PaV) :
+    assert block.timestamp
+    assert ended
+    ended = True
+    send(beneficiary, highestBid)
+end
