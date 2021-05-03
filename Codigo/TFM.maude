@@ -359,8 +359,8 @@ fmod VYPER-GRAMMAR is
 	sort @DeclaracionControl@ .
 	ops break continue pass : -> @DeclaracionControl@ [ctor] .
 	op raise _ : @Token@ -> @DeclaracionControl@ [ctor] . ***desencadena una expecion y revierte la llamada
-	op assert _ : @Exp@ -> @DeclaracionControl@ [ctor] .
-	op assert _,_ : @Exp@ @Token@ -> @DeclaracionControl@ [ctor] . *** si es falso se revierte la transaccion
+	op assert _ : @Exp@ -> @DeclaracionControl@ [ctor prec 65] .
+	op assert _,_ : @Exp@ @Token@ -> @DeclaracionControl@ [ctor prec 65] . *** si es falso se revierte la transaccion
 	op return _ : @Exp@ -> @DeclaracionControl@ [ctor] . 
 	op return _,_ : @Exp@ @Exp@ -> @DeclaracionControl@ [ctor] . ***se puede devolver una tupla
 	op return [_] : @Bubble@ -> @DeclaracionControl@ [ctor] .
