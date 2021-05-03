@@ -350,14 +350,18 @@ var  Ct : Constant .
    ceq parse('_:_end[T1,TL]) = 'fun[T1' , TL'] 
    if  T1'  := parse (T1) /\
          TL'  := parse (TL) [print "ecuacionParseaFuncion:" TL' ] .
+   ***LLAMADA
+   ceq parse('_`(_`)[T1,TL]) = 'call[T1' , TL'] 
+   if  T1'  := parse (T1) /\
+       TL'  := parse (TL) [print "ecuacionParseaLLamada:" TL' ] .
 
 *** PARSEANDO DECLARACION DE CONTROL
    ***RAISE
    ceq parse('raise_[T1]) = 'Raise[ T1'] 
    if  T1'  := parse (T1)  [print "Raise:" T1 ] .
    ***Assert
-   ceq parse('assert_[T1]) = 'Assert[ T1'] 
-   if  T1'  := parse (T1)  [print "Assert:" T1 ] .
+   ceq parse('assert_[TL]) = 'Assert[ TL'] 
+   if  TL'  := parse (TL)  [print "Assert:" TL' ] .
    ceq parse('assert_`,_[T1,T2]) = 'Assert[ T1' , T2' ] 
    if  T1'  := parse (T1) /\
        T2'  := parse (T2) [print "AssertString:" T1' ] .

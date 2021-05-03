@@ -660,6 +660,7 @@ red metaParse(GRAMMAR, tokenize(" assert x + 2 "), anyType) .
 red metaParse(GRAMMAR, tokenize(" beneficiary : public(address) @external def __init__(_beneficiary : address, _auction_start : uint256, _bidding_time : uint256) : beneficiary = _beneficiary auctionStart = _auction_start end @external @payable def bid(PaV) : assert block.timestamp end "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) : assert x if x : pass end if x : pass else: pass end end  \n"), anyType) .
 red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) : beneficiary = _beneficiary beneficiary = _beneficiary end \n"), anyType) .
+red metaParse(GRAMMAR, tokenize(" bids : HashMap [address, Bid[128] ]"), anyType) .
 set print attribute on .
 
 erew run .
