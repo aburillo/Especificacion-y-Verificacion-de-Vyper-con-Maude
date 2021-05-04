@@ -204,7 +204,11 @@ var  Ct : Constant .
 *** parsea -=
    ceq parse('_-=_[T1,T2]) = '_-=._[T1', T2'] 
     if  T1'  := parse (T1) /\
-        T2'  := parse (T2) [print "asignacion-=:" T1' ] . 
+        T2'  := parse (T2) [print "asignacion-=:" T1' ] .
+    ceq parse('_=_`(`{_`}`)[T1,T2,TL]) = '_=._[T1', T2', TL'] 
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) /\
+        TL'  := parse (TL) [print "asignacionStruC:" TL' ] . 
 
 *** PARSEA FOR
 
@@ -235,6 +239,10 @@ var  Ct : Constant .
 ***PARSEA IF-ELSE
 *** if sencillo
    ceq parse('if_:_end[T1,TL]) =  'If_Else[T1', TL'] 
+   if  T1'  := parse (T1) /\
+       TL'  := parseL (TL)  [print "ecuacionIFELSE sin else:" TL ] .
+*** if sencillo parentesis
+   ceq parse('if`(_`):_end[T1,TL]) =  'If_Else[T1', TL'] 
    if  T1'  := parse (T1) /\
        TL'  := parseL (TL)  [print "ecuacionIFELSE sin else:" TL ] .
 *** if else sin elseif
@@ -661,6 +669,9 @@ red metaParse(GRAMMAR, tokenize(" beneficiary : public(address) @external def __
 ***red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) : assert x if x : pass end if x : pass else: pass end end  \n"), anyType) .
 red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) : beneficiary = _beneficiary beneficiary = _beneficiary end \n"), anyType) .
 red metaParse(GRAMMAR, tokenize(" bids : HashMap [address, Bid[128] ]"), anyType) .
+red metaParse(GRAMMAR, tokenize(" bids[msg.sender][numBids] = Bid({ blindedBid : _blindedBid , deposit : msg.value })"), anyType) .
+red metaParse(GRAMMAR, tokenize(" def reveal(_numBids : int128, _values : uint256 [128], _fakes : bool [128], _secrets : bytes32 [128]) "), anyType) .
+red metaParse(GRAMMAR, tokenize("if (placeBid(msg.sender, value)) : refund -= value end"), anyType) .
 set print attribute on .
 
 erew run .

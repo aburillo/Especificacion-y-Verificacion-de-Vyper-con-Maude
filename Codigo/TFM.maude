@@ -209,7 +209,7 @@ fmod VYPER-GRAMMAR is
 	****op _:_ : @Token@ @Token@ -> @Declaracion@ [ctor] .
 	op _: public( _ ) : @Token@ @Token@ -> @Declaracion@ [ctor prec 22 ] . *** ! al ser declaracion se podria meter en los parametros de una fun
 
-	***declarar Lista
+	***declarar Lista quito declaracionLisra
 	op _:_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 22] . *** op _:_[_] : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
 	op _: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 22 ] . *** op _: public(_[_]) : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
 	***op _:_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
@@ -271,11 +271,15 @@ fmod VYPER-GRAMMAR is
 	op _<=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
 	op _==_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
 	op _!=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op not_ : @Exp@ -> @Exp@ [ctor prec 30] .
+	op _or_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op _and_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
 	
 	***Asignaciones
 	op _=_ : @Acceso@ @Exp@ -> @asig@ [ctor] .
 	op _+=_ : @Acceso@ @Exp@ -> @asig@ [ctor] . ***tambien uede ser que en el preparse cambio += o - por otra cosa
 	op _-=_ : @Acceso@ @Exp@ -> @asig@ [ctor] .
+	op _=_({_}) : @Acceso@ @Token@ @Parametros@ -> @asig@ [ctor] .
 	--- op _=_ : @Token@ @Exp@ -> @asig@ [ctor prec 30] .
 	--- op _+=_ : @Token@ @Exp@ -> @asig@ [ctor prec 30] . ***tambien uede ser que en el preparse cambio += o - por otra cosa
 	--- op _-=_ : @Token@ @Exp@ -> @asig@ [ctor prec 30] . 
@@ -300,7 +304,7 @@ fmod VYPER-GRAMMAR is
 
 	***Funciones
 	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ @valorDevuelto@ @Default@ @Init@ @Funcion@ @Funciones@ @Call@ .
-	subsort @Declaracion@ < @Parametros@ .
+	subsort @Declaracion@ @DeclaracionLista@ < @Parametros@ .
 	subsort @Funcion@ < @Funciones@ .
 	***Decoradores quito los decoradores y los trato en el parse
 	***ops @external @internal : -> @DecoratorEI@  [ctor] .
@@ -308,7 +312,7 @@ fmod VYPER-GRAMMAR is
 	op @nonreentrant(_) : @Token@ -> @DecoratorNR@ [ctor] .
 	***Parametros de una funcion pueden ser vacios
 	op PaV : -> @Parametros@ [ctor] .
-	op _,_ : @Parametros@ @Parametros@  -> @Parametros@  [ctor assoc id: PaV prec 25 ] .
+	op _,_ : @Parametros@ @Parametros@  -> @Parametros@  [ctor assoc id: PaV prec 25 ] . ***
 	*** valores de vuelta
 	***op ->_ : @Token@ -> @valorDevuelto@ [ctor] .
 	***op ->(_: _ ) : @Token@ -> @valorDevuelto@ [ctor] .  
@@ -341,10 +345,10 @@ fmod VYPER-GRAMMAR is
 	*** for
 	sort @For@ .
 	op bv : -> @Body@ [ctor] . ***prueba
-	op for _ in range(_);_ end : @Token@ @Exp@ @Body@ -> @For@ [ctor] .
-	op for _ in range(_,_);_ end : @Token@ @Exp@ @Exp@ @Body@ -> @For@ [ctor] .
-	op for _ in _;_ end : @Token@ @Token@ @Body@ -> @For@ [ctor] .
-	op for _ in [_];_ end : @Token@ @Bubble@ @Body@ -> @For@ [ctor] .
+	op for _ in range(_):_ end : @Token@ @Exp@ @Body@ -> @For@ [ctor] .
+	op for _ in range(_,_):_ end : @Token@ @Exp@ @Exp@ @Body@ -> @For@ [ctor] .
+	op for _ in _:_ end : @Token@ @Token@ @Body@ -> @For@ [ctor] .
+	op for _ in [_]:_ end : @Token@ @Bubble@ @Body@ -> @For@ [ctor] .
 	*** if else
 	sort @ifElse@ @elseif@ @ListElseif@ .
 	subsort @elseif@ < @ListElseif@ .
@@ -355,6 +359,8 @@ fmod VYPER-GRAMMAR is
 	op if_:_ end : @Exp@ @Body@ -> @ifElse@ [ctor] .
 	op if_:_else:_ end : @Exp@ @Body@ @Body@ -> @ifElse@ [ctor] .
 	op if_:__else:_ end : @Exp@ @Body@ @ListElseif@ @Body@ -> @ifElse@ [ctor] . 
+	*** if parentesis
+	op if(_):_ end : @Exp@ @Body@ -> @ifElse@ [ctor] .
 	***Control flow
 	sort @DeclaracionControl@ .
 	ops break continue pass : -> @DeclaracionControl@ [ctor] .

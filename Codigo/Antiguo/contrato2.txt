@@ -1,0 +1,23 @@
+struct Bid :
+  blindedBid : bytes32
+  deposit : uint256
+
+MAX_BIDS : constant(int128) = 128
+
+event AuctionEnded :
+    highestBidder : address
+    highestBid : uint256
+
+beneficiary : public(address)
+biddingEnd : public(uint256)
+revealEnd : public(uint256)
+
+ended : public(bool)
+
+highestBid : public(uint256)
+highestBidder : public(address)
+
+bids : HashMap[address, Bid[128]]
+bidCounts : HashMap[address, int128]
+
+pendingReturns : HashMap[address, uint256]
