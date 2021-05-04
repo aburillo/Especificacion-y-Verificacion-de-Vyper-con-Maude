@@ -1,1 +1,73 @@
-x : bool 
+@external
+def reveal(_numBids : int128, _values : uint256[128], _fakes : bool[128], _secrets : bytes32[128]) :
+    assert block.timestamp > biddingEnd
+
+    assert block.timestamp < revealEnd
+
+    assert _numBids == bidCounts[msg.sender]
+
+    refund : uint256 = 0
+    for i in range(MAX_BIDS) :
+        if (i >= _numBids) :
+            break
+        end
+
+        bidToCheck : Bid = (bids[msg.sender])[i]
+
+        value : uint256 = _values[i]
+        fake : bool = _fakes[i]
+        secret : bytes32 = _secrets[i]
+        blindedBid : bytes32 = keccak256(concat(
+            convert(value, bytes32),
+            convert(fake, bytes32),
+            secret
+        ))
+
+        if (blindedBid != bidToCheck.blindedBid) :
+            assert 1 == 0
+            continue
+        end
+
+        refund += bidToCheck.deposit
+        if (not fake and bidToCheck.deposit >= value) :
+            if (placeBid(msg.sender, value)) :
+                refund -= value
+            end
+        end
+        zeroBytes32 : bytes32 = EMPTY_BYTES32
+        bidToCheck.blindedBid = zeroBytes32
+    end
+    if (refund != 0) :
+        send(msg.sender, refund)
+    end
+end
+
+@external
+def reveal(PaV) :
+    assert block.timestamp > biddingEnd
+
+    assert block.timestamp < revealEnd
+
+    assert _numBids == bidCounts [msg.sender]
+    refund : uint256 = 0 
+    for i in range(MAX_BIDS) :
+    if (i >= _numBids) :
+        break
+    end
+
+    bidToCheck : Bid = bids[msg.sender][i]
+
+    value : uint256 = _values[i]
+    fake : bool = _fakes[i]
+    secret : bytes32 = _secrets[i]
+
+    if (blindedBid != bidToCheck.blindedBid) :
+        assert 1 == 0
+        continue
+    end
+    refund += bidToCheck.deposit
+    if (placeBid(msg.sender, value)) :
+        refund -= value
+    end
+    end
+end
