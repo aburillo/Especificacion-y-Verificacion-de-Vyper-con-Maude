@@ -210,7 +210,7 @@ fmod VYPER-GRAMMAR is
 	op _: public( _ ) : @Token@ @Token@ -> @Declaracion@ [ctor prec 22 ] . *** ! al ser declaracion se podria meter en los parametros de una fun
 
 	***declarar Lista quito declaracionLisra
-	op _:_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 22] . *** op _:_[_] : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
+	op _:_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 21] . *** op _:_[_] : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
 	op _: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 22 ] . *** op _: public(_[_]) : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
 	***op _:_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
 	***op _: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
@@ -242,7 +242,7 @@ fmod VYPER-GRAMMAR is
 	***Lista de declaraciones
 	op dc : -> @Declaraciones@  [ctor ] .
 	op __ : @Declaraciones@ @Declaraciones@ -> @Declaraciones@  [ctor assoc id: dc prec 25 ] .
-	
+
 	***ACCESOS A MEMORIA
 	sort @Acceso@ @Referencia@ .
 	subsort @Token@ < @Acceso@ .
@@ -253,8 +253,8 @@ fmod VYPER-GRAMMAR is
 ***	op _[_]._ : @Token@ @Token@ @Token@ -> @Acceso@ [ctor prec 10] .
 ***	op _._[_] : @Token@ @Token@ @Token@ -> @Acceso@ [ctor prec 10] .
 
-	
-	
+
+
 	***Operaciones
 	sorts @Exp@ @Body@ @asig@ .
 	subsort @Acceso@ < @Exp@ .
@@ -274,7 +274,15 @@ fmod VYPER-GRAMMAR is
 	op not_ : @Exp@ -> @Exp@ [ctor prec 30] .
 	op _or_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
 	op _and_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	
+
+    op __ : @Token@ @Arg@ -> @Exp@ [ctor prec 20] .
+
+	sort @Arg@ @ArgList@ .
+	subsort @Exp@ < @ArgList@ .
+	op `(`) : -> @Arg@ [ctor] .
+	op `(_`) : @ArgList@ -> @Arg@ [ctor] .
+	op _,_ : @ArgList@ @ArgList@ -> @ArgList@ [ctor assoc prec 60] .
+
 	***Asignaciones
 	op _=_ : @Acceso@ @Exp@ -> @asig@ [ctor] .
 	op _+=_ : @Acceso@ @Exp@ -> @asig@ [ctor] . ***tambien uede ser que en el preparse cambio += o - por otra cosa
@@ -282,7 +290,7 @@ fmod VYPER-GRAMMAR is
 	op _=_({_}) : @Acceso@ @Token@ @Parametros@ -> @asig@ [ctor] .
 	--- op _=_ : @Token@ @Exp@ -> @asig@ [ctor prec 30] .
 	--- op _+=_ : @Token@ @Exp@ -> @asig@ [ctor prec 30] . ***tambien uede ser que en el preparse cambio += o - por otra cosa
-	--- op _-=_ : @Token@ @Exp@ -> @asig@ [ctor prec 30] . 
+	--- op _-=_ : @Token@ @Exp@ -> @asig@ [ctor prec 30] .
 	--- op _[_] = _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
 	--- op _[_] += _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
 	--- op _[_] -= _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
@@ -303,7 +311,7 @@ fmod VYPER-GRAMMAR is
 	op self._() : @Token@ -> @self@ [ctor] .
 
 	***Funciones
-	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ @valorDevuelto@ @Default@ @Init@ @Funcion@ @Funciones@ @Call@ .
+	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ @valorDevuelto@ @Default@ @Init@ @Funcion@ @Funciones@ .
 	subsort @Declaracion@ @DeclaracionLista@ < @Parametros@ .
 	subsort @Funcion@ < @Funciones@ .
 	***Decoradores quito los decoradores y los trato en el parse
@@ -315,7 +323,7 @@ fmod VYPER-GRAMMAR is
 	op _,_ : @Parametros@ @Parametros@  -> @Parametros@  [ctor assoc id: PaV prec 25 ] . ***
 	*** valores de vuelta
 	***op ->_ : @Token@ -> @valorDevuelto@ [ctor] .
-	***op ->(_: _ ) : @Token@ -> @valorDevuelto@ [ctor] .  
+	***op ->(_: _ ) : @Token@ -> @valorDevuelto@ [ctor] .
 	*** Declaracion de funciones
 	op def _(_) : @Token@ @Parametros@ -> @Cabecera@ [ctor] .
 	op _ def _(_) : @Token@ @Token@ @Parametros@ -> @Cabecera@ [ctor] .
@@ -330,18 +338,15 @@ fmod VYPER-GRAMMAR is
 	op _ def _(_)-> (_:_) : @Token@ @Token@ @Parametros@ @Token@ @Token@ -> @Cabecera@ [ctor] .
 	op _ _ def _(_)-> (_:_) : @Token@ @Token@ @Token@ @Parametros@ @Token@ @Token@ -> @Cabecera@ [ctor] .
 
-	***LLamada a una funcion
-	op _(_) : @Token@ @Bubble@ -> @Call@ [ctor] .
-
 	***funcion default
 	*** esto comprobarlo en el parse y tener solo las funciones de arriba
 	***op _ _ def --default--() : @DecoratorEI@ @DecoratorMut@ -> @Default@ [ctor] . *** soilo pude ser external payable
 	***funcion init
 	***op def --init--(_) : @Parametros@ -> @Init@ [ctor ] . *** me da ambiguo con funciones
 
-	*** declaracion de funciones 
+	*** declaracion de funciones
 	op _:_ end : @Cabecera@ @Body@ -> @Funcion@ [ctor] . *** ejemplo end
-	op __ : @Funciones@ @Funciones@ -> @Funciones@ [ctor assoc assoc prec 75 ] .
+	op __ : @Funciones@ @Funciones@ -> @Funciones@ [ctor assoc prec 75 ] .
 	*** for
 	sort @For@ .
 	op bv : -> @Body@ [ctor] . ***prueba
@@ -358,7 +363,7 @@ fmod VYPER-GRAMMAR is
 	op __ : @ListElseif@ @ListElseif@  -> @ListElseif@  [ctor] .
 	op if_:_ end : @Exp@ @Body@ -> @ifElse@ [ctor] .
 	op if_:_else:_ end : @Exp@ @Body@ @Body@ -> @ifElse@ [ctor] .
-	op if_:__else:_ end : @Exp@ @Body@ @ListElseif@ @Body@ -> @ifElse@ [ctor] . 
+	op if_:__else:_ end : @Exp@ @Body@ @ListElseif@ @Body@ -> @ifElse@ [ctor] .
 	*** if parentesis
 	op if(_):_ end : @Exp@ @Body@ -> @ifElse@ [ctor] .
 	***Control flow
@@ -367,7 +372,7 @@ fmod VYPER-GRAMMAR is
 	op raise _ : @Token@ -> @DeclaracionControl@ [ctor] . ***desencadena una expecion y revierte la llamada
 	op assert _ : @Exp@ -> @DeclaracionControl@ [ctor prec 65] .
 	op assert _,_ : @Exp@ @Token@ -> @DeclaracionControl@ [ctor prec 65] . *** si es falso se revierte la transaccion
-	op return _ : @Exp@ -> @DeclaracionControl@ [ctor] . 
+	op return _ : @Exp@ -> @DeclaracionControl@ [ctor] .
 	op return _,_ : @Exp@ @Exp@ -> @DeclaracionControl@ [ctor] . ***se puede devolver una tupla
 	op return [_] : @Bubble@ -> @DeclaracionControl@ [ctor] .
 
@@ -379,7 +384,7 @@ fmod VYPER-GRAMMAR is
 	op _ , _  = _() : @Token@ @Token@ @Token@ -> @asigTupla@ [ctor] .
 	*** registrar eventos
 	op log _(_) : @Token@ @Bubble@ -> @RegistrarEventos@ [ctor] .
-	subsort @For@ @DeclaracionControl@ @asig@ @asigTupla@ @RegistrarEventos@ @DeclaracionValor@ @ifElse@ @DeclaracionValor@ @Call@ < @Body@ .
+	subsort @For@ @DeclaracionControl@ @asig@ @asigTupla@ @RegistrarEventos@ @DeclaracionValor@ @ifElse@ @DeclaracionValor@ < @Body@ .
 	op __ : @Body@ @Body@ -> @Body@ [ctor assoc prec 70 ] .
 
 	***Crea un contrato

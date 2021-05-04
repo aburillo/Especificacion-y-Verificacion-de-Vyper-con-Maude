@@ -1,13 +1,12 @@
 struct Bid :
   blindedBid : bytes32
   deposit : uint256
-
+end
 MAX_BIDS : constant(int128) = 128
-
 event AuctionEnded :
     highestBidder : address
     highestBid : uint256
-
+end
 beneficiary : public(address)
 biddingEnd : public(uint256)
 revealEnd : public(uint256)
@@ -16,8 +15,44 @@ ended : public(bool)
 
 highestBid : public(uint256)
 highestBidder : public(address)
+@external
+def __init__(_beneficiary : address, _biddingTime : uint256, _revealTime : uint256) :
+    beneficiary = _beneficiary
+    biddingEnd = block.timestamp + _biddingTime
+    revealEnd = biddingEnd + _revealTime
+end
+@external
+@payable
+def bid(_blindedBid : bytes32) :
+    assert block.timestamp < biddingEnd
+    numBids : int128 = bidCounts[msg.sender]
+    assert numBids < MAX_BIDS
 
-bids : HashMap[address, Bid[128]]
-bidCounts : HashMap[address, int128]
+    bids[msg.sender][numBids] = Bid({
+        blindedBid : _blindedBid ,
+        deposit : msg.value
+        })
+    bidCounts[msg.sender] += 1
+end
+@internal
+def placeBid(bidder : address, _value : uint256) -> bool :
+    if (_value <= highestBid) :
+        return False
+        end
+    if (highestBidder != ZERO_ADDRESS) :
+        pendingReturns[highestBidder] += highestBid
+    end
+    highestBid = _value
+    highestBidder = bidder
 
-pendingReturns : HashMap[address, uint256]
+    return True
+end
+@external
+def withdraw(PaV) :
+    pendingAmount : uint256 = pendingReturns[msg.sender]
+    if (pendingAmount > 0) :
+        pendingReturns[msg.sender] = 0
+
+        send(msg.sender, pendingAmount)
+    end
+end
