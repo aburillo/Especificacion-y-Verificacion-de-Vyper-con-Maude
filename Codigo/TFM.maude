@@ -200,47 +200,47 @@ fmod VYPER-GRAMMAR is
 	*** pa los eventos
 	sort @DeclaracionIndexada@ @DeclaracionEvento@ @RegistrarEventos@ .
 	***subsort @Declaracion@ @DeclaracionLista@ < @ParamStruct@ .
-	subsort @Declaracion@ @DeclaracionLista@ @DConstante@ @DcHashMap@ @DcStruct@ @DeclaracionIndexada@ @DeclaracionEvento@ @DeclaracionEvento@ < @Declaraciones@ .
+	subsort @Declaracion@ @DeclaracionLista@ @DConstante@ @DcHashMap@ @DcStruct@ @DeclaracionIndexada@ @DeclaracionEvento@  < @Declaraciones@ .
 	***ops bool int128 uint256 decimal address bytes32 String Bytes struct HashMap : -> @Tipos@ [ctor] .
 	***subsort @Tipos@ @Token@ < @TiposToken@ .
 	***declaracion
 
-	op _:_ : @Token@ @Token@ -> @Declaracion@ [ctor prec 22 ] .
+	op _::_ : @Token@ @Token@ -> @Declaracion@ [ctor prec 22 ] .
 	****op _:_ : @Token@ @Token@ -> @Declaracion@ [ctor] .
-	op _: public( _ ) : @Token@ @Token@ -> @Declaracion@ [ctor prec 22 ] . *** ! al ser declaracion se podria meter en los parametros de una fun
+	op _:: public( _ ) : @Token@ @Token@ -> @Declaracion@ [ctor prec 22 ] . *** ! al ser declaracion se podria meter en los parametros de una fun
 
 	***declarar Lista quito declaracionLisra
-	op _:_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 21] . *** op _:_[_] : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
-	op _: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 22 ] . *** op _: public(_[_]) : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
+	op _::_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 21] . *** op _:_[_] : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
+	op _:: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 22 ] . *** op _: public(_[_]) : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
 	***op _:_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
 	***op _: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
 
 	***Declarar dando una valor ! mas enfocado a dentro de una funcion
-	op _:_ = _ : @Token@ @Token@ @Exp@ -> @DeclaracionValor@ [ctor] . *** op _:_ = _ : @Token@ @Tipos@ @Token@ -> @DeclaracionValor@ [ctor] .
+	op _::_ = _ : @Token@ @Token@ @Exp@ -> @DeclaracionValor@ [ctor] . *** op _:_ = _ : @Token@ @Tipos@ @Token@ -> @DeclaracionValor@ [ctor] .
 	***op _:_ = _[_] : @Token@ @Token@ @Exp@ @Token@ -> @DeclaracionValor@ [ctor] . ***NOT
 	***Declarar un valor constante
-	op _: constant( _ ) = _ : @Token@ @Token@ @Token@ -> @DConstante@ [ctor prec 22 ] . *** op _: constant( _ ) = _ : @Token@ @Tipos@ @Token@ -> @DConstante@ [ctor] .
+	op _:: constant( _ ) = _ : @Token@ @Token@ @Token@ -> @DConstante@ [ctor prec 22 ] . *** op _: constant( _ ) = _ : @Token@ @Tipos@ @Token@ -> @DConstante@ [ctor] .
 
 	*** Declara HashMap
-	op _:_[_,_] :  @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@ [ctor prec 22  ] . ***op _:_[_,_] :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
-	op _: public(_[_,_]) :  @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@ [ctor prec 22  ] . *** op _: public(_[_,_]) :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
+	op _::_[_,_] :  @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@ [ctor prec 22  ] . ***op _:_[_,_] :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
+	op _:: public(_[_,_]) :  @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@ [ctor prec 22  ] . *** op _: public(_[_,_]) :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
 	***op _:_[_,_] : @Token@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
 	***op _: public(_[_,_]) : @Token@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
-	op _:_[_,_ [ _ ] ] : @Token@ @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@  [ctor prec 22  ] . *** op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
+	op _::_[_,_ [ _ ] ] : @Token@ @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@  [ctor prec 22  ] . *** op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
 	***op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
-	op _: public(_[_,_ [ _ ] ]) : @Token@ @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@  [ctor prec 22 ] . *** op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
+	op _:: public(_[_,_ [ _ ] ]) : @Token@ @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@  [ctor prec 22 ] . *** op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
 	***op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
 	***Declarar Struct
 	***subsort @Declaracion@ @DeclaracionLista@ < @ParamStruct@ .
 	***op __ : @ParamStruct@ @ParamStruct@ -> @ParamStruct@ [ctor] .
-	op struct_:_end : @Token@ @Declaraciones@ -> @DcStruct@ [ctor prec 22] .
+	op struct_::_end : @Token@ @Declaraciones@ -> @DcStruct@ [ctor prec 22] .
 	***declaracion indexada para Eventos
-	op _: indexed(_) : @Token@ @Token@ -> @DeclaracionIndexada@ [ctor prec 22 ]. *** suelen ser las direcciones
+	op _:: indexed(_) : @Token@ @Token@ -> @DeclaracionIndexada@ [ctor prec 22 ]. *** suelen ser las direcciones
 	*** eventos
-	op event _:_end : @Token@ @Declaraciones@ -> @DeclaracionEvento@ [ctor prec 22] .
-	op event _:_end : @Token@  @DeclaracionControl@ -> @DeclaracionEvento@ [ctor prec 22] . *** solo puede ser pass
+	op event _::_end : @Token@ @Declaraciones@ -> @DeclaracionEvento@ [ctor prec 22] .
+	op event _::_end : @Token@  @DeclaracionControl@ -> @DeclaracionEvento@ [ctor prec 22] . *** solo puede ser pass
 	***Lista de declaraciones
-	op dc : -> @Declaraciones@  [ctor ] .
+	op dc : -> @Declaraciones@  [ctor] .
 	op __ : @Declaraciones@ @Declaraciones@ -> @Declaraciones@  [ctor assoc id: dc prec 25 ] .
 
 	***ACCESOS A MEMORIA
@@ -313,12 +313,14 @@ fmod VYPER-GRAMMAR is
 	op self._() : @Token@ -> @self@ [ctor] .
 
 	***Funciones
-	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ @valorDevuelto@ @Default@ @Init@ @Funcion@ @Funciones@ .
-	subsort @Declaracion@ @DeclaracionLista@ < @Parametros@ .
+	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ @valorDevuelto@ @Default@ @Init@ @Funcion@ @Funciones@ @Param@ .
+	subsort @Param@ < @Parametros@ .
 	subsort @Funcion@ < @Funciones@ .
 	***Decoradores quito los decoradores y los trato en el parse
 	***ops @external @internal : -> @DecoratorEI@  [ctor] .
 	***ops @pure @view @payable @nonpayables : -> @DecoratorMut@ [ctor] .
+	op _:_ : @Token@ @Token@ -> @Param@ [ctor ] .
+	op _:_[_] : @Token@ @Token@ @Token@ -> @Param@ [ctor] .
 	op @nonreentrant(_) : @Token@ -> @DecoratorNR@ [ctor] .
 	***Parametros de una funcion pueden ser vacios
 	op PaV : -> @Parametros@ [ctor] .

@@ -561,7 +561,7 @@ crl [parsing] :
     QIL := tokenize(Read) /\
     QIL1 := preparse(QIL) /\
     {T, Ty} := metaParse(GRAMMAR, QIL1, anyType) /\
-    T' := parse(T) [print QIL1 T "\nParseado: " T'] .
+    T' := parse(T) [print QIL1 T "\nParseado: " T' " " Ty] .
 
  ***                              ***
  ***          closedFile          ***
@@ -687,14 +687,20 @@ red metaParse(GRAMMAR, tokenize(" beneficiary : public(address) @external def __
 --- red metaParse(GRAMMAR, tokenize("()"), anyType) .
 --- red metaParse(GRAMMAR, tokenize("(value)"), anyType) .
 --- red metaParse(GRAMMAR, tokenize("(msg.sender, value, palo)"), anyType) . value : public(uint256)
+*** hashmap y declaraciones
  red metaParse(GRAMMAR, tokenize("value : public(uint256)"), anyType) . 
+ red metaParse(GRAMMAR, tokenize(" bids : HashMap [address, Bid[128] ]"), anyType) .
+ *** llamada a una funcion
 red metaParse(GRAMMAR, tokenize("value( value1 , value2 , value3 )"), '@Exp@) . 
 red metaParse(GRAMMAR, tokenize("value( )"), '@Exp@) .
-red metaParse(GRAMMAR, preparse(tokenize("value()")), '@Exp@) . 
-red metaParse(GRAMMAR, preparse(tokenize("a b def value()")), anyType) .
+***parametros
+red metaParse(GRAMMAR, tokenize(" def reveal(_numBids : int128, _values : uint256 [128], _fakes : bool [128], _secrets : bytes32 [128]) "), anyType) .
+***preparse
+--- red metaParse(GRAMMAR, preparse(tokenize("value()")), '@Exp@) . 
+--- red metaParse(GRAMMAR, preparse(tokenize("a b def value()")), anyType) .
 red metaParse(GRAMMAR, preparse(tokenize("assert self. x ")), anyType) .
-red metaParse(GRAMMAR, preparse(tokenize("assert self.x ")), anyType) .
-red metaParse(GRAMMAR, preparse(tokenize("x: int128 ")), anyType) .
+ red metaParse(GRAMMAR, preparse(tokenize("assert self.x ")), anyType) .
+--- red metaParse(GRAMMAR, preparse(tokenize("x: int128 ")), anyType) .
 set print attribute on .
 
 erew run .
