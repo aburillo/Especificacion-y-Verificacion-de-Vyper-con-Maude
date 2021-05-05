@@ -1,0 +1,14 @@
+fmod PREPARSE is
+ pr CONVERSION .
+ pr QID-LIST .
+
+ var S S1 S2 S3 S4 : QidList .
+ var Q Q1 : Qid .
+ op preparse : QidList -> QidList .
+ eq preparse('`def S '`( '`) S2) = '`def preparse(S) '`( 'PaV '`) preparse(S2) .
+ eq preparse(S '`( '`) S2) = preparse(S) '`( 'PaV '`) preparse(S2) .
+ eq preparse(S 'self. S2) = preparse(S) preparse(S2) .
+eq preparse(S 'Q:. S2) = preparse(S) preparse('Q) : preparse(S2) .
+ 
+ eq preparse(S) = S [owise] .
+endfm

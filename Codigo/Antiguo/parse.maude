@@ -359,9 +359,13 @@ var  Ct : Constant .
    if  T1'  := parse (T1) /\
          TL'  := parse (TL) [print "ecuacionParseaFuncion:" TL' ] .
    ***LLAMADA
-   ceq parse('_`(_`)[T1,TL]) = 'call[T1' , TL']
+   ***Parametros de la llamada
+   ceq parse('`(_`)[TL]) = 'parametros[TL']
+   if  TL'  := parse (TL) [print "ecuacionCall:" TL' ] .
+   ***llamada
+   ceq parse('__[T1,T2]) = 'call[T1' , T2']
    if  T1'  := parse (T1) /\
-       TL'  := parse (TL) [print "ecuacionParseaLLamada:" TL' ] .
+       T2'  := parse (T2) [print "ecuacionParseaLLamada:" T1' ] .
 
 *** PARSEANDO DECLARACION DE CONTROL
    ***RAISE
@@ -667,12 +671,17 @@ red metaParse(GRAMMAR, tokenize(" log as(x , y , z , 3 , 4 ) "), anyType) .
 red metaParse(GRAMMAR, tokenize(" assert x + 2 "), anyType) .
 red metaParse(GRAMMAR, tokenize(" beneficiary : public(address) @external def __init__(_beneficiary : address, _auction_start : uint256, _bidding_time : uint256) : beneficiary = _beneficiary auctionStart = _auction_start end @external @payable def bid(PaV) : assert block.timestamp end "), anyType) .
 ***red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) : assert x if x : pass end if x : pass else: pass end end  \n"), anyType) .
-red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) : beneficiary = _beneficiary beneficiary = _beneficiary end \n"), anyType) .
-red metaParse(GRAMMAR, tokenize(" bids : HashMap [address, Bid[128] ]"), anyType) .
-red metaParse(GRAMMAR, tokenize(" bids[msg.sender][numBids] = Bid({ blindedBid : _blindedBid , deposit : msg.value })"), anyType) .
-red metaParse(GRAMMAR, tokenize(" def reveal(_numBids : int128, _values : uint256 [128], _fakes : bool [128], _secrets : bytes32 [128]) "), '@Cabecera@) .
-red metaParse(GRAMMAR, tokenize("if (placeBid(msg.sender, value)) : refund -= value end"), anyType) .
-red metaParse(GRAMMAR, tokenize("placeBid(msg.sender, value)"), '@Exp@) .
+--- red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) : beneficiary = _beneficiary beneficiary = _beneficiary end \n"), anyType) .
+--- red metaParse(GRAMMAR, tokenize(" bids : HashMap [address, Bid[128] ]"), anyType) .
+--- red metaParse(GRAMMAR, tokenize(" bids[msg.sender][numBids] = Bid({ blindedBid : _blindedBid , deposit : msg.value })"), anyType) .
+--- red metaParse(GRAMMAR, tokenize(" def reveal(_numBids : int128, _values : uint256 [128], _fakes : bool [128], _secrets : bytes32 [128]) "), '@Cabecera@) .
+--- red metaParse(GRAMMAR, tokenize("if (placeBid(msg.sender, value)) : refund -= value end"), anyType) .
+--- red metaParse(GRAMMAR, tokenize("placeBid(msg.sender, value)"), '@Exp@) .
+--- red metaParse(GRAMMAR, tokenize("dale(value)"), '@Exp@) .
+--- red metaParse(GRAMMAR, tokenize("()"), anyType) .
+--- red metaParse(GRAMMAR, tokenize("(value)"), anyType) .
+--- red metaParse(GRAMMAR, tokenize("(msg.sender, value, palo)"), anyType) . value : public(uint256)
+ red metaParse(GRAMMAR, tokenize("value : public(uint256)"), anyType) . 
 set print attribute on .
 
 erew run .

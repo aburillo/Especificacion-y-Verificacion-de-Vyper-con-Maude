@@ -256,7 +256,7 @@ fmod VYPER-GRAMMAR is
 
 
 	***Operaciones
-	sorts @Exp@ @Body@ @asig@ .
+	sorts @Exp@ @Body@ @asig@ @al@ .
 	subsort @Acceso@ < @Exp@ .
 	***op _+_ : @Token@ @Token@ -> @asig@ [ctor comm assoc] . *** esto si funciona
 	***op _+_ : @Token@ @Token@ -> @Token@ [ctor comm assoc] . *** esto no funciona
@@ -274,14 +274,16 @@ fmod VYPER-GRAMMAR is
 	op not_ : @Exp@ -> @Exp@ [ctor prec 30] .
 	op _or_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
 	op _and_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op _`(_`) : @Token@ @Bubble@ -> @Exp@ [ctor prec 20] . *** prueba
+	op _`(`) : @Token@ -> @Exp@ [ctor prec 20] .
+	*** HECHO POR ADRIAN
+    ---op __ : @Token@ @Arg@ -> @Exp@ [ctor prec 20] . hecho por adrian 
 
-    op __ : @Token@ @Arg@ -> @Exp@ [ctor prec 20] .
-
-	sort @Arg@ @ArgList@ .
-	subsort @Exp@ < @ArgList@ .
-	op `(`) : -> @Arg@ [ctor] .
-	op `(_`) : @ArgList@ -> @Arg@ [ctor] .
-	op _,_ : @ArgList@ @ArgList@ -> @ArgList@ [ctor assoc prec 60] .
+	--- sort @Arg@ @ArgList@ .
+	--- subsort @Exp@ < @ArgList@ .
+	--- op `(`) : -> @Arg@ [ctor] .
+	--- op `(_`) : @ArgList@ -> @Arg@ [ctor] .
+	--- op _,_ : @ArgList@ @ArgList@ -> @ArgList@ [ctor assoc prec 60] .
 
 	***Asignaciones
 	op _=_ : @Acceso@ @Exp@ -> @asig@ [ctor] .
@@ -325,7 +327,7 @@ fmod VYPER-GRAMMAR is
 	***op ->_ : @Token@ -> @valorDevuelto@ [ctor] .
 	***op ->(_: _ ) : @Token@ -> @valorDevuelto@ [ctor] .
 	*** Declaracion de funciones
-	op def _(_) : @Token@ @Parametros@ -> @Cabecera@ [ctor] .
+	op def _ (_) : @Token@ @Parametros@ -> @Cabecera@ [ctor] .
 	op _ def _(_) : @Token@ @Token@ @Parametros@ -> @Cabecera@ [ctor] .
 	op _ _ def _(_) : @Token@ @Token@ @Token@ @Parametros@  -> @Cabecera@ [ctor] .
 
