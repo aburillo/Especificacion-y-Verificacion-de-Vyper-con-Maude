@@ -8,7 +8,36 @@ fmod PREPARSE is
  eq preparse('`def S '`( '`) S2) = '`def preparse(S) '`( 'PaV '`) preparse(S2) .
  eq preparse(S '`( '`) S2) = preparse(S) '`( 'PaV '`) preparse(S2) .
  eq preparse(S 'self. S2) = preparse(S) preparse(S2) .
-eq preparse(S 'Q:. S2) = preparse(S) preparse('Q) : preparse(S2) .
+eq preparse(S Q S2) = preparse(S) preparse('Q) `: preparse(S2) . 
  
  eq preparse(S) = S [owise] .
 endfm
+*** quitar self.
+--- vars QIL QIL' : QidList .
+--- var  Q : Qid .
+--- vars S S' : String .
+
+--- ceq preparse(QIL Q QIL') = preparse(QIL Q' QIL')
+---  if S := string(Q) /\
+---     N := find(S, "self.", 0) /\
+---     S' := substr(S, N, len(S)) /\
+---     Q' := qid(S') .
+*** sustituir  : por ::
+--- vars QIL QIL' : QidList .
+--- var  Q : Qid .
+--- vars S S' : String .
+
+--- ceq preparse(QIL Q QIL') = preparse(QIL Q' QIL')
+---  if S := string(Q) /\
+---     N := find(S, "self.", 0) /\
+---     S' := substr(S, N, len(S)) /\
+---     Q' := qid(S') .
+
+--- op preparse : QidList -> QidList .
+--- ceq preparse(QIL) = preparseFinal(QIL'' QIL''')
+---  if QIL' := hastaPrimerDef(QIL) /\
+---     QIL'' := preparseAntes(QIL') /\
+---     QIL''' := despuesPrimerDef(QIL)  .
+
+--- op hastaPrimerDef : QidList -> QidList .
+--- ceq hastaPrimerDef(Q QIL) = Q hastaPrimerDef

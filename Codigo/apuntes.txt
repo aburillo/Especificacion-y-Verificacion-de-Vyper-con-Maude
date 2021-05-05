@@ -1,10 +1,1 @@
-@external
-def auctionEnd(PaV) :
-    assert block.timestamp > revealEnd
-
-    assert not ended
-
-    log AuctionEnded( highestBidder,  highestBid)
-    ended = True
-
-end
+beneficiary : public(address)

@@ -274,16 +274,16 @@ fmod VYPER-GRAMMAR is
 	op not_ : @Exp@ -> @Exp@ [ctor prec 30] .
 	op _or_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
 	op _and_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op _`(_`) : @Token@ @Bubble@ -> @Exp@ [ctor prec 20] . *** prueba
+	op _`(_`) : @Token@ @ArgList@ -> @Exp@ [ctor prec 20] . *** prueba
 	op _`(`) : @Token@ -> @Exp@ [ctor prec 20] .
 	*** HECHO POR ADRIAN
     ---op __ : @Token@ @Arg@ -> @Exp@ [ctor prec 20] . hecho por adrian 
 
-	--- sort @Arg@ @ArgList@ .
-	--- subsort @Exp@ < @ArgList@ .
+	 sort @ArgList@ .
+	 subsort @Exp@ < @ArgList@ .
 	--- op `(`) : -> @Arg@ [ctor] .
 	--- op `(_`) : @ArgList@ -> @Arg@ [ctor] .
-	--- op _,_ : @ArgList@ @ArgList@ -> @ArgList@ [ctor assoc prec 60] .
+	op _,_ : @ArgList@ @ArgList@ -> @ArgList@ [ctor assoc prec 60] .
 
 	***Asignaciones
 	op _=_ : @Acceso@ @Exp@ -> @asig@ [ctor] .
@@ -391,7 +391,7 @@ fmod VYPER-GRAMMAR is
 
 	***Crea un contrato
 	sort @Contrato@ .
-	op __ : @Declaraciones@ @Funciones@ -> @Contrato@ [ctor  prec 80].
+	op __ : @Declaraciones@ @Funciones@ -> @Contrato@ [ctor prec 80].
 
 
  ***a=[1,2,3]

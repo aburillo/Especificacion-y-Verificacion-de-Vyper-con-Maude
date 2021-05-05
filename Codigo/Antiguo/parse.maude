@@ -1,3 +1,4 @@
+load preparse.maude
 load file.maude
 ***load carga.maude
 load TFM.maude
@@ -6,7 +7,7 @@ fmod PARSING is
  pr META-LEVEL .
  pr CONVERSION .
  pr META-SIGN .
- ***pr PREPARSE .
+ pr PREPARSE .
  sort ParsingRes .
 
 subsort Term < ParsingRes  .
@@ -359,13 +360,17 @@ var  Ct : Constant .
    if  T1'  := parse (T1) /\
          TL'  := parse (TL) [print "ecuacionParseaFuncion:" TL' ] .
    ***LLAMADA
-   ***Parametros de la llamada
-   ceq parse('`(_`)[TL]) = 'parametros[TL']
-   if  TL'  := parse (TL) [print "ecuacionCall:" TL' ] .
-   ***llamada
-   ceq parse('__[T1,T2]) = 'call[T1' , T2']
-   if  T1'  := parse (T1) /\
-       T2'  := parse (T2) [print "ecuacionParseaLLamada:" T1' ] .
+   ***LLamada antigua
+   ceq parse('_`(_`)[T1,TL]) = 'parametros[TL']
+   if  T1'  := parse (T1) /\ 
+      TL'  := parse (TL) [print "ecuacionCall:" TL' ] .
+   --- ***Parametros de la llamada
+   --- ceq parse('`(_`)[TL]) = 'parametros[TL']
+   --- if  TL'  := parse (TL) [print "ecuacionCall:" TL' ] .
+   --- ***llamada
+   --- ceq parse('__[T1,T2]) = 'call[T1' , T2']
+   --- if  T1'  := parse (T1) /\
+   ---     T2'  := parse (T2) [print "ecuacionParseaLLamada:" T1' ] .
 
 *** PARSEANDO DECLARACION DE CONTROL
    ***RAISE
@@ -476,7 +481,7 @@ mod MTP is
  vars Text Original Read Source : String .
  var  Attrs : AttributeSet .
  vars FHIn FHOut : Oid .
- var  QIL : QidList .
+ var  QIL QIL1 : QidList .
  vars T T' : Term .
  var  M : Module .
  vars N N' : Nat .
@@ -551,11 +556,12 @@ rl [newLine] :
 crl [parsing] :
     < example : EXAMPLE | read: Read, state: parsing, Attrs >
  => < example : EXAMPLE | read: "", Attrs >
-    write(stdout, example, "Parsed.\n") ***'@asig@
+    write(stdout, example, "Parsed.\n")
  if Read =/= "" /\
     QIL := tokenize(Read) /\
-    {T, Ty} := metaParse(GRAMMAR, QIL, anyType) /\
-     T' := parse(T) [print T "\nParseado: " T'] .
+    QIL1 := preparse(QIL) /\
+    {T, Ty} := metaParse(GRAMMAR, QIL1, anyType) /\
+    T' := parse(T) [print QIL1 T "\nParseado: " T'] .
 
  ***                              ***
  ***          closedFile          ***
@@ -682,6 +688,13 @@ red metaParse(GRAMMAR, tokenize(" beneficiary : public(address) @external def __
 --- red metaParse(GRAMMAR, tokenize("(value)"), anyType) .
 --- red metaParse(GRAMMAR, tokenize("(msg.sender, value, palo)"), anyType) . value : public(uint256)
  red metaParse(GRAMMAR, tokenize("value : public(uint256)"), anyType) . 
+red metaParse(GRAMMAR, tokenize("value( value1 , value2 , value3 )"), '@Exp@) . 
+red metaParse(GRAMMAR, tokenize("value( )"), '@Exp@) .
+red metaParse(GRAMMAR, preparse(tokenize("value()")), '@Exp@) . 
+red metaParse(GRAMMAR, preparse(tokenize("a b def value()")), anyType) .
+red metaParse(GRAMMAR, preparse(tokenize("assert self. x ")), anyType) .
+red metaParse(GRAMMAR, preparse(tokenize("assert self.x ")), anyType) .
+red metaParse(GRAMMAR, preparse(tokenize("x: int128 ")), anyType) .
 set print attribute on .
 
 erew run .
