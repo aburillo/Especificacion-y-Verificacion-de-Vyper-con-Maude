@@ -205,30 +205,30 @@ fmod VYPER-GRAMMAR is
 	***subsort @Tipos@ @Token@ < @TiposToken@ .
 	***declaracion
 
-	op _::_ : @Token@ @Token@ -> @Declaracion@ [ctor prec 22 ] .
+	op _::_ : @Token@ @Acceso@ -> @Declaracion@ [ctor prec 22 ] .
 	****op _:_ : @Token@ @Token@ -> @Declaracion@ [ctor] .
-	op _:: public( _ ) : @Token@ @Token@ -> @Declaracion@ [ctor prec 22 ] . *** ! al ser declaracion se podria meter en los parametros de una fun
+	op _:: public( _ ) : @Token@ @Acceso@ -> @Declaracion@ [ctor prec 22 ] . *** ! al ser declaracion se podria meter en los parametros de una fun
 
 	***declarar Lista quito declaracionLisra
-	op _::_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 21] . *** op _:_[_] : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
-	op _:: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 22 ] . *** op _: public(_[_]) : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
+	***op _::_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 21] . *** op _:_[_] : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
+	***op _:: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 22 ] . *** op _: public(_[_]) : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
 	***op _:_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
 	***op _: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
 
 	***Declarar dando una valor ! mas enfocado a dentro de una funcion
-	op _::_ = _ : @Token@ @Token@ @Exp@ -> @DeclaracionValor@ [ctor] . *** op _:_ = _ : @Token@ @Tipos@ @Token@ -> @DeclaracionValor@ [ctor] .
+	op _:_ = _ : @Token@ @Token@ @Exp@ -> @DeclaracionValor@ [ctor] . *** op _:_ = _ : @Token@ @Tipos@ @Token@ -> @DeclaracionValor@ [ctor] .
 	***op _:_ = _[_] : @Token@ @Token@ @Exp@ @Token@ -> @DeclaracionValor@ [ctor] . ***NOT
 	***Declarar un valor constante
 	op _:: constant( _ ) = _ : @Token@ @Token@ @Token@ -> @DConstante@ [ctor prec 22 ] . *** op _: constant( _ ) = _ : @Token@ @Tipos@ @Token@ -> @DConstante@ [ctor] .
 
 	*** Declara HashMap
-	op _::_[_,_] :  @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@ [ctor prec 22  ] . ***op _:_[_,_] :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
-	op _:: public(_[_,_]) :  @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@ [ctor prec 22  ] . *** op _: public(_[_,_]) :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
+	op _:: HashMap[_,_] :  @Token@ @Token@ @Acceso@ -> @DcHashMap@ [ctor prec 22  ] . ***op _:_[_,_] :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
+	op _:: public(HashMap[_,_]) :  @Token@ @Token@ @Acceso@ -> @DcHashMap@ [ctor prec 22  ] . *** op _: public(_[_,_]) :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
 	***op _:_[_,_] : @Token@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
 	***op _: public(_[_,_]) : @Token@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
-	op _::_[_,_ [ _ ] ] : @Token@ @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@  [ctor prec 22  ] . *** op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
+	***op _:: HashMap[_,_ [ _ ] ] : @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@  [ctor prec 22  ] . *** op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
 	***op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
-	op _:: public(_[_,_ [ _ ] ]) : @Token@ @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@  [ctor prec 22 ] . *** op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
+	***op _:: public(HashMap[_,_ [ _ ] ]) : @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@  [ctor prec 22 ] . *** op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
 	***op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
 	***Declarar Struct
 	***subsort @Declaracion@ @DeclaracionLista@ < @ParamStruct@ .
@@ -319,12 +319,12 @@ fmod VYPER-GRAMMAR is
 	***Decoradores quito los decoradores y los trato en el parse
 	***ops @external @internal : -> @DecoratorEI@  [ctor] .
 	***ops @pure @view @payable @nonpayables : -> @DecoratorMut@ [ctor] .
-	op _:_ : @Token@ @Token@ -> @Param@ [ctor ] .
-	op _:_[_] : @Token@ @Token@ @Token@ -> @Param@ [ctor] .
+	op _:_ : @Token@ @Acceso@ -> @Param@ [ctor prec 22] .
+	***op _:_[_] : @Token@ @Token@ @Token@ -> @Param@ [ctor] .
 	op @nonreentrant(_) : @Token@ -> @DecoratorNR@ [ctor] .
 	***Parametros de una funcion pueden ser vacios
 	op PaV : -> @Parametros@ [ctor] .
-	op _,_ : @Parametros@ @Parametros@  -> @Parametros@  [ctor assoc id: PaV prec 25 ] . ***
+	op _,_ : @Parametros@ @Parametros@  -> @Parametros@  [ctor assoc id: PaV prec 25] . ***prec 25
 	*** valores de vuelta
 	***op ->_ : @Token@ -> @valorDevuelto@ [ctor] .
 	***op ->(_: _ ) : @Token@ -> @valorDevuelto@ [ctor] .
@@ -412,7 +412,8 @@ fmod META-SIGN is
         op 'token : 'Qid -> '@Token@
              [special(
                (id-hook('Bubble, '1 '1)
-                op-hook('qidSymbol, '<Qids>, nil, 'Qid)))] .
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
+				id-hook('Exclude, 'public 'HashMap 'constant 'indexed)))] .
         op 'bubble : 'QidList -> '@Bubble@
              [special(
                (id-hook('Bubble, '1 '-1 '`( '`))

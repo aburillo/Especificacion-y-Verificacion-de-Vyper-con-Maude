@@ -1,0 +1,44 @@
+beneficiary :: public(address)
+auctionStart :: public(uint256)
+auctionEnd :: public(uint256)
+highestBidder :: public(address)
+highestBid :: public(uint256)
+ended :: public(bool)
+pendingReturns :: public(HashMap[address, uint256])
+@external
+def __init__(_beneficiary : address, _auction_start : uint256, _bidding_time : uint256) :
+    beneficiary = _beneficiary
+    auctionStart = _auction_start
+    auctionEnd = auctionStart + _bidding_time
+    assert block.timestamp < auctionEnd 
+end
+@external 
+@payable 
+def bid(PaV) :
+    assert block.timestamp >= auctionStart
+    assert block.timestamp < auctionEnd
+    assert msg.value > highestBid
+    pendingReturns[highestBidder] += highestBid
+    highestBidder = msg.sender
+    highestBid = msg.value
+end
+@external
+def withdraw(PaV) :
+    pending_amount : uint256 = pendingReturns[msg.sender]
+    pendingReturns[msg.sender] = 0
+end
+@external
+def endAuction(PaV) :
+    assert block.timestamp >= auctionEnd
+    assert ended
+    ended = True
+end
+def auctionEnd(PaV) :
+    assert block.timestamp >  revealEnd
+
+    assert not ended
+
+    log AuctionEnded( highestBidder,  highestBid)
+    ended = True
+
+end
