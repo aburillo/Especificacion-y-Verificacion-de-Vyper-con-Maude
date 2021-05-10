@@ -1,0 +1,103 @@
+struct Bid ::
+  blindedBid :: bytes32
+  deposit :: uint256
+end
+MAX_BIDS :: constant(int128) = 128
+event AuctionEnded ::
+    highestBidder :: address
+    highestBid :: uint256
+end
+beneficiary :: public(address)
+biddingEnd :: public(uint256)
+revealEnd :: public(uint256)
+
+ended :: public(bool)
+
+highestBid :: public(uint256)
+highestBidder :: public(address)
+@external
+def __init__(_beneficiary : address, _biddingTime : uint256, _revealTime : uint256) :
+    beneficiary = _beneficiary
+    biddingEnd = block.timestamp + _biddingTime
+    revealEnd = biddingEnd + _revealTime
+end
+@external
+@payable
+def bid(_blindedBid : bytes32) :
+    assert block.timestamp < biddingEnd
+    numBids : int128 = bidCounts[msg.sender]
+    assert numBids < MAX_BIDS
+
+    bids[msg.sender][numBids] = Bid({
+        blindedBid : _blindedBid ,
+        deposit : msg.value
+        })
+    bidCounts[msg.sender] += 1
+end
+@internal
+def placeBid(bidder : address, _value : uint256) :
+    if (_value <= highestBid) :
+        return False
+        end
+    if (highestBidder != ZERO_ADDRESS) :
+        pendingReturns[highestBidder] += highestBid
+    end
+    highestBid = _value
+    highestBidder = bidder
+
+    return True
+end
+@external
+def reveal(_numBids : int128, _values : uint256[128], _fakes : bool[128], _secrets : bytes32[128])  :
+    assert block.timestamp > biddingEnd
+
+    assert block.timestamp < revealEnd
+
+    assert _numBids == bidCounts[msg.sender]
+
+    refund : uint256 = 0
+    for i in range(MAX_BIDS) :
+        if (i >= _numBids) :
+            break
+        end
+
+        bidToCheck : Bid = bids[msg.sender][i]
+
+        value : uint256 = _values[i]
+        fake : bool = _fakes[i]
+        secret : bytes32 = _secrets[i]
+
+        if (blindedBid != bidToCheck.blindedBid) :
+            assert 1 == 0
+            continue
+        end
+        refund += bidToCheck.deposit
+        if (not fake and bidToCheck.deposit >= value) :
+            if (placeBid(msg.sender, value)) :
+                refund -= value
+            end
+        end
+        zeroBytes32 : bytes32 = EMPTY_BYTES32
+        bidToCheck.blindedBid = zeroBytes32
+
+    if (refund != 0) :
+        send(msg.sender, refund)
+    end
+    end
+end
+@external
+def auctionEnd(PaV) :
+    assert block.timestamp >  revealEnd
+
+    assert not ended
+
+    log AuctionEnded( highestBidder,  highestBid)
+    ended = True
+end
+def withdraw(PaV) :
+    pendingAmount : uint256 = pendingReturns[msg.sender]
+    if (pendingAmount > 0) :
+        pendingReturns[msg.sender] = 0
+
+    end
+end

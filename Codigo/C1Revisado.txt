@@ -26,13 +26,16 @@ end
 def withdraw(PaV) :
     pending_amount : uint256 = pendingReturns[msg.sender]
     pendingReturns[msg.sender] = 0
+    send(msg.sender, pending_amount)
 end
 @external
 def endAuction(PaV) :
     assert block.timestamp >= auctionEnd
     assert ended
     ended = True
+    send(beneficiary, highestBid)
 end
+@external
 def auctionEnd(PaV) :
     assert block.timestamp >  revealEnd
 
@@ -41,4 +44,5 @@ def auctionEnd(PaV) :
     log AuctionEnded( highestBidder,  highestBid)
     ended = True
 
+    send( beneficiary,  highestBid)
 end

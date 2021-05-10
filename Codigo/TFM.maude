@@ -11,7 +11,7 @@ fmod VYPER-GRAMMAR is
 	op _:: public( _ ) : @Token@ @Acceso@ -> @Declaracion@ [ctor prec 22 ] . *** ! al ser declaracion se podria meter en los parametros de una fun
 
 	***Declarar dando un valor, solo valido dentro de una funcion
-	op _:_ = _ : @Token@ @Token@ @Exp@ -> @DeclaracionValor@ [ctor] .
+	op _:_ = _ : @Token@ @Name@ @Exp@ -> @DeclaracionValor@ [ctor] .
 
 	***Declarar un valor constante !quizas hay que cambiar token por acceso
 	op _:: constant( _ ) = _ : @Token@ @Token@ @Token@ -> @DConstante@ [ctor prec 22 ] . 
@@ -54,9 +54,9 @@ fmod VYPER-GRAMMAR is
 	op _<=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
 	op _==_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
 	op _!=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op not_ : @Exp@ -> @Exp@ [ctor prec 30] .
+	op not_ : @Exp@ -> @Exp@ [ctor prec 28] .
 	op _or_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op _and_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op _and_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 32] .
 	***quizas deberia ser una expression
 	op _`(_`) : @Token@ @ArgList@ -> @Call@ [ctor prec 10] . *** prueba
 	op _`(`) : @Token@ -> @Call@ [ctor prec 20] .
@@ -81,10 +81,11 @@ fmod VYPER-GRAMMAR is
 	op self._() : @Token@ -> @self@ [ctor] .
 
 	***Funciones
-	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ @valorDevuelto@ @Default@ @Init@ @Funcion@ @Funciones@ @Param@ .
+	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ @valorDevuelto@ @Default@ @Init@ @Funcion@ @Funciones@ @Param@ @Decorator@ .
 	subsort @Param@ < @Parametros@ .
 	subsort @Funcion@ < @Funciones@ .
-
+	***Decoradores quito los decoradores y los trato en el parse
+	ops @external @internal @pure @view @payable @nonpayables : -> @Decorator@ [ctor] .
 	op _:_ : @Token@ @Acceso@ -> @Param@ [ctor prec 22] .
 
 	op @nonreentrant(_) : @Token@ -> @DecoratorNR@ [ctor] .
@@ -96,18 +97,18 @@ fmod VYPER-GRAMMAR is
 
 	*** Declaracion de funciones sin return
 	op def _ (_) : @Token@ @Parametros@ -> @Cabecera@ [ctor prec 90 ] .
-	op _ def _(_) : @Token@ @Token@ @Parametros@ -> @Cabecera@ [ctor prec 90] .
-	op _ _ def _(_) : @Token@ @Token@ @Token@ @Parametros@  -> @Cabecera@ [ctor prec 90] .
+	op _ def _(_) : @Decorator@ @Token@ @Parametros@ -> @Cabecera@ [ctor prec 90] .
+	op _ _ def _(_) : @Decorator@ @Decorator@ @Token@ @Parametros@  -> @Cabecera@ [ctor prec 90] .
 
 	*** Declaracion de funciones con return
-	op def _(_)->_ : @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor prec 90] .
-	op _ def _(_)->_ : @Token@ @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor prec 90] .
-	op _ _ def _(_)->_ : @Token@ @Token@ @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor prec 90] .
+	op def _(_)-> _ : @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor prec 90] .
+	op _ def _(_)-> _ : @Decorator@ @Decorator@ @Parametros@ @Token@ -> @Cabecera@ [ctor prec 90] .
+	op _ _ def _(_)-> _ : @Decorator@ @Decorator@ @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor prec 90] .
 
 	*** FUNCION RETORNA TUPLA
 	op def _(_)-> (_:_) : @Token@ @Parametros@ @Token@ @Token@  -> @Cabecera@ [ctor prec 90] .
-	op _ def _(_)-> (_:_) : @Token@ @Token@ @Parametros@ @Token@ @Token@ -> @Cabecera@ [ctor prec 90] .
-	op _ _ def _(_)-> (_:_) : @Token@ @Token@ @Token@ @Parametros@ @Token@ @Token@ -> @Cabecera@ [ctor prec 90] .
+	op _ def _(_)-> (_:_) : @Decorator@ @Token@ @Parametros@ @Token@ @Token@ -> @Cabecera@ [ctor prec 90] .
+	op _ _ def _(_)-> (_:_) : @Decorator@ @Decorator@ @Token@ @Parametros@ @Token@ @Token@ -> @Cabecera@ [ctor prec 90] .
 
 	*** declaracion de funciones
 	op _:_ end : @Cabecera@ @Body@ -> @Funcion@ [ctor prec 91] . *** ejemplo end
@@ -158,7 +159,7 @@ fmod VYPER-GRAMMAR is
 
 	***Crea un contrato
 	sort @Contrato@ .
-	op __ : @Declaraciones@ @Funciones@ -> @Contrato@ [ctor prec 80] .
+	op __ : @Declaraciones@ @Funciones@ -> @Contrato@ [ctor prec 100] .
 
 
  ***a=[1,2,3]
@@ -178,7 +179,7 @@ fmod META-SIGN is
              [special(
                (id-hook('Bubble, '1 '1)
                 op-hook('qidSymbol, '<Qids>, nil, 'Qid)
-				id-hook('Exclude, 'public 'HashMap 'constant 'indexed 'assert '`, '`( '`) '> 'not 'log '= )))] .
+				id-hook('Exclude, 'public 'HashMap 'constant 'indexed 'assert '`, '`( '`) '> 'not 'log '= ':: '+ '< '@external '@internal '@pure '@view '@payable '@nonpayables '>= '<= '+= '-= '`[ '`] ': 'return '!= 'break 'range '== 'and 'continue )))] .
         op 'logName : 'Qid -> '@Name@
              [special(
                (id-hook('Bubble, '1 '1)

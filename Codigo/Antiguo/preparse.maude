@@ -14,11 +14,46 @@ ceq preparse(S Q S1) = preparse(S Q' S1)
  if St := string(Q) /\
     N := find(St, "self.", 0) /\
     St' := substr(St, N + 5, length(St)) /\
-    Q' := qid(St') [print N] .
- ***eq preparse(S 'self. S2) = preparse(S) preparse(S2) .
-***eq preparse(S Q S2) = preparse(S) preparse('Q) `: preparse(S2) . 
- 
- eq preparse(S) = S [owise] .
+    Q' := qid(St') .
+***op preparse : QidList -> QidList .
+ceq preparse(S) = preparseFinal(S2 S3)
+ if S1 := hastaPrimerDef(S) /\
+    S2 := preparseAntes(S1) /\
+    S3 := despuesPrimerDef(S) .
+eq preparse(S) = S [owise] .
+op hastaPrimerDef : QidList -> QidList .
+eq hastaPrimerDef('def S) = nil .
+eq hastaPrimerDef(Q S) = Q hastaPrimerDef(S) .
+***eq hastaPrimerDef(Q) = nil .
+
+op despuesPrimerDef : QidList -> QidList .
+eq despuesPrimerDef('def S) = S .
+eq despuesPrimerDef(Q S) = despuesPrimerDef(S) .
+
+*** sustituir : por ::
+op preparseAntes : QidList -> QidList .
+ceq preparseAntes(S Q S1) = preparse(S Q' S1)
+ if St := string(Q) /\
+    N := find(St, ":", 0) /\
+    St' := St + ":" /\
+    Q' := qid(St') .
+
+
+op preparseFinal : QidList -> QidList .
+eq preparseFinal('`def S '`( '`) S2) = '`def preparseFinal(S) '`( 'PaV '`) preparseFinal(S2) .
+*** eliminar self.
+ceq preparseFinal(S Q S1) = preparseFinal(S Q' S1)
+ if St := string(Q) /\
+    N := find(St, "self.", 0) /\
+    St' := substr(St, N + 5, length(St)) /\
+    Q' := qid(St') .
+
+ceq preparseFinal(S Q S1) = preparseFinal(S Q' S1)
+ if St := string(Q) /\
+    N := find(St, ":", 0) /\
+    St' := substr(St, 0, N) + " " + substr(St, N + 1, length(St) ) /\
+    Q' := qid(St') .
+eq preparseFinal(S) = S [owise] .
 endfm
 *** quitar self.
 --- vars QIL QIL' : QidList .
