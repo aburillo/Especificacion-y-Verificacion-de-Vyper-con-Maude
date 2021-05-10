@@ -1,8 +1,6 @@
 load preparse.maude
 load file.maude
-***load carga.maude
 load TFM.maude
-***load io.maude
 fmod PARSING is
  pr META-LEVEL .
  pr CONVERSION .
@@ -22,74 +20,76 @@ var  Ct : Constant .
  var B : Bool .
 
  op parse : Term -> ParsingRes .
- ***eq parse(T) = parse(upModule('GRAMATICA, true), T) . ***llamar al otro parse
- ***op parse : Module Term -> ParsingRes .
-
- ***ceq parse(M, 'token[T]) = < M, upTerm(F) >
-  ***if Q := downQid(T) /\
-  ***   S := string(Q) . ***/\
-    *** B := Bool(S) .
-*** parsea comas!
- ceq parse('token[T]) = Q1 ***QUITAR LAS COMAS EN EL POSPARSE
+*** PARSEA COMAS DE LOS BUBBLE
+ ceq parse('token[T]) = Q1 
   if Q := downQid(T) /\
      S := string(Q) /\
      S == "`," /\
      S1 := "," + ".eliminar" /\
      Q1 := qid(S1) [print "ecuacionComa" Q1 ] .
- ***parsea Bool
+ 
+ *** PARSEA BOOLEANOS
  ceq parse('token[T]) =  Q1
   if Q := downQid(T) /\
      S := string(Q) /\
      isBool(S) /\
      S1 := S + ".bool" /\
      Q1 := qid(S1) [print "ecuacionBool" S ] .
- ***parsea Decorador externo interno
+ 
+ ***PARSEA DECORADOR EXTERNO INTERNO
  ceq parse('token[T]) =  Q1
   if Q := downQid(T) /\
      S := string(Q) /\
      isDecoradorEI(S) /\
      S1 := S + ".decoradorEI" /\
      Q1 := qid(S1) [print "ecuacionDecoradorEI" Q1 ] .
- ***parsea Decorador mutab
+
+ ***PARSEA DECORADOR DE MUTABILIDAD
  ceq parse('token[T]) =  Q1
   if Q := downQid(T) /\
      S := string(Q) /\
      isDecoradorMUT(S) /\
      S1 := S + ".decoradorMUT" /\
      Q1 := qid(S1) [print "ecuacionDecoradorMUT" Q1 ] .
-*** parsea tipos
+
+*** PARSEA TIPOS DE DATOS
   ceq parse('token[T]) =  Q1
   if Q := downQid(T) /\
      S := string(Q) /\
      isTipo(S) /\
      S1 := S + ".tipo" /\
      Q1 := qid(S1) [print "ecuacionTipos" Q1 ] .
-*** parsea variable de entorno
+
+*** PARSEA VARIABLES DE ENTORNO
   ceq parse('token[T]) =  Q1
   if Q := downQid(T) /\
      S := string(Q) /\
      isVariableEntorno(S) /\
      S1 := S + ".VarEnt" /\
      Q1 := qid(S1) [print "ecuacionVaraibleEntorno" Q1 ] .
-*** parsea CONSTANTES
+
+*** PARSEA CONSTANTES
   ceq parse('token[T]) =  Q1
   if Q := downQid(T) /\
      S := string(Q) /\
      isConstante(S) /\
      S1 := S + ".constante" /\
      Q1 := qid(S1) [print "ecuacionconstante" Q1 ] .
-*** parsea float
+
+*** PARSEA CONSTANTES
  ceq parse('token[T]) =  upTerm(F)
   if Q := downQid(T) /\
      S := string(Q) /\
      F := float(S) .
-*** parsea int
+
+*** PARSEA INT
  ceq parse('token[T]) =  upTerm(F)
   if Q := downQid(T) /\
      S := string(Q) /\
      rat(S, 10) :: Nat /\
      F := float(S + ".0") .
-*** parsea qid!
+
+*** PARSEA QID
  ceq parse('token[T]) =  T
   if Q := downQid(T) /\
      S := string(Q) /\
@@ -98,33 +98,26 @@ var  Ct : Constant .
      not isBool(S) /\
      not isTipo(S)  /\
      not isVariableEntorno(S) [print "ecuacionQid" S ] .
-*** parsea bubble!
+
+*** PARSEA BUBBLE!
 ***['__[''2.Qid,''`,.Qid,''x.Qid]]
+*** parsea lista de bubble
  ceq parse('bubble['__[TL]]) =  TL'
   if TL' := parseB(TL) [print "ecuacionBubble" TL ] .
+ *** parsea bubble individual
  ceq parse('bubble[TL]) =  TL'
   if TL' := parseB(TL) [print "ecuacionBubbleiNDIVIDUAL" TL ] .
 
  *** PARSEA DECLARACIONES
- ***Declaracion basica
+ ***Declaracion variable y array
  ceq parse('_::_[T1,T2]) =  '_::_[T1', T2']
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) [print "ecuacion:" T1' ] .
-*** declaracion publica
+*** Declaracion varibale y array publico
  ceq parse('_::`public`(_`)[T1,T2]) =  '_::_[T1', T2', upTerm("public") ]
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) [print "ecuacion:" T1' ] .
-***declaracion lista qid o tipos no necesario
----  ceq parse('_:_`[_`][T1,T2,T3]) =  '_:_[T1', T2', T3']
----     if  T1'  := parse (T1) /\
----         T2'  := parse (T2) /\
----         T3'  := parse (T3) [print "ecuacion:" T1 ] .
---- ***DECLARACION LISTA publica
----  ceq parse('_:`public`(_`[_`]`)[T1,T2,T3]) =  '_:_[T1', T2', T3' , upTerm("public") ]
----     if  T1'  := parse (T1) /\
----         T2'  := parse (T2) /\
----         T3'  := parse (T3) [print "ecuacion:" T1 ] .
-***DECLARACION dando valor inicial
+***Declaracion dando un valor inicial, dentro de funciones
  ceq parse('_:_=_[T1,T2,T3]) =  '_:_[T1', T2', T3']
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) /\
@@ -134,7 +127,7 @@ var  Ct : Constant .
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) /\
         T3'  := parse (T3) [print "ecuacion:" T1 ] .
-***Declaracion hashmap qid o tipos
+***Declaracion hashmap 
  ceq parse('_::`HashMap`[_`,_`] [T1,T2,T3]) =  '_::_[T1', T2', T3']
     if  T1' := parse (T1) /\
         T2' := parse (T2) /\
@@ -144,27 +137,10 @@ var  Ct : Constant .
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) /\
         T3'  := parse (T3)  [print "ecuacion:" T1 ] .
-***dECLARACION HASMAP CON LISTAS
----    ceq parse('_:_`[_`,_`[_`]`][T1,T2,T3,T4,T5]) =  '_:_[T1', T2', T3', T4', T5']
----    if  T1'  := parse (T1) /\
----        T2'  := parse (T2) /\
----        T3'  := parse (T3) /\
----        T4'  := parse (T4) /\
----        T5'  := parse (T5) [print "ecuacion:" T1 ] .
-
---- ***Declaracion nhashmap con listas Y PUBLICO
----   ceq parse('_:`public`(_`[_`,_`[_`]`]`)[T1,T2,T3,T4,T5]) =  '_:_[T1', T2', T3', T4', T5', upTerm("public")]
----     if  T1'  := parse (T1) /\
----         T2'  := parse (T2) /\
----         T3'  := parse (T3) /\
----         T4'  := parse (T4) /\
----         T5'  := parse (T5) [print "ecuacion:" T1 ] .
- *** declaracion de struct
+ *** Declaracion de struct
    ceq parse('struct_::_end[T1,TL]) =  'struct[T1', TL']
     if  T1'  := parse (T1) /\
         TL'  := parse (TL) [print "ecuacionStruct:" T1 ] .
-
-
 ***Parte de eventos
 *** Parsea declaracion indexada
   ceq parse('_::`indexed`(_`)[T1,T2]) =  '_::_[T1', T2', upTerm("indexed")]
@@ -173,27 +149,26 @@ var  Ct : Constant .
 ***Parsea evento
   ceq parse('event_::_end[T1,TL]) =  'event[T1', TL']
     if  T1'  := parse (T1) /\
-        TL'  := parse (TL) [print "ecuacionEvent:" T1 ] .
-***Parsea declaraciones
+        TL'  := parse (TL) [print "ecuacionEvent:" T1 ] .    
+***Parsea lista de  declaraciones
    ceq parse('__[TL]) =  'Lista[TL']
     if  TL'  := parseL (TL) [print "ecuacionDeclaracionesOBody:" TL ] .
 
 
 ***PARSEA ACCESOS A MEMORIA
+***Acceso a posición de array
  ceq parse('_`[_`][T1,T2]) = '->[T1' , T2']
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) [print "Acceso:" T1' ] .
-
+***Acceso a struct
  ceq parse('_._[T1,T2]) = '.[T1' , T2']
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) [print "Acceso:" T1' ] .
 
 
-
-
-*** PARSEA Asignaciones
-*** parsea asignacion
- ceq parse('_=_[T1,T2]) = '_=._[T1', T2']
+*** PARSEA ASIGNACIONES
+*** =
+   ceq parse('_=_[T1,T2]) = '_=._[T1', T2']
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) [print "asignacion=:" T1' ] .
 *** parsea +=
@@ -210,25 +185,23 @@ var  Ct : Constant .
         TL'  := parse (TL) [print "asignacionStruC:" TL' ] .
 
 *** PARSEA FOR
-
-
-*** parseando un for_in_
+*** Parseando un for_in_
    ceq parse('for_in_;_end[T1,T2,TL]) =  'for[T1', T2', TL']
    if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
        TL'  := parseL (TL) .
-***parseando range
+***Parseando range
    ceq parse('for_in`range`(_`);_end[T1,T2,TL]) =  'for[T1', T2', TL']
    if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
        TL'  := parseL (TL) .
-*** parseando un for_in range(_,_)
+***Parseando un for_in range(_,_)
    ceq parse('for_in`range`(_`,_`);_end[T1,T2,T3,TL]) =  'for[T1', T2', T3, TL']
    if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
        T3'  := parse (T3) /\
        TL'  := parseL (TL) .
-*** parseando un for_in list(_,_) quizas esta es igual que la primera de for
+***Parseando un for_in list(_,_) quizas esta es igual que la primera de for
    ceq parse('for_in`[_`];_end[T1,T2,TL]) =  'for[T1', TL2', TL']
   if  T1'  := parse (T1) /\
        TL2'  := parse (T2) /\
@@ -259,24 +232,19 @@ var  Ct : Constant .
        TL'  := parseL (TL) /\
        TL2'  := parseL (TL2) /\
        TL3'  := parseL (TL3) [print "ecuacionIFELSE Ccon elseif:" TL ].
+
 ***FUNCIONES!
-***Parsea param
+***Parsea parametro simples y arrays
  ceq parse('_:_[T1,T2]) =  '_:_[T1', T2']
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) [print "ecuacion:" T1' ] .
 
-***Parsea parametros
+***Parsea lista de parametrod
    ceq parse('_`,_[TL]) =  'Param[TL']
     if  TL' := parseL (TL) [print "ecuacionParametros" TL ] .
 
----   ceq parse('token[T]) =  Q1
----   if Q := downQid(T) /\
----      S := string(Q) /\
----      isTipo(S) /\
----      S1 := S + ".tipo" /\
----      Q1 := qid(S1) [print "ecuacionTipos" Q1 ] .
-
-   *** Cabecera init
+***PARSEA CABECERASAS DE FUNCIONES
+*** Cabecera init
    ceq parse('_def_`(_`)[T1,'token[T],TL]) = 'init[ TL']
    if T1' := parse (T1) /\
       S1 := string(T1') /\
@@ -285,8 +253,7 @@ var  Ct : Constant .
       S := string(Q) /\
       S == "__init__" /\
          TL'  := parse (TL) [print "ecuacionFuncionesInit:" S ] .
-   *** Cabecera  default
-   ***ceq parse(__'def_`(_`)[T1 , T2, 'token[T] ,TL]) = 'default[ T1' , T2' ]
+*** Cabecera  default
     ceq parse('__def_`(_`)[T1,T2,'token[T],'PaV.@Parametros@]) = 'default[T1', T2']
    if T1'  := parse (T1) /\
       S1 := string(T1') /\
@@ -298,36 +265,36 @@ var  Ct : Constant .
       S := string(Q) /\
       S == "__default__" [print "ecuacionFuncionesDEFAULT:" S1 ] .
 
-   *** Cabecera sin decoradores sin return FUN
+*** Cabecera sin decoradores sin return FUN
    ceq parse('def_`(_`)[T1,TL]) = 'cab[ T1' , TL']
   if   T1'  := parse (T1) /\
        TL'  := parse (TL) [print "ecuacionFunciones1:" TL ] .
 
-   *** Cabecera con un decorador sin return FUN
+*** Cabecera con un decorador sin return FUN
       ceq parse('_def_`(_`)[T1,T2,TL]) = 'cab[T1', T2', TL']
   if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
        TL'  := parse (TL) [print "ecuacionFunciones2:" TL ] .
-   *** Cabecera con dos decoradores sin return FUN
+*** Cabecera con dos decoradores sin return FUN
       ceq parse('__def_`(_`)[T1,T2,T3,TL]) = 'cab[T1', T2', T3', TL']
   if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
        T3'  := parse (T3) /\
        TL'  := parse (TL) [print "ecuacionFunciones3:" TL ] .
 
-   *** Cabecera sin decoradores CON return FUN
+*** Cabecera sin decoradores CON return FUN
    ceq parse('def_`(_`)->_[T1,TL,T2]) = 'cab[T1' , T2 , TL' ]
   if  T1'  := parse (T1) /\
        TL'  := parse (TL) /\
        T2'  := parse (T2) [print "ecuacionFunciones4:" TL' ] .
 
-   *** Cabecera con un decorador CON return FUN
+*** Cabecera con un decorador CON return FUN
       ceq parse('_def_`(_`)->_[T1,T2,TL,T3]) = 'cab[T1', T2', T3' , TL']
   if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
        TL'  := parse (TL) /\
        T3'  := parse (T3) [print "ecuacionFunciones5:" TL' ] .
-   *** Cabecera con dos decoradores CON return FUN
+*** Cabecera con dos decoradores CON return FUN
       ceq parse('__def_`(_`)->_[T1,T2,T3,TL,T4]) = 'cab[T1', T2', T3' , T4' ,TL']
   if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
@@ -335,20 +302,20 @@ var  Ct : Constant .
        TL'  := parse (TL) /\
        T4'  := parse (T4) [print "ecuacionFunciones6:" TL' ] .
 
-   *** Cabecera sin decoradores CON return tupla FUN
+*** Cabecera sin decoradores CON return tupla FUN
    ceq parse('def_`(_`)->`(_:_`)[T1,TL,T2,T3]) = 'cab[T1' , T2' , T3' , TL' ]
   if  T1'  := parse (T1) /\
        TL'  := parse (TL) /\
        T2'  := parse (T2) /\
        T3'  := parse (T3) [print "ecuacionFunciones7:" TL' ] .
-   *** Cabecera con un decorador CON return tupla FUN
+*** Cabecera con un decorador CON return tupla FUN
       ceq parse('_def_`(_`)->`(_:_`)[T1,T2,TL,T3,T4]) = 'cab[T1', T2', T3' , T4' ,TL']
   if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
        TL'  := parse (TL) /\
        T3'  := parse (T3) /\
        T4'  := parse (T4) [print "ecuacionFunciones8:" TL' ] .
-   *** Cabecera con dos decoradores CON return tupla FUN
+*** Cabecera con dos decoradores CON return tupla FUN
       ceq parse('__def_`(_`)->`(_:_`)[T1,T2,T3,TL, T4, T5 ]) = 'cab[T1', T2', T3', T4', T5' , TL']
   if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
@@ -356,14 +323,14 @@ var  Ct : Constant .
        TL'  := parse (TL)  /\
        T4'  := parse (T4)  /\
        T5'  := parse (T5) [print "ecuacionFunciones9:" TL' ] .
-    *** FUNCION
+*** FUNCION
    ceq parse('_:_end[T1,TL]) = 'fun[T1' , TL']
    if  T1'  := parse (T1) /\
          TL'  := parse (TL) [print "ecuacionParseaFuncion:" TL' ] .
-   ***LLAMADA
-   ***LLamada antigua
-   ceq parse('_`(_`)[T1,TL]) = 'parametros[TL']
-   if  T1'  := parse (T1) /\ 
+   
+   ***LLAMADA A UNA FUNCION
+   ceq parse('_`(_`)[T1,TL]) = 'Call[T1',TL']
+   if  T1'  := parse (T1) /\
       TL'  := parse (TL) [print "ecuacionCall:" TL' ] .
    --- ***Parametros de la llamada
    --- ceq parse('`(_`)[TL]) = 'parametros[TL']
@@ -384,17 +351,20 @@ var  Ct : Constant .
    if  T1'  := parse (T1) /\
        T2'  := parse (T2) [print "AssertString:" T1' ] .
    ***Return
+   ***Valor unico
    ceq parse('return_[T1]) = 'Return[ T1']
    if  T1'  := parse (T1)  [print "Return:" T1 ] .
+   ***TUPLA
    ceq parse('return_`,_[T1,T2]) = 'Return[ T1' , T2' ]
       if  T1'  := parse (T1) /\
           T2'  := parse (T2) [print "Return2Valores:" T1' ] .
+   ***Lista
    ceq parse('return`[_`][TL]) = 'Return[ TL' ]
       if  TL'  := parse (TL)  [print "ReturnLista:" TL' ] .
 
 
 
-*** TUPLA
+*** TUPLA !MODIFICAR
 *** parseando una asignacion de tupla con paratensis
    ceq parse('`(_`,_`)=_`(_`)[T1,T2,T3,TL]) = 'tup[T1', T2', T3', TL']
   if  T1'  := parse (T1) /\
@@ -407,12 +377,12 @@ var  Ct : Constant .
        T2'  := parse (T2) /\
        T3'  := parse (T3) /\
        TL'  := parse (TL) [print "ecuacionAsignacionTupla:" TL ] .
-*** parseando una asignacion de tupla con paratensis SIN P
+*** parseando una asignacion de tupla con paratensis SIN Parametros
    ceq parse('`(_`,_`)=_`(`)[T1,T2,T3]) = 'tup[T1', T2', T3']
   if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
        T3'  := parse (T3) [print "ecuacionAsignacionTupla:" T3' ] .
-*** parseando una asignacion de tupla SIN paratensis SIN P
+*** parseando una asignacion de tupla SIN paratensis SIN Parametros
    ceq parse('_`,_=_`(`)[T1,T2,T3]) = 'tup[T1', T2', T3']
   if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
@@ -422,31 +392,31 @@ var  Ct : Constant .
    ceq parse('log_`(_`)[T1,TL]) = 'logE[T1', 'L[TL']]
     if  T1'  := parse (T1) /\
         TL'  := parse (TL) [print "ecuacionLogEvent:" T1 ] .
-
+*** PARSEO EXPRESIONES Y OPERACIONES
  *** Parseando una suma .
- ceq parse('_+_[T1,T2]) = '_+._[T1', T2'] 
+ ceq parse('_+_[T1,T2]) = '_+._[T1', T2']
     if  T1'  := parse (T1) /\
-        T2' >:= parse (T2) .
+        T2'  := parse (T2) .
 
 ***PARSEO UN <
- ceq parse('_<_[T1,T2]) =  '_<._[T1', T2'] 
+ ceq parse('_<_[T1,T2]) =  '_<._[T1', T2']
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) .
 ***PARSEO UN <
- ceq parse('_>_[T1,T2]) =  '_>._[T1', T2'] 
+ ceq parse('_>_[T1,T2]) =  '_>._[T1', T2']
     if  T1'  := parse (T1) /\
         T2' := parse (T2) .
 ***PARSEO UN <
- ceq parse('_<=_[T1,T2]) =  '_<=._[T1', T2'] 
+ ceq parse('_<=_[T1,T2]) =  '_<=._[T1', T2']
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) .
 ***PARSEO UN <
- ceq parse('_>=_[T1,T2]) = '_>=._[T1', T2'] 
+ ceq parse('_>=_[T1,T2]) = '_>=._[T1', T2']
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) .
 
  eq parse(T) =  T  [owise] .
-*** parsea Lista
+*** Parsea una lista
 op parseL : TermList -> TermList .
 eq parseL(empty) = empty .
 eq parseL( (T , TL) ) = parse(T) , parseL (TL) .
@@ -458,6 +428,7 @@ eq parseB( (T , TL) ) = parse('token[T]) , parseB (TL) .
  op downQid : Term -> [Qid] [memo] .
  eq downQid(Ct)
     = qid(substr(string(getName(Ct)), 1, length(string(getName(Ct))))) .
+
 *** comprueba si una palabra es true o false
  op isBool : String -> Bool .
  eq isBool(S) = (S == "True") or (S == "False") .
@@ -479,9 +450,6 @@ eq parseB( (T , TL) ) = parse('token[T]) , parseB (TL) .
  *** comprueba si es un decorador de mutabilidad
  op isDecoradorMUT : String -> Bool .
  eq isDecoradorMUT(S) = (S == "@pure") or (S == "@view") or (S == "@payable") or (S == "@nonpayables") .
- *** comprueba si una palabra es true o false
- ***op isExternal : String -> Bool .
- ***eq isExternal(S) = (S == "@external") .
 endfm
 
 mod MTP is
@@ -576,6 +544,16 @@ crl [parsing] :
     ***QIL1 := preparse(QIL) /\
     {T, Ty} := metaParse(GRAMMAR, QIL, anyType) /\
     T' := parse(T) [print QIL T "\nParseado: " T' " " Ty] .
+
+var RP? : [ResultPair] .
+
+crl [parsingError] :
+    < example : EXAMPLE | read: Read, state: parsing, Attrs >
+ => < example : EXAMPLE | read: "", Attrs >
+ if Read =/= "" /\
+    QIL := tokenize(Read) /\
+    ***QIL1 := preparse(QIL) /\
+    RP? := metaParse(GRAMMAR, QIL, '@Funcion@) [print QIL "\nNo parseado: " RP?] .
 --- crl [parsing] :
 ---     < example : EXAMPLE | read: Read, state: parsing, Attrs >
 ---  => < example : EXAMPLE | read: "", Attrs >
@@ -615,119 +593,9 @@ endm
 
 
 
----  red metaParse(GRAMMAR, tokenize("x :: public(int128) \n y :: uint256 \n z :: HashMap[bool , bool] \n"), anyType) .
---- red metaParse(GRAMMAR, tokenize("x :: int128 \n"), anyType) .
---- red metaParse(GRAMMAR, tokenize("x :: public(int128) \n"), anyType) .
---- red metaParse(GRAMMAR, tokenize("x :: int128[5] \n"), anyType) .
---- red metaParse(GRAMMAR, tokenize("x :: public(int128[5]) \n"), anyType) .
---- red metaParse(GRAMMAR, tokenize("x :: int128 = 2 "), anyType) .
---- red metaParse(GRAMMAR, tokenize("x :: constant(int128) = 2 "), anyType) .
-  red metaParse(GRAMMAR, tokenize("x :: HashMap[int128, int128] "), anyType) .
-   red metaParse(GRAMMAR, tokenize("x :: public( HashMap[int128, int128]) "), anyType) .
----  red metaParse(GRAMMAR, tokenize("x :: HashMap[int128, loco[12] ]"), anyType) .
----  red metaParse(GRAMMAR, tokenize("x :: public(HashMap[int128, loco[12] ])"), anyType) .
----  red metaParse(GRAMMAR, tokenize("x :: int128 [ int128 , int128 ] "), anyType) .
---- red metaParse(GRAMMAR, tokenize("struct Funder :: x :: decimal y :: bool end"), anyType) .
---- red metaParse(GRAMMAR, tokenize(" sender :: indexed(address) "), anyType) .
---- red metaParse(GRAMMAR, tokenize(" event mism :: sender :: indexed(address) end "), anyType) .
---- red metaParse(GRAMMAR, tokenize(" event mism :: sender :: indexed(address) a :: int128 b :: String end "), anyType) .
---- red metaParse(GRAMMAR, tokenize("x : HashMap[int128, loco[12] ] \n"), anyType) .
-***red metaParse(GRAMMAR, tokenize(" x :  int128[3] \n"), anyType) .
-***red metaParse(GRAMMAR, tokenize(" microchip : public ( comida [15]) \n"), anyType) .
-***red metaParse(GRAMMAR, tokenize(" microchip : public ( HashMap [ bool, int128 ] ) \n"), anyType) .
-****red metaParse(GRAMMAR, tokenize(" self.x3333 \n"), anyType) .
-***red metaParse(GRAMMAR, tokenize(" [ x , y , z , 3 ] \n"), anyType) .
-***red metaParse(GRAMMAR, tokenize(" for j in range(z); bv \n"), anyType) .
-***red metaParse(GRAMMAR, tokenize(" x[3] = 2 "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" x = 4 + y * 2 "), anyType) . *** MO Funciona
-red metaParse(GRAMMAR, tokenize("struct Funder :: x :: decimal y :: bool end"), anyType) .
-red metaParse(GRAMMAR, tokenize("struct Loco :: sender :: address value :: uint256 end "), anyType) .
---- red metaParse(GRAMMAR, tokenize(" x : bool "), anyType) .
---- red metaParse(GRAMMAR, tokenize(" 3 +! x "), anyType) .
---- red metaParse(GRAMMAR, tokenize(" x + 4 + 3 "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" x - y "), anyType) .
-*** red metaParse(GRAMMAR, tokenize(" x * y "),  '@Exp@ ) .
---- red metaParse(GRAMMAR, tokenize(" x / y "), anyType) .
---- red metaParse(GRAMMAR, tokenize(" x ** y "), anyType) .
-***funciones
-***red metaParse(GRAMMAR, tokenize(" def loco(PaV) \n"), anyType) .
-***red metaParse(GRAMMAR, tokenize(" def loco(x : bool , y : int128 ) \n"), anyType) .
-***red metaParse(GRAMMAR, tokenize(" @external def loco(x : bool , y : int128 ) \n"), anyType) .
-***red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) \n"), anyType) .
-***red metaParse(GRAMMAR, tokenize(" @external @payable def loco(x : bool , y : int128) "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" def --init--(_a : int128 , b : bool , c : decimal ) "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) -> ( bool : bool )  \n"), anyType) .
-red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) : if x : pass end end  \n"), anyType) .
 
-***declaracion de control
-***red metaParse(GRAMMAR, tokenize(" pass "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" raise casa "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" assert x "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" assert 5 + 2  "), anyType) .  *** MO Funciona
-***red metaParse(GRAMMAR, tokenize(" assert 5 > y ,  \" losm uertos \"  "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" return x "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" return x + y  "), anyType) .  *** MO Funciona
-***red metaParse(GRAMMAR, tokenize(" return [ 2 , 4 , 7 , x ]  "), anyType) . *** MO Funciona
-***red metaParse(GRAMMAR, tokenize(" return 2 , 3 + x  "), anyType) .
-***for
-***red metaParse(GRAMMAR, tokenize(" for x in y ; pass x  = 2 "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" for x in y ; continue for x in y ; pass "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" for x in range(y, y + 2) ; continue for x in y ; pass "), anyType) . *** mp funcionma
-***red metaParse(GRAMMAR, tokenize(" for x in range(y, y + 2) ; continue end "), anyType) . *** mp funcionma
-***red metaParse(GRAMMAR, tokenize(" for x in [ 2 , x ] ; continue end "), anyType) .
-***if else
-***red metaParse(GRAMMAR, tokenize(" elif x == 2 : continue pass "), anyType) .s
-***red metaParse(GRAMMAR, tokenize(" if x == 2 : pass else: continue end "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" if x : pass else: continue end "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" if x : pass (elif x : pass) else: continue end "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" if x : pass (elif x : pass elif y : continue) else: continue end "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" elif x : pass elif y : continue "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" if x : continue (elif y : continue pass elif z : pass ) else: continue pass end "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" if x : (continue pass) (elif y : continue elif z : pass ) else: continue pass end "), anyType) .
-***eventos
-***red metaParse(GRAMMAR, tokenize(" sender : indexed(address) "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" event mism : sender : indexed(address) "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" event mism : sender : indexed(address) a : int128 b : String "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" log as(x , y , z , 3 , 4 ) "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" event mism : pass "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" x = ZERO_ADDRESS "), anyType) .
-*** tupla
-***red metaParse(GRAMMAR, tokenize("  (a , b)  = foo( a , b ) "), anyType) .
-****red metaParse(GRAMMAR, tokenize("  a , b  = foo( a , b ) "), anyType) .
-*** @internal def loco( x : bool , y : decimal , y : decimal , y : decimal , y : decimal )
-***Accesos a memoria
-***Accesos a memoria
---- red metaParse(GRAMMAR, tokenize(" voters[target] . delegate "), '@Exp@) .
---- red metaParse(GRAMMAR, tokenize(" voters[target]"), '@Exp@) .
---- red metaParse(GRAMMAR, tokenize(" voters[target][o]"), '@Exp@) .
---- red metaParse(GRAMMAR, tokenize(" voters . x"), '@Exp@) .
---- red metaParse(GRAMMAR, tokenize(" voters . x [target]"), '@Exp@) .
-***aAIGNACIONES
---- red metaParse(GRAMMAR, tokenize(" X = Q"), anyType) .
---- red metaParse(GRAMMAR, tokenize(" x[2] += x . loco "), anyType) .
---- red metaParse(GRAMMAR, tokenize(" x -= 22 "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" assert x + 2 "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" beneficiary : public(address) @external def __init__(_beneficiary : address, _auction_start : uint256, _bidding_time : uint256) : beneficiary = _beneficiary auctionStart = _auction_start end @external @payable def bid(PaV) : assert block.timestamp end "), anyType) .
-***red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) : assert x if x : pass end if x : pass else: pass end end  \n"), anyType) .
---- red metaParse(GRAMMAR, tokenize(" @external @view def loco(x : bool , y : int128 ) : beneficiary = _beneficiary beneficiary = _beneficiary end \n"), anyType) .
---- red metaParse(GRAMMAR, tokenize(" bids : HashMap [address, Bid[128] ]"), anyType) .
---- red metaParse(GRAMMAR, tokenize(" bids[msg.sender][numBids] = Bid({ blindedBid : _blindedBid , deposit : msg.value })"), anyType) .
---- red metaParse(GRAMMAR, tokenize(" def reveal(_numBids : int128, _values : uint256 [128], _fakes : bool [128], _secrets : bytes32 [128]) "), '@Cabecera@) .
---- red metaParse(GRAMMAR, tokenize("if (placeBid(msg.sender, value)) : refund -= value end"), anyType) .
---- red metaParse(GRAMMAR, tokenize("placeBid(msg.sender, value)"), '@Exp@) .
---- red metaParse(GRAMMAR, tokenize("dale(value)"), '@Exp@) .
---- red metaParse(GRAMMAR, tokenize("()"), anyType) .
---- red metaParse(GRAMMAR, tokenize("(value)"), anyType) .
---- red metaParse(GRAMMAR, tokenize("(msg.sender, value, palo)"), anyType) . value : public(uint256)
-*** hashmap y declaraciones
----  red metaParse(GRAMMAR, tokenize("value :: public(uint256)"), anyType) . 
----  red metaParse(GRAMMAR, tokenize(" bids :: HashMap [address, Bid[128] ]"), anyType) .
-red metaParse(GRAMMAR, tokenize(" Bid[128]"), anyType) .
- *** llamada a una funcion
-
-red metaParse(GRAMMAR, tokenize("value( value1 , value2 , value3 )"), '@Exp@) . 
+red metaParse(GRAMMAR, tokenize("value( value1 , value2 , value3 )"), '@Exp@) .
 red metaParse(GRAMMAR, tokenize("value( )"), '@Exp@) .
-***parametros
 red metaParse(GRAMMAR, tokenize("  _beneficiary : address"), anyType) .
 red metaParse(GRAMMAR, tokenize("  _beneficiary : address , _beneficiary : address "), anyType) .
 red metaParse(GRAMMAR, tokenize(" @external def hola( _beneficiary : address , _auction_start : uint256,) "), anyType) .
@@ -738,8 +606,18 @@ red metaParse(GRAMMAR, tokenize(" a() "), '@Exp@) .
 red metaParse(GRAMMAR, tokenize(" a(DALE, VOY , PAPU) "), '@Exp@) .
 red metaParse(GRAMMAR, tokenize(" a() "), anyType) .
 red metaParse(GRAMMAR, tokenize(" a(DALE, VOY , PAPU) "), anyType) .
+
+red metaParse(GRAMMAR, tokenize(" send( beneficiary,  highestBid) "), '@Exp@) .
+
+red metaParse(GRAMMAR, tokenize(" @external def auctionEnd(PaV) : assert block.timestamp >  revealEnd assert not ended " +
+                                " log AuctionEnded( highestBidder,  highestBid) end "), '@Funcion@) .
+
+
+red metaParse(GRAMMAR, tokenize(" @external def auctionEnd(PaV) : assert block.timestamp >  revealEnd assert not ended " +
+                                " log AuctionEnded( highestBidder,  highestBid) ended = True send( beneficiary,  highestBid) end "), '@Funcion@) .
+
 ***preparse
---- red metaParse(GRAMMAR, preparse(tokenize("value()")), '@Exp@) . 
+--- red metaParse(GRAMMAR, preparse(tokenize("value()")), '@Exp@) .
 --- red metaParse(GRAMMAR, preparse(tokenize("a b def value()")), anyType) .
 ***red metaParse(GRAMMAR, preparse(tokenize("assert self. x ")), anyType) .
 ***red metaParse(GRAMMAR, preparse((tokenize("assert self.x ")), anyType) .

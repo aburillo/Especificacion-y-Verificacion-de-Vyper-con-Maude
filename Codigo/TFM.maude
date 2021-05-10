@@ -1,10 +1,236 @@
+fmod VYPER-GRAMMAR is
+ *** pr STRING .
+ sorts @Token@ @Bubble@ @NeTokenList@ @Name@ @LToken@ .
+
+	sorts @Declaracion@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @DcStruct@ @Declaraciones@  .
+	*** Subsort eventos
+	sort @DeclaracionIndexada@ @DeclaracionEvento@ @RegistrarEventos@ .
+	subsort @Declaracion@ @DConstante@ @DcHashMap@ @DcStruct@ @DeclaracionIndexada@ @DeclaracionEvento@  < @Declaraciones@ .
+	***declaracion valida para x :: int128 y x :: int128 [12]
+	op _::_ : @Token@ @Acceso@ -> @Declaracion@ [ctor prec 22 ] .
+	op _:: public( _ ) : @Token@ @Acceso@ -> @Declaracion@ [ctor prec 22 ] . *** ! al ser declaracion se podria meter en los parametros de una fun
+
+	***Declarar dando un valor, solo valido dentro de una funcion
+	op _:_ = _ : @Token@ @Token@ @Exp@ -> @DeclaracionValor@ [ctor] .
+
+	***Declarar un valor constante !quizas hay que cambiar token por acceso
+	op _:: constant( _ ) = _ : @Token@ @Token@ @Token@ -> @DConstante@ [ctor prec 22 ] . 
+
+	*** Declara HashMap x : hasmap [int128 int128] x : hasmap [int128 int128[5]]
+	op _:: HashMap[_,_] :  @Token@ @Token@ @Acceso@ -> @DcHashMap@ [ctor prec 22  ] . 
+	op _:: public(HashMap[_,_]) :  @Token@ @Token@ @Acceso@ -> @DcHashMap@ [ctor prec 22  ] . 
+	
+	***Declarar Struct
+	op struct_::_end : @Token@ @Declaraciones@ -> @DcStruct@ [ctor prec 22] .
+
+	***declaracion indexada para Eventos
+	op _:: indexed(_) : @Token@ @Token@ -> @DeclaracionIndexada@ [ctor prec 22 ]. *** suelen ser las direcciones
+	
+	*** eventos
+	op event _::_end : @Token@ @Declaraciones@ -> @DeclaracionEvento@ [ctor prec 22] .
+	op event _::_end : @Token@  @DeclaracionControl@ -> @DeclaracionEvento@ [ctor prec 22] . *** solo puede ser pass
+	
+	***Lista de declaraciones
+	op dc : -> @Declaraciones@  [ctor] .
+	op __ : @Declaraciones@ @Declaraciones@ -> @Declaraciones@  [ctor assoc id: dc prec 25 ] .
+
+	***ACCESOS A MEMORIA
+	sort @Acceso@ .
+	subsort @Token@ < @Acceso@ .
+	op _[_] : @Acceso@ @Exp@ -> @Acceso@ [ctor prec 14] .
+	op _._ :  @Acceso@ @Acceso@ -> @Acceso@ [ctor prec 15] .
+
+	***Operaciones
+	sorts @Exp@ @Body@ @asig@ @al@ @Call@ .
+	subsort @Acceso@ @Call@ < @Exp@ .
+	op _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc prec 30] .
+	op _-_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 5] .
+	op _*_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc prec 30] .
+	op _/_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op _**_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op _>_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op _>=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op _<_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op _<=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op _==_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op _!=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op not_ : @Exp@ -> @Exp@ [ctor prec 30] .
+	op _or_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op _and_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	***quizas deberia ser una expression
+	op _`(_`) : @Token@ @ArgList@ -> @Call@ [ctor prec 10] . *** prueba
+	op _`(`) : @Token@ -> @Call@ [ctor prec 20] .
+
+
+	***Lista de expressiones
+	sort @ArgList@ .
+	subsort @Exp@ < @ArgList@ .
+	op _,_ : @ArgList@ @ArgList@ -> @ArgList@ [ctor assoc prec 60] .
+
+	***Asignaciones
+	op _=_ : @Acceso@ @Exp@ -> @asig@ [ctor] .
+	op _+=_ : @Acceso@ @Exp@ -> @asig@ [ctor] . ***tambien uede ser que en el preparse cambio += o - por otra cosa
+	op _-=_ : @Acceso@ @Exp@ -> @asig@ [ctor] .
+	op _=_({_}) : @Acceso@ @Token@ @Parametros@ -> @asig@ [ctor] .
+
+	***Self seguramente no le de uso
+	sort @self@ .
+	op self : -> @self@ [ctor] .
+	op self.balance : -> @self@ [ctor] .
+	op self._ : @Token@ -> @self@ [ctor] .
+	op self._() : @Token@ -> @self@ [ctor] .
+
+	***Funciones
+	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ @valorDevuelto@ @Default@ @Init@ @Funcion@ @Funciones@ @Param@ .
+	subsort @Param@ < @Parametros@ .
+	subsort @Funcion@ < @Funciones@ .
+
+	op _:_ : @Token@ @Acceso@ -> @Param@ [ctor prec 22] .
+
+	op @nonreentrant(_) : @Token@ -> @DecoratorNR@ [ctor] .
+
+	***Parametros de una funcion pueden ser vacios
+	op PaV : -> @Parametros@ [ctor] .
+	op _,_ : @Parametros@ @Parametros@  -> @Parametros@  [ctor assoc id: PaV prec 25] . ***prec 25
+	*** valores de vuelta
+
+	*** Declaracion de funciones sin return
+	op def _ (_) : @Token@ @Parametros@ -> @Cabecera@ [ctor prec 90 ] .
+	op _ def _(_) : @Token@ @Token@ @Parametros@ -> @Cabecera@ [ctor prec 90] .
+	op _ _ def _(_) : @Token@ @Token@ @Token@ @Parametros@  -> @Cabecera@ [ctor prec 90] .
+
+	*** Declaracion de funciones con return
+	op def _(_)->_ : @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor prec 90] .
+	op _ def _(_)->_ : @Token@ @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor prec 90] .
+	op _ _ def _(_)->_ : @Token@ @Token@ @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor prec 90] .
+
+	*** FUNCION RETORNA TUPLA
+	op def _(_)-> (_:_) : @Token@ @Parametros@ @Token@ @Token@  -> @Cabecera@ [ctor prec 90] .
+	op _ def _(_)-> (_:_) : @Token@ @Token@ @Parametros@ @Token@ @Token@ -> @Cabecera@ [ctor prec 90] .
+	op _ _ def _(_)-> (_:_) : @Token@ @Token@ @Token@ @Parametros@ @Token@ @Token@ -> @Cabecera@ [ctor prec 90] .
+
+	*** declaracion de funciones
+	op _:_ end : @Cabecera@ @Body@ -> @Funcion@ [ctor prec 91] . *** ejemplo end
+	op __ : @Funciones@ @Funciones@ -> @Funciones@ [ctor assoc prec 95 ] .
+
+	*** FOR
+	sort @For@ .
+	op bv : -> @Body@ [ctor] .
+	op for _ in range(_):_ end : @Token@ @Exp@ @Body@ -> @For@ [ctor] .
+	op for _ in range(_,_):_ end : @Token@ @Exp@ @Exp@ @Body@ -> @For@ [ctor] .
+	op for _ in _:_ end : @Token@ @Token@ @Body@ -> @For@ [ctor] .
+	op for _ in [_]:_ end : @Token@ @Bubble@ @Body@ -> @For@ [ctor] .
+
+	*** IFELSE
+	sort @ifElse@ @elseif@ @ListElseif@ .
+	subsort @elseif@ < @ListElseif@ .
+
+	op elif_:_ : @Exp@ @Body@ -> @elseif@ [ctor] .
+	op __ : @ListElseif@ @ListElseif@  -> @ListElseif@  [ctor] .
+	op if_:_ end : @Exp@ @Body@ -> @ifElse@ [ctor] .
+	op if_:_else:_ end : @Exp@ @Body@ @Body@ -> @ifElse@ [ctor] .
+	op if_:__else:_ end : @Exp@ @Body@ @ListElseif@ @Body@ -> @ifElse@ [ctor] .
+	
+	*** if parentesis
+	op if(_):_ end : @Exp@ @Body@ -> @ifElse@ [ctor] .
+	
+	***Control flow
+	sort @DeclaracionControl@ .
+	ops break continue pass : -> @DeclaracionControl@ [ctor] .
+	op raise _ : @Token@ -> @DeclaracionControl@ [ctor] . ***desencadena una expecion y revierte la llamada
+	op assert _ : @Exp@ -> @DeclaracionControl@ [ctor prec 65] .
+	op assert _,_ : @Exp@ @Token@ -> @DeclaracionControl@ [ctor prec 65] . *** si es falso se revierte la transaccion
+	op return _ : @Exp@ -> @DeclaracionControl@ [ctor] .
+	op return _,_ : @Exp@ @Exp@ -> @DeclaracionControl@ [ctor] . ***se puede devolver una tupla
+	op return [_] : @Bubble@ -> @DeclaracionControl@ [ctor] .
+
+	***igualr una tupla SEGURAMENTE TENGA PROBLEMAS PORQUE NO SERIA UN BUBBLE
+	sort @asigTupla@ .
+	op (_ , _ ) = _(_) : @Token@ @Token@ @Token@ @Bubble@ -> @asigTupla@ [ctor] .
+	op _ , _  = _(_) : @Token@ @Token@ @Token@ @Bubble@ -> @asigTupla@ [ctor] .
+	op (_ , _ ) = _() : @Token@ @Token@ @Token@ -> @asigTupla@ [ctor] .
+	op _ , _  = _() : @Token@ @Token@ @Token@ -> @asigTupla@ [ctor] .
+
+	*** registrar eventos
+	op log _`(_`) : @Name@ @ArgList@ -> @RegistrarEventos@ [ctor] .
+	subsort @For@ @DeclaracionControl@ @asig@ @asigTupla@ @RegistrarEventos@ @DeclaracionValor@ @ifElse@ @DeclaracionValor@ @Call@ < @Body@ .
+	op __ : @Body@ @Body@ -> @Body@ [ctor assoc prec 79 ] .
+
+	***Crea un contrato
+	sort @Contrato@ .
+	op __ : @Declaraciones@ @Funciones@ -> @Contrato@ [ctor prec 80] .
+
+
+ ***a=[1,2,3]
+endfm
+fmod META-SIGN is
+ pr META-LEVEL .
+
+ op BUBBLES : -> FModule .
+ op GRAMMAR : -> FModule [memo] .
+
+ eq BUBBLES
+    = (fmod 'GRAMMAR is
+        including 'QID-LIST .
+        sorts none .
+        none
+        op 'token : 'Qid -> '@Token@
+             [special(
+               (id-hook('Bubble, '1 '1)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
+				id-hook('Exclude, 'public 'HashMap 'constant 'indexed 'assert '`, '`( '`) '> 'not 'log '= )))] .
+        op 'logName : 'Qid -> '@Name@
+             [special(
+               (id-hook('Bubble, '1 '1)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
+				id-hook('Exclude, 'public 'HashMap 'constant 'indexed 'assert '`, '`( '`) '> 'not 'log '= )))] .
+        op 'bubble : 'QidList -> '@Bubble@
+             [special(
+               (id-hook('Bubble, '1 '-1 '`( '`))
+                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
+                id-hook('Exclude, 'eq 'ceq 'rl '=)))] .
+        op 'neTokenList : 'QidList -> '@NeTokenList@
+             [special(
+               (id-hook('Bubble, '1 '-1 '`( '`))
+                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
+                id-hook('Exclude, '. ': '`[ 'forall 'exists)))] .
+        none
+        none
+     endfm) .
+ eq GRAMMAR = addImports(BUBBLES, (including 'VYPER-GRAMMAR .)) .
+
+ var  SSDS : SubsortDeclSet .
+ vars IL IL' : ImportList .
+ var  EqS : EquationSet .
+ var  ODS : OpDeclSet .
+ var  MAS : MembAxSet .
+ var  RS : RuleSet .
+ var  M : Module .
+ var  SS : SortSet .
+ var  H : Header .
+
+ op setImports : Module ImportList -> Module .
+ eq setImports(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, IL')
+    = fmod H is IL' sorts SS . SSDS ODS MAS EqS endfm .
+ eq setImports(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, IL')
+    = mod H is IL' sorts SS . SSDS ODS MAS EqS RS endm .
+ eq setImports(fth H is IL sorts SS . SSDS ODS MAS EqS endfth, IL')
+    = fth H is IL' sorts SS . SSDS ODS MAS EqS endfth .
+ eq setImports(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, IL')
+    = th H is IL' sorts SS . SSDS ODS MAS EqS RS endth .
+
+ op addImports : Module ImportList -> Module .
+ eq addImports(M, IL) = setImports(M, (getImports(M) IL)) .
+endfm
+***sEGURAMNETE VAYA FUERA
 fmod BOOLEAN is
 	pr STRING .
 	sorts  BasicB ValuesB .
 	subsort  BasicB  < ValuesB .
-	***subsort Negacion AND OR  < OperacionBooleana .
+
 	ops True False : ->  BasicB [ctor] .
-	***op __=_ : Boolean String ValuesB -> DeclaracionBooleana [ctor] .
 	op not _ : ValuesB -> BasicB  .
 	eq (not True ) = False .
 	eq (not False ) = True .
@@ -16,18 +242,16 @@ fmod BOOLEAN is
 	eq (True or True) = True .
 	eq (True or False) = True .
 	eq (False or False) = False .
-	***op obv : -> OperacionBooleana [ctor] .
-	***op __ : OperacionBooleana OperacionBooleana -> OperacionBooleana [ctor id : obv] .
+
 endfm
+*** 3 MODULOS ESPECIALIZADO EN DIRECCIONES
 fmod AddressType is
 	pr STRING .
 	pr NAT .
 	sorts Direccion Byte .
 	op 0 1 2 3 4 5 6 7 8 9 a b c d f : -> Byte [ctor] .
-	***cambiar esto a que direccion sea un supertipo de string
 	op  0x____________________ : Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte Byte -> Direccion [ctor] .
 	op initAddress : -> Direccion .
-	***eq(initAddress) = 0x 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! 0! .
 	op _<balance> : String -> Nat .
 	***op _<codehash> : String -> bytes32 .
 	op _<codesize> : String -> Nat .
@@ -61,8 +285,7 @@ fmod TIPOS is
 	pr BYTES32 .
 	pr BYTES .
 	sort Tipos .
-	***subsort  Boolean Integer128 Integer256 Decimal Address String < HashMapT .
-	***subsort Boolean Integer128 Integer256 Decimal Address B32 Str Byts Stct HMap < Tipos .
+
 	var B : ValuesB .
 	ops bool int128 uint256 decimal address bytes32 String Bytes struct HashMap : -> Tipos [ctor] .
 	***FUNCIONES INICIALES
@@ -94,11 +317,7 @@ fmod TIPOS is
 							   then 1
 							   else 0
 							   fi .
-	***op convert(_,bytes32) : ValuesB -> Int .
-	***eq (convert(B,bytes32)) =  if B == True
-	***						   then 0x000000000
-	***						   else 0
-	***						   fi .
+
 endfm
 fmod LISTAS is
 	pr TIPOS .
@@ -188,272 +407,7 @@ endfm
 
 *** no vale porque no puedo crear un diccionario del tipo FP
 ***unificar en un tipo!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-fmod VYPER-GRAMMAR is
- *** pr STRING .
- sorts @Token@ @Bubble@ @NeTokenList@ @LToken@ .
 
-
- ***op If_Then_Else_Fi : @Exp@ @Prog@ @Prog@ -> @Prog@ [ctor] .
- ***ops _*_ _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc] .
- ***op _=_; : @Token@ @Exp@ -> @Prog@ [ctor] .
-	sorts @Declaracion@ @DeclaracionLista@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @DcStruct@ @Declaraciones@ @ParamStruct@  .
-	*** pa los eventos
-	sort @DeclaracionIndexada@ @DeclaracionEvento@ @RegistrarEventos@ .
-	***subsort @Declaracion@ @DeclaracionLista@ < @ParamStruct@ .
-	subsort @Declaracion@ @DeclaracionLista@ @DConstante@ @DcHashMap@ @DcStruct@ @DeclaracionIndexada@ @DeclaracionEvento@  < @Declaraciones@ .
-	***ops bool int128 uint256 decimal address bytes32 String Bytes struct HashMap : -> @Tipos@ [ctor] .
-	***subsort @Tipos@ @Token@ < @TiposToken@ .
-	***declaracion
-
-	op _::_ : @Token@ @Acceso@ -> @Declaracion@ [ctor prec 22 ] .
-	****op _:_ : @Token@ @Token@ -> @Declaracion@ [ctor] .
-	op _:: public( _ ) : @Token@ @Acceso@ -> @Declaracion@ [ctor prec 22 ] . *** ! al ser declaracion se podria meter en los parametros de una fun
-
-	***declarar Lista quito declaracionLisra
-	***op _::_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 21] . *** op _:_[_] : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
-	***op _:: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor prec 22 ] . *** op _: public(_[_]) : @Token@ @Tipos@ @Token@ -> @DeclaracionLista@ [ctor] .
-	***op _:_[_] : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
-	***op _: public(_[_]) : @Token@ @Token@ @Token@ -> @DeclaracionLista@ [ctor] .
-
-	***Declarar dando una valor ! mas enfocado a dentro de una funcion
-	op _:_ = _ : @Token@ @Token@ @Exp@ -> @DeclaracionValor@ [ctor] . *** op _:_ = _ : @Token@ @Tipos@ @Token@ -> @DeclaracionValor@ [ctor] .
-	***op _:_ = _[_] : @Token@ @Token@ @Exp@ @Token@ -> @DeclaracionValor@ [ctor] . ***NOT
-	***Declarar un valor constante
-	op _:: constant( _ ) = _ : @Token@ @Token@ @Token@ -> @DConstante@ [ctor prec 22 ] . *** op _: constant( _ ) = _ : @Token@ @Tipos@ @Token@ -> @DConstante@ [ctor] .
-
-	*** Declara HashMap
-	op _:: HashMap[_,_] :  @Token@ @Token@ @Acceso@ -> @DcHashMap@ [ctor prec 22  ] . ***op _:_[_,_] :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
-	op _:: public(HashMap[_,_]) :  @Token@ @Token@ @Acceso@ -> @DcHashMap@ [ctor prec 22  ] . *** op _: public(_[_,_]) :  @Token@ @Tipos@ @Tipos@ @Tipos@ -> @DcHashMap@ [ctor] .
-	***op _:_[_,_] : @Token@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
-	***op _: public(_[_,_]) : @Token@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
-	***op _:: HashMap[_,_ [ _ ] ] : @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@  [ctor prec 22  ] . *** op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
-	***op _:_[_,_ [ _ ] ] : @Token@ @Tipos@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
-	***op _:: public(HashMap[_,_ [ _ ] ]) : @Token@ @Token@ @Token@ @Token@ -> @DcHashMap@  [ctor prec 22 ] . *** op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Token@ @Token@ -> @DcHashMap@  [ctor] .
-	***op _: public(_[_,_ [ _ ] ]) : @Token@ @Tipos@ @Tipos@ @Tipos@ @Token@ -> @DcHashMap@  [ctor] .
-	***Declarar Struct
-	***subsort @Declaracion@ @DeclaracionLista@ < @ParamStruct@ .
-	***op __ : @ParamStruct@ @ParamStruct@ -> @ParamStruct@ [ctor] .
-	op struct_::_end : @Token@ @Declaraciones@ -> @DcStruct@ [ctor prec 22] .
-	***declaracion indexada para Eventos
-	op _:: indexed(_) : @Token@ @Token@ -> @DeclaracionIndexada@ [ctor prec 22 ]. *** suelen ser las direcciones
-	*** eventos
-	op event _::_end : @Token@ @Declaraciones@ -> @DeclaracionEvento@ [ctor prec 22] .
-	op event _::_end : @Token@  @DeclaracionControl@ -> @DeclaracionEvento@ [ctor prec 22] . *** solo puede ser pass
-	***Lista de declaraciones
-	op dc : -> @Declaraciones@  [ctor] .
-	op __ : @Declaraciones@ @Declaraciones@ -> @Declaraciones@  [ctor assoc id: dc prec 25 ] .
-
-	***ACCESOS A MEMORIA
-	sort @Acceso@ @Referencia@ .
-	subsort @Token@ < @Acceso@ .
-	***subsort @Token@ @Acceso@ < @Referencia@ .
-	op _[_] : @Acceso@ @Exp@ -> @Acceso@ [ctor prec 14] .
-***	op _[_][_] : @Token@ @Token@ @Token@ -> @Acceso@ [ctor prec 10] .
-	op _._ :  @Acceso@ @Acceso@ -> @Acceso@ [ctor prec 15] .
-***	op _[_]._ : @Token@ @Token@ @Token@ -> @Acceso@ [ctor prec 10] .
-***	op _._[_] : @Token@ @Token@ @Token@ -> @Acceso@ [ctor prec 10] .
-
-
-
-	***Operaciones
-	sorts @Exp@ @Body@ @asig@ @al@ .
-	subsort @Acceso@ < @Exp@ .
-	***op _+_ : @Token@ @Token@ -> @asig@ [ctor comm assoc] . *** esto si funciona
-	***op _+_ : @Token@ @Token@ -> @Token@ [ctor comm assoc] . *** esto no funciona
-	op _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc prec 30] . ***esto no funciona
-	op _-_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 5] .
-	op _*_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc prec 30] .
-	op _/_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op _**_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op _>_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op _>=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op _<_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op _<=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op _==_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op _!=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op not_ : @Exp@ -> @Exp@ [ctor prec 30] .
-	op _or_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op _and_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op _`(_`) : @Token@ @ArgList@ -> @Exp@ [ctor prec 20] . *** prueba
-	op _`(`) : @Token@ -> @Exp@ [ctor prec 20] .
-	*** HECHO POR ADRIAN
-    ---op __ : @Token@ @Arg@ -> @Exp@ [ctor prec 20] . hecho por adrian 
-
-	 sort @ArgList@ .
-	 subsort @Exp@ < @ArgList@ .
-	--- op `(`) : -> @Arg@ [ctor] .
-	--- op `(_`) : @ArgList@ -> @Arg@ [ctor] .
-	op _,_ : @ArgList@ @ArgList@ -> @ArgList@ [ctor assoc prec 60] .
-
-	***Asignaciones
-	op _=_ : @Acceso@ @Exp@ -> @asig@ [ctor] .
-	op _+=_ : @Acceso@ @Exp@ -> @asig@ [ctor] . ***tambien uede ser que en el preparse cambio += o - por otra cosa
-	op _-=_ : @Acceso@ @Exp@ -> @asig@ [ctor] .
-	op _=_({_}) : @Acceso@ @Token@ @Parametros@ -> @asig@ [ctor] .
-	--- op _=_ : @Token@ @Exp@ -> @asig@ [ctor prec 30] .
-	--- op _+=_ : @Token@ @Exp@ -> @asig@ [ctor prec 30] . ***tambien uede ser que en el preparse cambio += o - por otra cosa
-	--- op _-=_ : @Token@ @Exp@ -> @asig@ [ctor prec 30] .
-	--- op _[_] = _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
-	--- op _[_] += _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
-	--- op _[_] -= _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
-	--- op _._ = _ : @Token@ @Token@ @Exp@ -> @asig@ [ctor] .
-	***si que funciona si empre y cuanndo use los operadores dentro de otra funcion
-	*** LISTAS
-	--- sort @Lista@ .
-	--- subsort @Token@ < @LToken@ .
-	--- op ltk : -> @LToken@ [ctor] .
-	--- op _,_ : @LToken@ @LToken@ -> @LToken@ [ctor assoc id: ltk ] .
-	--- op [_] : @LToken@ -> @Lista@ [ctor] . ***prueba
-
-	***Self
-	sort @self@ .
-	op self : -> @self@ [ctor] .
-	op self.balance : -> @self@ [ctor] .
-	op self._ : @Token@ -> @self@ [ctor] .
-	op self._() : @Token@ -> @self@ [ctor] .
-
-	***Funciones
-	sort @DecoratorEI@ @DecoratorMut@ @DecoratorNR@ @Parametros@ @Cabecera@ @valorDevuelto@ @Default@ @Init@ @Funcion@ @Funciones@ @Param@ .
-	subsort @Param@ < @Parametros@ .
-	subsort @Funcion@ < @Funciones@ .
-	***Decoradores quito los decoradores y los trato en el parse
-	***ops @external @internal : -> @DecoratorEI@  [ctor] .
-	***ops @pure @view @payable @nonpayables : -> @DecoratorMut@ [ctor] .
-	op _:_ : @Token@ @Acceso@ -> @Param@ [ctor prec 22] .
-	***op _:_[_] : @Token@ @Token@ @Token@ -> @Param@ [ctor] .
-	op @nonreentrant(_) : @Token@ -> @DecoratorNR@ [ctor] .
-	***Parametros de una funcion pueden ser vacios
-	op PaV : -> @Parametros@ [ctor] .
-	op _,_ : @Parametros@ @Parametros@  -> @Parametros@  [ctor assoc id: PaV prec 25] . ***prec 25
-	*** valores de vuelta
-	***op ->_ : @Token@ -> @valorDevuelto@ [ctor] .
-	***op ->(_: _ ) : @Token@ -> @valorDevuelto@ [ctor] .
-	*** Declaracion de funciones
-	op def _ (_) : @Token@ @Parametros@ -> @Cabecera@ [ctor] .
-	op _ def _(_) : @Token@ @Token@ @Parametros@ -> @Cabecera@ [ctor] .
-	op _ _ def _(_) : @Token@ @Token@ @Token@ @Parametros@  -> @Cabecera@ [ctor] .
-
-	*** x : int128 , y : int128 ,
-	op def _(_)->_ : @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor] .
-	op _ def _(_)->_ : @Token@ @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor] .
-	op _ _ def _(_)->_ : @Token@ @Token@ @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor] .
-	*** FUNCION RETORNA TUPLA
-	op def _(_)-> (_:_) : @Token@ @Parametros@ @Token@ @Token@  -> @Cabecera@ [ctor] .
-	op _ def _(_)-> (_:_) : @Token@ @Token@ @Parametros@ @Token@ @Token@ -> @Cabecera@ [ctor] .
-	op _ _ def _(_)-> (_:_) : @Token@ @Token@ @Token@ @Parametros@ @Token@ @Token@ -> @Cabecera@ [ctor] .
-
-	***funcion default
-	*** esto comprobarlo en el parse y tener solo las funciones de arriba
-	***op _ _ def --default--() : @DecoratorEI@ @DecoratorMut@ -> @Default@ [ctor] . *** soilo pude ser external payable
-	***funcion init
-	***op def --init--(_) : @Parametros@ -> @Init@ [ctor ] . *** me da ambiguo con funciones
-
-	*** declaracion de funciones
-	op _:_ end : @Cabecera@ @Body@ -> @Funcion@ [ctor] . *** ejemplo end
-	op __ : @Funciones@ @Funciones@ -> @Funciones@ [ctor assoc prec 75 ] .
-	*** for
-	sort @For@ .
-	op bv : -> @Body@ [ctor] . ***prueba
-	op for _ in range(_):_ end : @Token@ @Exp@ @Body@ -> @For@ [ctor] .
-	op for _ in range(_,_):_ end : @Token@ @Exp@ @Exp@ @Body@ -> @For@ [ctor] .
-	op for _ in _:_ end : @Token@ @Token@ @Body@ -> @For@ [ctor] .
-	op for _ in [_]:_ end : @Token@ @Bubble@ @Body@ -> @For@ [ctor] .
-	*** if else
-	sort @ifElse@ @elseif@ @ListElseif@ .
-	subsort @elseif@ < @ListElseif@ .
-	***op if_:_else:_ : @Exp@ @Body@ @Body@ -> @ifElse@ [ctor] .
-	op elif_:_ : @Exp@ @Body@ -> @elseif@ [ctor] .
-	***op elifVacio : -> @ListElseif@ [ctor] .
-	op __ : @ListElseif@ @ListElseif@  -> @ListElseif@  [ctor] .
-	op if_:_ end : @Exp@ @Body@ -> @ifElse@ [ctor] .
-	op if_:_else:_ end : @Exp@ @Body@ @Body@ -> @ifElse@ [ctor] .
-	op if_:__else:_ end : @Exp@ @Body@ @ListElseif@ @Body@ -> @ifElse@ [ctor] .
-	*** if parentesis
-	op if(_):_ end : @Exp@ @Body@ -> @ifElse@ [ctor] .
-	***Control flow
-	sort @DeclaracionControl@ .
-	ops break continue pass : -> @DeclaracionControl@ [ctor] .
-	op raise _ : @Token@ -> @DeclaracionControl@ [ctor] . ***desencadena una expecion y revierte la llamada
-	op assert _ : @Exp@ -> @DeclaracionControl@ [ctor prec 65] .
-	op assert _,_ : @Exp@ @Token@ -> @DeclaracionControl@ [ctor prec 65] . *** si es falso se revierte la transaccion
-	op return _ : @Exp@ -> @DeclaracionControl@ [ctor] .
-	op return _,_ : @Exp@ @Exp@ -> @DeclaracionControl@ [ctor] . ***se puede devolver una tupla
-	op return [_] : @Bubble@ -> @DeclaracionControl@ [ctor] .
-
-	***igualr una tupla
-	sort @asigTupla@ .
-	op (_ , _ ) = _(_) : @Token@ @Token@ @Token@ @Bubble@ -> @asigTupla@ [ctor] .
-	op _ , _  = _(_) : @Token@ @Token@ @Token@ @Bubble@ -> @asigTupla@ [ctor] .
-	op (_ , _ ) = _() : @Token@ @Token@ @Token@ -> @asigTupla@ [ctor] .
-	op _ , _  = _() : @Token@ @Token@ @Token@ -> @asigTupla@ [ctor] .
-	*** registrar eventos
-	op log _(_) : @Token@ @Bubble@ -> @RegistrarEventos@ [ctor] .
-	subsort @For@ @DeclaracionControl@ @asig@ @asigTupla@ @RegistrarEventos@ @DeclaracionValor@ @ifElse@ @DeclaracionValor@ < @Body@ .
-	op __ : @Body@ @Body@ -> @Body@ [ctor assoc prec 70 ] .
-
-	***Crea un contrato
-	sort @Contrato@ .
-	op __ : @Declaraciones@ @Funciones@ -> @Contrato@ [ctor prec 80].
-
-
- ***a=[1,2,3]
-endfm
-fmod META-SIGN is
- pr META-LEVEL .
-
- op BUBBLES : -> FModule .
- op GRAMMAR : -> FModule [memo] .
-
- eq BUBBLES
-    = (fmod 'GRAMMAR is
-        including 'QID-LIST .
-        sorts none .
-        none
-        op 'token : 'Qid -> '@Token@
-             [special(
-               (id-hook('Bubble, '1 '1)
-                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
-				id-hook('Exclude, 'public 'HashMap 'constant 'indexed)))] .
-        op 'bubble : 'QidList -> '@Bubble@
-             [special(
-               (id-hook('Bubble, '1 '-1 '`( '`))
-                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
-                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
-                id-hook('Exclude, 'eq 'ceq 'rl)))] .
-        op 'neTokenList : 'QidList -> '@NeTokenList@
-             [special(
-               (id-hook('Bubble, '1 '-1 '`( '`))
-                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
-                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
-                id-hook('Exclude, '. ': '`[ 'forall 'exists)))] .
-        none
-        none
-     endfm) .
- eq GRAMMAR = addImports(BUBBLES, (including 'VYPER-GRAMMAR .)) .
-
- var  SSDS : SubsortDeclSet .
- vars IL IL' : ImportList .
- var  EqS : EquationSet .
- var  ODS : OpDeclSet .
- var  MAS : MembAxSet .
- var  RS : RuleSet .
- var  M : Module .
- var  SS : SortSet .
- var  H : Header .
-
- op setImports : Module ImportList -> Module .
- eq setImports(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, IL')
-    = fmod H is IL' sorts SS . SSDS ODS MAS EqS endfm .
- eq setImports(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, IL')
-    = mod H is IL' sorts SS . SSDS ODS MAS EqS RS endm .
- eq setImports(fth H is IL sorts SS . SSDS ODS MAS EqS endfth, IL')
-    = fth H is IL' sorts SS . SSDS ODS MAS EqS endfth .
- eq setImports(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, IL')
-    = th H is IL' sorts SS . SSDS ODS MAS EqS RS endth .
-
- op addImports : Module ImportList -> Module .
- eq addImports(M, IL) = setImports(M, (getImports(M) IL)) .
-endfm
 fmod DeclaracionVariables is
 	pr BOOLEAN .
 	pr TIPOS .
@@ -629,8 +583,6 @@ fmod Funciones is
 	op _,_ : Parametros Parametros -> Parametros [ctor assoc comm id: PaV ] .
 	op def _(_) : Qid Parametros -> Cabecera [ctor] .
 	op def _(_)->_ : Qid Parametros Tipos -> Cabecera [ctor] .
-	op def init(_) : Parametros -> initCabe [ctor] . *** puede ser payable no puede llamar otras funciones la prijmera en ser declarada
-	op def default() : -> defaultCabe [ctor] .
 endfm
 ***Primera idea de declaracion de un for
 fmod For is
@@ -658,155 +610,4 @@ mod AlmacenaVariables is
 	***	if (existeVariable(S,MS,M128,M256,MF)) == false .
 		***crl[AlmacenaInt]:  S : int128 D, MS, M128, M256, MF => D, MS, insert(S,0,M128), M256, MF
 	***	if (existeVariable(S,MS,M128,M256,MF)) == false .
-
 endm
-***Prueba para procesar un archivo y multiplicar por dos
---- fmod Duplica is
---- 	pr NAT .
---- 	pr FLOAT .
---- 	pr STRING .
---- 	pr CONVERSION .
---- 	var N : Float .
---- 	var S : String .
---- 	op doble _ : Float -> Float .
---- 	eq (doble N) = (N * 2.0) .
---- 	op cha _ : String -> Float .
---- 	eq (cha S) = float(S) .
-
---- endfm
---- ***Reglas encargadas de leer un archivo
---- mod LeerArchivo is
----  inc STD-STREAM .
----  pr  CONVERSION .
----  pr META-SIGN .
----  pr  LEXICAL .
----  pr Duplica .
---- *** pr PARSING .
----  inc FILE .
-
---- vars Text Original Read Source S : String .
----  var  Attrs : AttributeSet .
----  vars FHIn FHOut : Oid .
----  var  QIL : QidList .
----  vars T T' : Term .
----  var  M : Module .
----  vars N N' : Nat .
----  var  Ty : Type .
----  var  Q : Qid .
----  var F : Float .
----  var L : LS .
----   *** Object and class definition
----  op EXAMPLE : -> Cid [ctor] .
----  op example : -> Oid [ctor] .
-
----  op noFile : -> Oid [ctor] .
-
----  *** Attributes
----  op file:_ : Oid -> Attribute [ctor] .
----  op read:_ : String -> Attribute [ctor] .
----  op state:_ : State -> Attribute [ctor] .
----  op prueba:_ : LS -> Attribute [ctor] .
----  op terms:_ : TermList -> Attribute [ctor gather (&)] .
-
----  sort State .
----  ops idle reading parsing calculate : -> State [ctor] .
----  sort d LS .
----  subsort String < LS .
----  op lv : -> LS [ctor] .
----  op __ : LS LS -> LS [ctor assoc id: lv] .
-
----  *** Run command
----  op run : -> Configuration [ctor] .
-
----  ***                        ***
----  ***          LOAD          ***
----  ***                        ***
-
----  crl [loadComm] :
----     gotLine(example, stdin, Text)
----     < example : EXAMPLE | Attrs >
----  => < example : EXAMPLE | Attrs >
----     openFile(fileManager, example, Source, "r")
----   if Q := tokenize(Text) /\
----      Source := printTokens(Q) .
-
----  crl [loadCommERROR] :
----     gotLine(example, stdin, Text)
----     < example : EXAMPLE | Attrs >
----  => < example : EXAMPLE | Attrs >
----     write(stdout, example, "File name incorrect.\n")
----   if Q QIL := tokenize(Text) /\
----      QIL =/= nil .
-
----  rl [openedFile] :
----     openedFile(example, fileManager, FHIn)
----     < example : EXAMPLE | file: noFile, state: idle, Attrs >
----  => < example : EXAMPLE | file: FHIn, state: reading, Attrs >
----     getLine(FHIn, example) .
-
----  rl [openFileError] :
----     fileError(example, fileManager, Text)
----     < example : EXAMPLE | Attrs >
----  => < example : EXAMPLE | Attrs >
----     write(stdout, example, Text + "\n") .
-
----  ***                           ***
----  ***          GotLine          ***
----  ***                           ***
-
-
---- rl [newLine] :
----    gotLine(example, FHIn, Text)
----    < example : EXAMPLE | file: FHIn, read: Read, state: reading, prueba: (L ""), Attrs >
---- => if Text == ""
----    then < example : EXAMPLE | file: FHIn, read: Read, state: calculate, prueba: (L  "LL"), Attrs >
----         closeFile(FHIn, example)
----    else < example : EXAMPLE | file: FHIn, read: (Read + Text), state: reading, prueba: (L Text ""), Attrs >
----         getLine(FHIn, example)
----    fi .
-
---- ***crl [parsing] :
---- ***    < example : EXAMPLE | read: Read, state: parsing, Attrs >
---- *** => < example : EXAMPLE | read: "", Attrs >
---- ***    write(stdout, example, "Parsed.\n")
---- *** if Read =/= "" /\
---- ***    QIL := tokenize(Read) /\
---- ***    {T, Ty} := metaParse(GRAMMAR, QIL, anyType) /\
----  ***   < M, T' > := parse(T) [print T "\nParseado: " T'] .
---- rl [calcula] :
----     < example : EXAMPLE | read: Read, state: calculate, prueba: (S L  "LL" ), Attrs >
----  => < example : EXAMPLE | read: Read, state: calculate, prueba: (L  "LL" ), Attrs >
----     write(stdout, example, string (doble float( substr(S ,0 , sd (length( S ), 2 ) ) ) ) ) .
-
---- rl [calculaUltimo] :
----     < example : EXAMPLE | read: Read, state: calculate, prueba: ( lv "LL"), Attrs >
----  => < example : EXAMPLE | read: Read, prueba: ("Kelowa"), Attrs >
----     write(stdout, example, "Print linea.\n") .
-
----  ***                              ***
----  ***          closedFile          ***
----  ***                              ***
-
----  rl [closedFile] :
----     closedFile(example, FHIn)
----     < example : EXAMPLE | file: FHIn, Attrs >
----   => < example : EXAMPLE | file: noFile, Attrs > .
-
----  ***                          ***
----  ***          WROTE           ***
----  ***                          ***
-
----  rl [wrote] :
----     wrote(example, stdout)
----     < example : EXAMPLE | file: noFile, Attrs >
----  => < example : EXAMPLE | file: noFile, Attrs > .
-
----  eq run =
----     <> < example : EXAMPLE | file: noFile, read: "", state: idle, terms: empty,  prueba: ("")  >
----     ***<> | example ! 0 ! "" |
---- 	getLine(stdin, example, "Introduce un nombre de archivo ") .
---- endm
---- red metaParse(GRAMMAR, tokenize("x : int128 y : uint256 = true y : HashMap[bool , bool] \n"), anyType) .
---- ***red metaParse(GRAMMAR, tokenize("If xxw\nThen 4 = 4 + w ;\nElse z = 4.5 ;\nFi"), anyType) .
---- set print attribute on .
---- erew run .
