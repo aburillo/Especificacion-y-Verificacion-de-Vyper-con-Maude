@@ -594,32 +594,8 @@ endm
 
 
 
-red metaParse(GRAMMAR, tokenize("value( value1 , value2 , value3 )"), '@Exp@) .
-red metaParse(GRAMMAR, tokenize("value( )"), '@Exp@) .
-red metaParse(GRAMMAR, tokenize("  _beneficiary : address"), anyType) .
-red metaParse(GRAMMAR, tokenize("  _beneficiary : address , _beneficiary : address "), anyType) .
-red metaParse(GRAMMAR, tokenize(" @external def hola( _beneficiary : address , _auction_start : uint256,) "), anyType) .
-red metaParse(GRAMMAR, tokenize(" @external def __init__(_beneficiary : address, _auction_start : uint256, _bidding_time : uint256) "), anyType) .
-red metaParse(GRAMMAR, tokenize(" a() "), '@Contrato@) .
-red metaParse(GRAMMAR, tokenize(" a(DALE, VOY , PAPU) "), '@Contrato@) .
-red metaParse(GRAMMAR, tokenize(" a() "), '@Exp@) .
-red metaParse(GRAMMAR, tokenize(" a(DALE, VOY , PAPU) "), '@Exp@) .
-red metaParse(GRAMMAR, tokenize(" a() "), anyType) .
-red metaParse(GRAMMAR, tokenize(" a(DALE, VOY , PAPU) "), anyType) .
-
-red metaParse(GRAMMAR, tokenize(" send( beneficiary,  highestBid) "), '@Exp@) .
-
-red metaParse(GRAMMAR, tokenize(" @external def auctionEnd(PaV) : assert block.timestamp >  revealEnd assert not ended " +
-                                " log AuctionEnded( highestBidder,  highestBid) end "), '@Funcion@) .
 
 
-red metaParse(GRAMMAR, tokenize(" @external def auctionEnd(PaV) : assert block.timestamp >  revealEnd assert not ended " +
-                                " log AuctionEnded( highestBidder,  highestBid) ended = True send( beneficiary,  highestBid) end "), '@Funcion@) .
-
-red metaParse(GRAMMAR, tokenize("  event AuctionEnded :: highestBidder :: address highestBid :: uint256 end "), anyType) .
-red metaParse(GRAMMAR, tokenize(" assert msg.sender == seller "), anyType) .
-red metaParse(GRAMMAR, tokenize(" @internal def placeBid(bidder : address , _value : uint256)  -> bool "), anyType) .
-red metaParse(GRAMMAR, tokenize(" assert msg.sender == seller "), anyType) .
 red preparse(tokenize("beneficiary: public(address) " +
 "pendingReturns: public(HashMap[address, uint256]) " +
 "@external def __init__(_beneficiary: address, _auction_start: uint256, _bidding_time: uint256): " +
@@ -627,6 +603,15 @@ red preparse(tokenize("beneficiary: public(address) " +
 "   self.auctionEnd = self.auctionStart + _bidding_time " +
 "  assert block.timestamp < self.auctionEnd " +
     "auctionStart = _auction_start end" )) .
+
+
+red metaParse(GRAMMAR, tokenize(" @external def auctionEnd(PaV) : assert block.timestamp >  revealEnd assert not ended " +
+                                " log AuctionEnded( highestBidder,  highestBid) ended = True send( beneficiary,  highestBid) end "), '@Funcion@) .
+
+red metaParse(GRAMMAR, tokenize(" @internal def placeBid(bidder : address , _value : uint256)  "), anyType) .
+red metaParse(GRAMMAR, tokenize(" assert (msg.value % 2) == 0"), anyType) .
+red metaParse(GRAMMAR, tokenize("  assert msg.value == (2 * value) "), anyType) .
+
 set print attribute on .
 
 erew run .
