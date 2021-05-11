@@ -616,12 +616,16 @@ red metaParse(GRAMMAR, tokenize(" @external def auctionEnd(PaV) : assert block.t
 red metaParse(GRAMMAR, tokenize(" @external def auctionEnd(PaV) : assert block.timestamp >  revealEnd assert not ended " +
                                 " log AuctionEnded( highestBidder,  highestBid) ended = True send( beneficiary,  highestBid) end "), '@Funcion@) .
 
+red metaParse(GRAMMAR, tokenize("  event AuctionEnded :: highestBidder :: address highestBid :: uint256 end "), anyType) .
+red metaParse(GRAMMAR, tokenize(" @internal def placeBid(bidder : address , _value : uint256)  -> bool "), anyType) .
+red metaParse(GRAMMAR, tokenize(" @external def reveal(_numBids : int128 , _values : uint256[128], _fakes : bool[128], _secrets : bytes32[128])"), anyType) .
 ***preparse
 --- red metaParse(GRAMMAR, preparse(tokenize("value()")), '@Exp@) .
 --- red metaParse(GRAMMAR, preparse(tokenize("a b def value()")), anyType) .
 ***red metaParse(GRAMMAR, preparse(tokenize("assert self. x ")), anyType) .
 ***red metaParse(GRAMMAR, preparse((tokenize("assert self.x ")), anyType) .
 --- red metaParse(GRAMMAR, preparse(tokenize("x: int128 ")), anyType) .
+red preparse(tokenize("hola def ad() :")) .
 set print attribute on .
 
 erew run .

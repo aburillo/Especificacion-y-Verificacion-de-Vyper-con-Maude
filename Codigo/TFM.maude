@@ -47,6 +47,7 @@ fmod VYPER-GRAMMAR is
 	op _-_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 5] .
 	op _*_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc prec 30] .
 	op _/_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	op _%_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
 	op _**_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
 	op _>_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
 	op _>=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .

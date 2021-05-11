@@ -7,51 +7,58 @@ fmod PREPARSE is
  var N : Nat .
  vars St St' St1 : String .
  op preparse : QidList -> QidList .
- ***añadir PAV en los parentesis vacios que vengan con un def
- eq preparse(S1 'def S '`( '`) S2) = preparse(S1) 'def preparse(S) '`( 'PaV '`) preparse(S2) .
-*** eliminar self.
-ceq preparse(S Q S1) = preparse(S Q' S1)
- if St := string(Q) /\
-    N := find(St, "self.", 0) /\
-    St' := substr(St, N + 5, length(St)) /\
-    Q' := qid(St') .
+---  ***añadir PAV en los parentesis vacios que vengan con un def
+---  eq preparse(S1 'def S '`( '`) S2) = preparse(S1) 'def preparse(S) '`( 'PaV '`) preparse(S2) .
+--- *** eliminar self.
+--- ceq preparse(S Q S1) = preparse(S Q' S1)
+---  if St := string(Q) /\
+---     N := find(St, "self.", 0) /\
+---     St' := substr(St, N + 5, length(St)) /\
+---     Q' := qid(St') .
 ***op preparse : QidList -> QidList .
-ceq preparse(S) = preparseFinal(S2 S3)
- if S1 := hastaPrimerDef(S) /\
-    S2 := preparseAntes(S1) /\
-    S3 := despuesPrimerDef(S) .
+ceq preparse(S) = preparseFinal(S3 S4)
+ if S1 := PrePreparse(S) /\ 
+    S2 := hastaPrimerDef(S1) /\
+    S3 := preparseAntes(S2) /\
+    S4 := despuesPrimerDef(S1) .
 eq preparse(S) = S [owise] .
+
+***prepreparse
+op PrePreparse : QidList -> QidList .
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ if Q =/= ': /\
+    St := string(Q) /\
+    N := find(St, ":", 0) /\
+    St' := substr(St, 0, N) /\
+    St1 := substr(St, N , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1) .
+eq PrePreparse(S) = S [owise] .
+*** codigo antes del primer def
 op hastaPrimerDef : QidList -> QidList .
 eq hastaPrimerDef('def S) = nil .
-eq hastaPrimerDef(Q S) = Q hastaPrimerDef(S) [owise] .
 eq hastaPrimerDef(nil) = nil .
+eq hastaPrimerDef(Q S) = Q hastaPrimerDef(S) [owise] .
 
+*** codigo despues del primer def
 op despuesPrimerDef : QidList -> QidList .
 eq despuesPrimerDef('def S) = 'def S .
+eq despuesPrimerDef(nil) = nil .
 eq despuesPrimerDef(Q S) = despuesPrimerDef(S) [owise] .
 
-*** sustituir : por ::
+*** Preparse antes del primer def .
 op preparseAntes : QidList -> QidList .
-eq preparseAntes(S ': S1) = preparse(S ':: S1) .
-
-
+eq preparseAntes(S ': S1) = preparseAntes(S ':: S1) .
+eq preparseAntes(S) = S [owise] .
+*** preparse final
 op preparseFinal : QidList -> QidList .
-eq preparseFinal('`def S '`( '`) S2) = '`def preparseFinal(S) '`( 'PaV '`) preparseFinal(S2) .
+ eq preparseFinal(S1 'def S '`( '`) S2) = preparseFinal(S1) 'def preparseFinal(S) '`( 'PaV '`) preparseFinal(S2) .
 *** eliminar self.
 ceq preparseFinal(S Q S1) = preparseFinal(S Q' S1)
  if St := string(Q) /\
     N := find(St, "self.", 0) /\
     St' := substr(St, N + 5, length(St)) /\
     Q' := qid(St') .
-
-ceq preparseFinal(S Q S1) = preparseFinal(S Q' Q1 S1)
- if Q =/= ': /\
-    St := string(Q) /\
-    N := find(St, ":", 0) /\
-    St' := substr(St, 0, N) ) /\
-    St1 := substr(St, N + 1, length(St) ) /\
-    Q' := qid(St') /\
-    Q1 := qid(St1) .
 eq preparseFinal(S) = S [owise] .
 endfm
 *** quitar self.

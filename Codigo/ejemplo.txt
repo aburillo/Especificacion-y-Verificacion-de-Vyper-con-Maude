@@ -1,4 +1,0 @@
-If x
-Then y = 4 + w ;
-Else z = 4.5 ;
-Fi
