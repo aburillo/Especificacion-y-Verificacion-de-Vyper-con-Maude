@@ -1,0 +1,18 @@
+struct Funder :
+  sender: address
+  value: uint256
+end
+funders: HashMap[int128, Funder]
+nextFunderIndex: int128
+beneficiary: address
+deadline: public(uint256)
+goal: public(uint256)
+refundIndex: int128
+timelimit: public(uint256)
+@external
+def __init__(_beneficiary: address, _goal: uint256, _timelimit: uint256):
+    self.beneficiary = _beneficiary
+    self.deadline = block.timestamp + _timelimit
+    self.timelimit = _timelimit
+    self.goal = _goal
+end
