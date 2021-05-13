@@ -1,48 +1,42 @@
-beneficiary : public(address)
-auctionStart : public(uint256)
-auctionEnd : public(uint256)
-highestBidder : public(address)
-highestBid : public(uint256)
-ended : public(bool)
-pendingReturns : public(HashMap[address, uint256])
+beneficiary: public(address)
+auctionStart: public(uint256)
+auctionEnd: public(uint256)
+
+highestBidder: public(address)
+highestBid: public(uint256)
+
+ended: public(bool)
+
+pendingReturns: public(HashMap[address, uint256])
 @external
-def __init__(_beneficiary : address, _auction_start : uint256, _bidding_time : uint256) :
-    beneficiary = _beneficiary
-    auctionStart = _auction_start
-    auctionEnd = auctionStart + _bidding_time
-    assert block.timestamp < auctionEnd 
-end
-@external 
-@payable 
-def bid(PaV) :
-    assert block.timestamp >= auctionStart
-    assert block.timestamp < auctionEnd
-    assert msg.value > highestBid
-    pendingReturns[highestBidder] += highestBid
-    highestBidder = msg.sender
-    highestBid = msg.value
+def __init__(_beneficiary: address, _auction_start: uint256, _bidding_time: uint256):
+    self.beneficiary = _beneficiary
+    self.auctionStart = _auction_start 
+    self.auctionEnd = self.auctionStart + _bidding_time
+    assert block.timestamp < self.auctionEnd 
 end
 @external
-def withdraw(PaV) :
-    pending_amount : uint256 = pendingReturns[msg.sender]
-    pendingReturns[msg.sender] = 0
+@payable
+def bid():
+    assert block.timestamp >= self.auctionStart
+    assert block.timestamp < self.auctionEnd
+    assert msg.value > self.highestBid
+    self.pendingReturns[self.highestBidder] += self.highestBid
+    self.highestBidder = msg.sender
+    self.highestBid = msg.value
+end
+@external
+def withdraw():
+    pending_amount: uint256 = self.pendingReturns[msg.sender]
+    self.pendingReturns[msg.sender] = 0
     send(msg.sender, pending_amount)
 end
 @external
-def endAuction(PaV) :
-    assert block.timestamp >= auctionEnd
-    assert ended
-    ended = True
-    send(beneficiary, highestBid)
-end
-@external
-def auctionEnd(PaV) :
-    assert block.timestamp >  revealEnd
+def endAuction():
 
-    assert not ended
+    assert block.timestamp >= self.auctionEnd
+    assert not self.ended
 
-    log AuctionEnded( highestBidder,  highestBid)
-    ended = True
-
-    send( beneficiary,  highestBid)
+    self.ended = True
+    send(self.beneficiary, self.highestBid)
 end

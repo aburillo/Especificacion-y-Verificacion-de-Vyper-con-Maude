@@ -608,7 +608,7 @@ red preparse(tokenize("beneficiary: public(address) " +
 red metaParse(GRAMMAR, tokenize(" @external def auctionEnd(PaV) : assert block.timestamp >  revealEnd assert not ended " +
                                 " log AuctionEnded( highestBidder,  highestBid) ended = True send( beneficiary,  highestBid) end "), '@Funcion@) .
 
-red metaParse(GRAMMAR, tokenize(" @internal def placeBid(bidder : address , _value : uint256)  "), anyType) .
+red metaParse(GRAMMAR, tokenize(" @internal def placeBid(bidder : address , _value : uint256) -> bool "), anyType) .
 red metaParse(GRAMMAR, tokenize(" assert (msg.value % 2) == 0"), anyType) .
 red metaParse(GRAMMAR, tokenize("  assert msg.value == (2 * value) "), anyType) .
 

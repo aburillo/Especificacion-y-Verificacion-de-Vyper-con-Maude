@@ -43,21 +43,37 @@ fmod VYPER-GRAMMAR is
 	***Operaciones
 	sorts @Exp@ @Body@ @asig@ @al@ @Call@ .
 	subsort @Acceso@ @Call@ < @Exp@ .
-	op _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc prec 30] .
-	op _-_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 5] .
-	op _*_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc prec 30] .
-	op _/_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op _%_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op _**_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op _>_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op _>=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op _<_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op _<=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op _==_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op _!=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op not_ : @Exp@ -> @Exp@ [ctor prec 28] .
-	op _or_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
-	op _and_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 32] .
+	--- op _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc prec 30] .
+	--- op _-_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	--- op _*_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc prec 28] .
+	--- op _/_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 28] .
+	--- op _%_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 28] .
+	--- op _**_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 26] .
+	--- op _>_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 32] .
+	--- op _>=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 32] .
+	--- op _<_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 32] .
+	--- op _<=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 32] .
+	--- op _==_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 32] .
+	--- op _!=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 32] .
+	--- op not_ : @Exp@ -> @Exp@ [ctor prec 28] .
+	--- op _or_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
+	--- op _and_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 32] .
+	***op `(_`) : @Exp@ -> @Exp@ [ctor prec 8] .
+	op -_ : @Exp@ -> @Exp@ [ctor prec 10] .
+	op not_ : @Exp@ -> @Exp@ [ctor prec 10] .
+	op _*_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc prec 14] .
+	op _/_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 14] .
+	op _%_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 14] .
+	op _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc prec 16] .
+	op _-_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 16] .
+	op _>_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 18] .
+	op _>=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 18] .
+	op _<_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 18] .
+	op _<=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 18] .
+	op _==_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 19] .
+	op _!=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 19] .
+	op _and_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 20] .
+	op _or_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 21] .
 	***quizas deberia ser una expression
 	op _`(_`) : @Token@ @ArgList@ -> @Call@ [ctor prec 10] . *** prueba
 	op _`(`) : @Token@ -> @Call@ [ctor prec 20] .
@@ -180,7 +196,7 @@ fmod META-SIGN is
              [special(
                (id-hook('Bubble, '1 '1)
                 op-hook('qidSymbol, '<Qids>, nil, 'Qid)
-				id-hook('Exclude, 'public 'HashMap 'constant 'indexed 'assert '`, '`( '`) '> 'not 'log '= ':: '+ '< '@external '@internal '@pure '@view '@payable '@nonpayables '>= '<= '+= '-= '`[ '`] ': 'return '!= 'break 'range '== 'and 'continue )))] .
+				id-hook('Exclude, 'public 'HashMap 'constant 'indexed 'assert '`, '`( '`) '> 'not 'log '= ':: '+ '< '@external '@internal '@pure '@view '@payable '@nonpayables '>= '<= '+= '-= '`[ '`] ': 'return '!= 'break 'range '== 'and 'continue '* '-> 'and '/ '**)))] .
         op 'logName : 'Qid -> '@Name@
              [special(
                (id-hook('Bubble, '1 '1)
