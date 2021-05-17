@@ -1,5 +1,5 @@
 fmod VYPER-GRAMMAR is
- *** pr STRING .
+  pr STRING .
  sorts @Token@ @Bubble@ @NeTokenList@ @Name@ @LToken@ .
 
 	sorts @Declaracion@ @DeclaracionValor@ @DConstante@ @DcHashMap@ @DcStruct@ @Declaraciones@  .
@@ -37,8 +37,8 @@ fmod VYPER-GRAMMAR is
 	***ACCESOS A MEMORIA
 	sort @Acceso@ .
 	subsort @Token@ < @Acceso@ .
-	op _[_] : @Acceso@ @Exp@ -> @Acceso@ [ctor prec 14] .
-	op _._ :  @Acceso@ @Acceso@ -> @Acceso@ [ctor prec 15] .
+	op _[_] : @Exp@ @Exp@ -> @Acceso@ [ctor prec 14] . *** op _[_] : @Acceso@ @Exp@ -> @Acceso@ [ctor prec 14] .
+	op _._ :  @Exp@ @Exp@ -> @Acceso@ [ctor prec 15] . *** op _._ :  @Acceso@ @Acceso@ -> @Acceso@ [ctor prec 15] .
 
 	***Operaciones
 	sorts @Exp@ @Body@ @asig@ @al@ @Call@ .
@@ -58,7 +58,7 @@ fmod VYPER-GRAMMAR is
 	--- op not_ : @Exp@ -> @Exp@ [ctor prec 28] .
 	--- op _or_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 30] .
 	--- op _and_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 32] .
-	***op `(_`) : @Exp@ -> @Exp@ [ctor prec 8] .
+	op `(_`) : @Exp@ -> @Exp@ [ctor prec 8] .
 	op -_ : @Exp@ -> @Exp@ [ctor prec 10] .
 	op not_ : @Exp@ -> @Exp@ [ctor prec 10] .
 	op _*_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc prec 14] .
@@ -75,8 +75,8 @@ fmod VYPER-GRAMMAR is
 	op _and_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 20] .
 	op _or_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 21] .
 	***quizas deberia ser una expression
-	op _`(_`) : @Token@ @ArgList@ -> @Call@ [ctor prec 10] . *** prueba
-	op _`(`) : @Token@ -> @Call@ [ctor prec 20] .
+	op _(_) : @Name@ @ArgList@ -> @Call@ [ctor prec 10] . *** prueba
+	op _() : @Token@ -> @Call@ [ctor prec 20] .
 
 
 	***Lista de expressiones
@@ -118,14 +118,14 @@ fmod VYPER-GRAMMAR is
 	op _ _ def _(_) : @Decorator@ @Decorator@ @Token@ @Parametros@  -> @Cabecera@ [ctor prec 90] .
 
 	*** Declaracion de funciones con return
-	op def _(_)-> _ : @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor prec 90] .
-	op _ def _(_)-> _ : @Decorator@ @Decorator@ @Parametros@ @Token@ -> @Cabecera@ [ctor prec 90] .
-	op _ _ def _(_)-> _ : @Decorator@ @Decorator@ @Token@ @Parametros@ @Token@ -> @Cabecera@ [ctor prec 90] .
+	op def _`(_`) -> _ : @Token@ @Parametros@ @Name@ -> @Cabecera@ [ctor prec 90] .
+	op _ def _`(_`) -> _ : @Decorator@ @Token@ @Parametros@ @Name@ -> @Cabecera@ [ctor prec 90] .
+	op _ _ def _`(_`) -> _ : @Decorator@ @Decorator@ @Token@ @Parametros@ @Name@ -> @Cabecera@ [ctor prec 90] .
 
 	*** FUNCION RETORNA TUPLA
-	op def _(_)-> (_:_) : @Token@ @Parametros@ @Token@ @Token@  -> @Cabecera@ [ctor prec 90] .
-	op _ def _(_)-> (_:_) : @Decorator@ @Token@ @Parametros@ @Token@ @Token@ -> @Cabecera@ [ctor prec 90] .
-	op _ _ def _(_)-> (_:_) : @Decorator@ @Decorator@ @Token@ @Parametros@ @Token@ @Token@ -> @Cabecera@ [ctor prec 90] .
+	op def _`(_`)-> (_:_) : @Token@ @Parametros@ @Token@ @Token@  -> @Cabecera@ [ctor prec 90] .
+	op _ def _`(_`)-> (_:_) : @Decorator@ @Token@ @Parametros@ @Token@ @Token@ -> @Cabecera@ [ctor prec 90] .
+	op _ _ def _`(_`)-> (_:_) : @Decorator@ @Decorator@ @Token@ @Parametros@ @Token@ @Token@ -> @Cabecera@ [ctor prec 90] .
 
 	*** declaracion de funciones
 	op _:_ end : @Cabecera@ @Body@ -> @Funcion@ [ctor prec 91] . *** ejemplo end
@@ -150,14 +150,14 @@ fmod VYPER-GRAMMAR is
 	op if_:__else:_ end : @Exp@ @Body@ @ListElseif@ @Body@ -> @ifElse@ [ctor] .
 	
 	*** if parentesis
-	op if(_):_ end : @Exp@ @Body@ -> @ifElse@ [ctor] .
+	***op if(_):_ end : @Exp@ @Body@ -> @ifElse@ [ctor] .
 	
 	***Control flow
 	sort @DeclaracionControl@ .
 	ops break continue pass : -> @DeclaracionControl@ [ctor] .
 	op raise _ : @Token@ -> @DeclaracionControl@ [ctor] . ***desencadena una expecion y revierte la llamada
 	op assert _ : @Exp@ -> @DeclaracionControl@ [ctor prec 65] .
-	op assert _,_ : @Exp@ @Token@ -> @DeclaracionControl@ [ctor prec 65] . *** si es falso se revierte la transaccion
+	op assert _,_ : @Exp@ String -> @DeclaracionControl@ [ctor prec 65] . *** si es falso se revierte la transaccion
 	op return _ : @Exp@ -> @DeclaracionControl@ [ctor] .
 	op return _,_ : @Exp@ @Exp@ -> @DeclaracionControl@ [ctor] . ***se puede devolver una tupla
 	op return [_] : @Bubble@ -> @DeclaracionControl@ [ctor] .
@@ -172,7 +172,7 @@ fmod VYPER-GRAMMAR is
 	*** registrar eventos
 	op log _`(_`) : @Name@ @ArgList@ -> @RegistrarEventos@ [ctor] .
 	subsort @For@ @DeclaracionControl@ @asig@ @asigTupla@ @RegistrarEventos@ @DeclaracionValor@ @ifElse@ @DeclaracionValor@ @Call@ < @Body@ .
-	op __ : @Body@ @Body@ -> @Body@ [ctor assoc prec 79 ] .
+	op _;_ : @Body@ @Body@ -> @Body@ [ctor assoc prec 79 ] .
 
 	***Crea un contrato
 	sort @Contrato@ .
@@ -196,7 +196,7 @@ fmod META-SIGN is
              [special(
                (id-hook('Bubble, '1 '1)
                 op-hook('qidSymbol, '<Qids>, nil, 'Qid)
-				id-hook('Exclude, 'public 'HashMap 'constant 'indexed 'assert '`, '`( '`) '> 'not 'log '= ':: '+ '< '@external '@internal '@pure '@view '@payable '@nonpayables '>= '<= '+= '-= '`[ '`] ': 'return '!= 'break 'range '== 'and 'continue '* '-> 'and '/ '**)))] .
+				id-hook('Exclude, 'public 'HashMap 'constant 'indexed 'assert '`, '`( '`) '> 'not 'log '= ':: '+ '< '@external '@internal '@pure '@view '@payable '@nonpayables '>= '<= '+= '-= '`[ '`] ': 'return '!= 'break 'range '== 'and 'continue '* '-> 'and '/ '** '% ';)))] .
         op 'logName : 'Qid -> '@Name@
              [special(
                (id-hook('Bubble, '1 '1)

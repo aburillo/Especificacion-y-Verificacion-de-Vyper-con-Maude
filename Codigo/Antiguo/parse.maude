@@ -248,7 +248,7 @@ var  Ct : Constant .
    ceq parse('_def_`(_`)[T1,'token[T],TL]) = 'init[ TL']
    if T1' := parse (T1) /\
       S1 := string(T1') /\
-      S1 == "@external.decoradorEI" /\
+      S1 == "@external.@Decorator@" /\
       Q := downQid(T) /\
       S := string(Q) /\
       S == "__init__" /\
@@ -257,10 +257,10 @@ var  Ct : Constant .
     ceq parse('__def_`(_`)[T1,T2,'token[T],'PaV.@Parametros@]) = 'default[T1', T2']
    if T1'  := parse (T1) /\
       S1 := string(T1') /\
-      S1 == "@external.decoradorEI" /\
+      S1 == "@external.@Decorator@" /\
       T2' := parse (T2) /\
       S2 := string(T2') /\
-      S2 == "@payable.decoradorMUT" /\
+      S2 == "@payable.@Decorator@" /\
       Q := downQid(T) /\
       S := string(Q) /\
       S == "__default__" [print "ecuacionFuncionesDEFAULT:" S1 ] .
@@ -327,6 +327,9 @@ var  Ct : Constant .
    ceq parse('_:_end[T1,TL]) = 'fun[T1' , TL']
    if  T1'  := parse (T1) /\
          TL'  := parse (TL) [print "ecuacionParseaFuncion:" TL' ] .
+   ceq parse('_;_[T1,TL]) = 'Cuerpo[T1' , TL']
+   if  T1'  := parse (T1) /\
+       TL'  := parse (TL) [print "parseaBody:" TL' ] .
    
    ***LLAMADA A UNA FUNCION
    ceq parse('_`(_`)[T1,TL]) = 'Call[T1',TL']
@@ -533,7 +536,7 @@ rl [newLine] :
         closeFile(FHIn, example)
    else < example : EXAMPLE | file: FHIn, read: (Read + Text), state: reading, Attrs >
         getLine(FHIn, example)
-   fi .
+   fi [print Text] .
 
 crl [parsing] :
     < example : EXAMPLE | read: Read, state: parsing, Attrs >
@@ -596,22 +599,27 @@ endm
 
 
 
-red preparse(tokenize("beneficiary: public(address) " +
-"pendingReturns: public(HashMap[address, uint256]) " +
-"@external def __init__(_beneficiary: address, _auction_start: uint256, _bidding_time: uint256): " +
-"    beneficiary = _beneficiary " +
-"   self.auctionEnd = self.auctionStart + _bidding_time " +
-"  assert block.timestamp < self.auctionEnd " +
-    "auctionStart = _auction_start end" )) .
+red preparse(tokenize("@external " +
+"def withdraw(): " +
+"pending_amount: uint256 = self.pendingReturns[msg.sender] ; " +
+"    self.pendingReturns[msg.sender] = 0 ; " +
+"   send(msg.sender, pending_amount)" +
+"  end " )) .
 
 
 red metaParse(GRAMMAR, tokenize(" @external def auctionEnd(PaV) : assert block.timestamp >  revealEnd assert not ended " +
                                 " log AuctionEnded( highestBidder,  highestBid) ended = True send( beneficiary,  highestBid) end "), '@Funcion@) .
 
 red metaParse(GRAMMAR, tokenize(" @internal def placeBid(bidder : address , _value : uint256) -> bool "), anyType) .
-red metaParse(GRAMMAR, tokenize(" assert (msg.value % 2) == 0"), anyType) .
-red metaParse(GRAMMAR, tokenize("  assert msg.value == (2 * value) "), anyType) .
+red metaParse(GRAMMAR, tokenize(" assert (msg.value % 2) == 0"), '@DeclaracionControl@) .
+red metaParse(GRAMMAR, tokenize("  assert ( x + 2 ) == 2"), '@DeclaracionControl@) .
 
+red metaParse(GRAMMAR, tokenize("  bidToCheck : Bid = (bids[msg.sender])[i]"), '@Body@) .
+red metaParse(GRAMMAR, preparse(tokenize("@external " +
+"def withdraw(): " +
+"pending_amount: uint256 = self.pendingReturns[msg.sender]  ;" +
+"    self.pendingReturns[msg.sender] = 0  " +
+"  end " )), anyType) .
 set print attribute on .
 
 erew run .

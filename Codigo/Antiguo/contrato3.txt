@@ -6,6 +6,7 @@ ended: public(bool)
 @external
 @payable
 def __init__():
+    assert (msg.value % 2) == 0
     self.value = msg.value 
     self.seller = msg.sender
     self.unlocked = True
@@ -20,7 +21,7 @@ end
 @payable
 def purchase():
     assert self.unlocked 
-    assert msg.value == 2
+    assert msg.value == (2 * self.value)
     self.buyer = msg.sender
     self.unlocked = False
 end
