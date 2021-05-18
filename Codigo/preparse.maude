@@ -52,10 +52,15 @@ op preparseAntes : QidList -> QidList .
 eq preparseAntes(S ': S1) = preparseAntes(S ':: S1) .
 eq preparseAntes(S '; S1) = preparseAntes(S S1) .
 eq preparseAntes(S) = S [owise] .
-*** Preparse antes del primer def .
+*** Preparse despues del primer def .
 op preparseDespues : QidList -> QidList .
 eq preparseDespues(S ': '; S1) = preparseDespues(S ': S1) .
-eq preparseDespues(S 'end '; S1) = preparseDespues(S 'end S1) .
+eq preparseDespues(S '; 'end ) = preparseDespues(S 'end) .
+eq preparseDespues(S 'end ';) = preparseDespues(S 'end) .
+eq preparseDespues(S 'end '; S1 ) = preparseDespues(S 'end S1) .
+ceq preparseDespues(S Q '; S1) = preparseDespues(S Q S1 ) 
+if    St := string(Q) /\
+      N := find(St, "@", 0) .
 eq preparseDespues(S) = S [owise] .
 *** preparse final
 op preparseFinal : QidList -> QidList .

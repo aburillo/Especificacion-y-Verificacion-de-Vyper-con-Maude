@@ -2,7 +2,7 @@ fmod PREPARSE is
  pr CONVERSION .
  pr QID-LIST .
 
- var S S1 S2 S3 S4 : QidList .
+ var S S1 S2 S3 S4 S5 : QidList .
  var Q Q1 Q' : Qid .
  var N : Nat .
  vars St St' St1 : String .
@@ -16,11 +16,12 @@ fmod PREPARSE is
 ---     St' := substr(St, N + 5, length(St)) /\
 ---     Q' := qid(St') .
 ***op preparse : QidList -> QidList .
-ceq preparse(S) = preparseFinal(S3 S4)
+ceq preparse(S) = preparseFinal(S3 S5)
  if S1 := PrePreparse(S) /\ 
     S2 := hastaPrimerDef(S1) /\
     S3 := preparseAntes(S2) /\
-    S4 := despuesPrimerDef(S1) .
+    S4 := despuesPrimerDef(S1) /\ 
+    S5 := preparseDespues(S4) .
 eq preparse(S) = S [owise] .
 
 ***prepreparse
@@ -49,7 +50,13 @@ eq despuesPrimerDef(Q S) = despuesPrimerDef(S) [owise] .
 *** Preparse antes del primer def .
 op preparseAntes : QidList -> QidList .
 eq preparseAntes(S ': S1) = preparseAntes(S ':: S1) .
+eq preparseAntes(S '; S1) = preparseAntes(S S1) .
 eq preparseAntes(S) = S [owise] .
+*** Preparse antes del primer def .
+op preparseDespues : QidList -> QidList .
+eq preparseDespues(S ': '; S1) = preparseDespues(S ': S1) .
+eq preparseDespues(S 'end '; S1) = preparseDespues(S 'end S1) .
+eq preparseDespues(S) = S [owise] .
 *** preparse final
 op preparseFinal : QidList -> QidList .
  eq preparseFinal(S1 'def S '`( '`) S2) = preparseFinal(S1) 'def preparseFinal(S) '`( 'PaV '`) preparseFinal(S2) .

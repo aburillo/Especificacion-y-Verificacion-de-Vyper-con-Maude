@@ -536,7 +536,7 @@ rl [newLine] :
         closeFile(FHIn, example)
    else < example : EXAMPLE | file: FHIn, read: (Read + Text + " ; "), state: reading, Attrs >
         getLine(FHIn, example)
-   fi [print Read] .
+   fi .
 
 crl [parsing] :
     < example : EXAMPLE | read: Read, state: parsing, Attrs >
@@ -544,9 +544,9 @@ crl [parsing] :
     write(stdout, example, "Parsed.\n")
  if Read =/= "" /\
     QIL := tokenize(Read) /\
-    QIL1 := preparse(QIL) [print QIL QIL1] .
-    ***{T, Ty} := metaParse(GRAMMAR, QIL1, anyType) /\
-    ***T' := parse(T) [print QIL T "\nParseado: " T' " " Ty] .
+    QIL1 := preparse(QIL)  /\
+    {T, Ty} := metaParse(GRAMMAR, QIL1, anyType) /\
+    T' := parse(T) [print T "\nParseado: " T' " " Ty] .
 
 var RP? : [ResultPair] .
 
@@ -555,7 +555,7 @@ crl [parsingError] :
  => < example : EXAMPLE | read: "", Attrs >
  if Read =/= "" /\
     QIL := tokenize(Read) /\
-    ***QIL1 := preparse(QIL) /\
+    QIL1 := preparse(QIL) /\
     RP? := metaParse(GRAMMAR, QIL, '@Funcion@) [print QIL "\nNo parseado: " RP?] .
 --- crl [parsing] :
 ---     < example : EXAMPLE | read: Read, state: parsing, Attrs >
@@ -623,10 +623,10 @@ red metaParse(GRAMMAR, preparse(tokenize("@external " +
 red preparse(tokenize( "auctionEnd: public(uint256) ; " +
 "auctionEnd: public(uint256) ; " +
 "@external ; " +
-"def withdraw(): ; " +
+"def withdraw(): ; " + "@external ; " +
 "pending_amount: uint256 = self.pendingReturns[msg.sender] ; " +
 "    self.pendingReturns[msg.sender] = 0 ; " +
-"  end ; "  )) .
+"  end ; " + "@external ; " )) .
 set print attribute on .
 
 erew run .
