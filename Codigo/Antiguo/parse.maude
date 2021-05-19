@@ -536,7 +536,7 @@ rl [newLine] :
         closeFile(FHIn, example)
    else < example : EXAMPLE | file: FHIn, read: (Read + Text + " ; "), state: reading, Attrs >
         getLine(FHIn, example)
-   fi .
+   fi [print Text ] .
 
 crl [parsing] :
     < example : EXAMPLE | read: Read, state: parsing, Attrs >
@@ -546,7 +546,7 @@ crl [parsing] :
     QIL := tokenize(Read) /\
     QIL1 := preparse(QIL)  /\
     {T, Ty} := metaParse(GRAMMAR, QIL1, anyType) /\
-    T' := parse(T) [print T "\nParseado: " T' " " Ty] .
+    T' := parse(T) [print  QIL T "\nParseado: " T' " " Ty] .
 
 var RP? : [ResultPair] .
 
@@ -556,7 +556,7 @@ crl [parsingError] :
  if Read =/= "" /\
     QIL := tokenize(Read) /\
     QIL1 := preparse(QIL) /\
-    RP? := metaParse(GRAMMAR, QIL, '@Funcion@) [print QIL "\nNo parseado: " RP?] .
+    RP? := metaParse(GRAMMAR, QIL, '@Funcion@) [print QIL1 "\nNo parseado: " RP?] .
 --- crl [parsing] :
 ---     < example : EXAMPLE | read: Read, state: parsing, Attrs >
 ---  => < example : EXAMPLE | read: "", Attrs >

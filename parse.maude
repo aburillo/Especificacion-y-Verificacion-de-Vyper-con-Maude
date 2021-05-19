@@ -615,18 +615,27 @@ red metaParse(GRAMMAR, tokenize(" assert (msg.value % 2) == 0"), '@DeclaracionCo
 red metaParse(GRAMMAR, tokenize("  assert ( x + 2 ) == 2"), '@DeclaracionControl@) .
 
 red metaParse(GRAMMAR, tokenize("  bidToCheck : Bid = (bids[msg.sender])[i]"), '@Body@) .
-red metaParse(GRAMMAR, preparse(tokenize("@external " +
-"def withdraw(): " +
-"pending_amount: uint256 = self.pendingReturns[msg.sender]  ;" +
-"    self.pendingReturns[msg.sender] = 0  " +
-"  end " )), anyType) .
-red preparse(tokenize( "auctionEnd: public(uint256) ; " +
-"auctionEnd: public(uint256) ; " +
-"@external ; " +
-"def withdraw(): ; " + "@external ; " +
-"pending_amount: uint256 = self.pendingReturns[msg.sender] ; " +
-"    self.pendingReturns[msg.sender] = 0 ; " +
-"  end ; " + "@external ; " )) .
+
+--- red metaParse(GRAMMAR, preparse(tokenize("@external " +
+--- "def withdraw(): " +
+--- "pending_amount: uint256 = self.pendingReturns[msg.sender]  ;" +
+--- "    self.pendingReturns[msg.sender] = 0  " +
+--- "  end " )), anyType) .
+--- red preparse(tokenize( "auctionEnd: public(uint256) ; " +
+--- "auctionEnd: public(uint256) ; " +
+--- "@external ; " +
+--- "def withdraw(): ; " + "@external ; " +
+--- "pending_amount: uint256 = self.pendingReturns[msg.sender] ; " +
+--- "    self.pendingReturns[msg.sender] = 0 ; " +
+--- "  end ; " + "@external ; " )) .
+
+red metaParse(GRAMMAR, tokenize(" x = funders[i].sender "), anyType) .
+red metaParse(GRAMMAR, tokenize(" send(self.funders[i].sender, self.funders[i].value) "), anyType) .
+red metaParse(GRAMMAR, tokenize(" if x <= y : " +
+            "refundIndex = nextFunderIndex ; " +
+            "return " +
+        "end" ), '@ifElse@ ) .
+red metaParse(GRAMMAR, tokenize(" x = 2 "), anyType) .
 set print attribute on .
 
 erew run .

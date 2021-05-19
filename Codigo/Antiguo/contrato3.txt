@@ -30,9 +30,7 @@ def received():
     assert not self.unlocked 
     assert msg.sender == self.buyer
     assert not self.ended
-
     self.ended = True
-
     send(self.buyer, self.value) 
     selfdestruct(self.seller)
 end 

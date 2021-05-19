@@ -29,7 +29,7 @@ end
 def withdraw():
     pending_amount: uint256 = self.pendingReturns[msg.sender]
     self.pendingReturns[msg.sender] = 0
-    send(msg.sender, pending_amount);
+    send(msg.sender, pending_amount)
 end
 @external
 def endAuction():

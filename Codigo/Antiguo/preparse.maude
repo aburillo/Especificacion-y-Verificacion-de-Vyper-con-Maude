@@ -56,6 +56,7 @@ eq preparseAntes(S) = S [owise] .
 op preparseDespues : QidList -> QidList .
 eq preparseDespues(S ': '; S1) = preparseDespues(S ': S1) .
 eq preparseDespues(S '; 'end ) = preparseDespues(S 'end) .
+eq preparseDespues(S '; 'end S1) = preparseDespues(S 'end S1) .
 eq preparseDespues(S 'end ';) = preparseDespues(S 'end) .
 eq preparseDespues(S 'end '; S1 ) = preparseDespues(S 'end S1) .
 ceq preparseDespues(S Q '; S1) = preparseDespues(S Q S1 ) 
