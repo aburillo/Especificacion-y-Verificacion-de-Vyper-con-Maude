@@ -1,0 +1,36 @@
+value: public(uint256)
+seller: public(address)
+buyer: public(address)
+unlocked: public(bool)
+ended: public(bool)
+@external
+@payable
+def __init__():
+    assert (msg.value % 2) == 0
+    self.value = msg.value 
+    self.seller = msg.sender
+    self.unlocked = True
+end
+@external
+def abort():
+    assert self.unlocked
+    assert msg.sender == self.seller
+    selfdestruct(self.seller)
+end
+@external
+@payable
+def purchase():
+    assert self.unlocked 
+    assert msg.value == (2 * self.value)
+    self.buyer = msg.sender
+    self.unlocked = False
+end
+@external
+def received():
+    assert not self.unlocked 
+    assert msg.sender == self.buyer
+    assert not self.ended
+    self.ended = True
+    send(self.buyer, self.value) 
+    selfdestruct(self.seller)
+end 
