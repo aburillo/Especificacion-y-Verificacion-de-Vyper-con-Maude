@@ -75,8 +75,8 @@ fmod VYPER-GRAMMAR is
 	op _and_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 20] .
 	op _or_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 21] .
 	***quizas deberia ser una expression
-	op _(_) : @Name@ @ArgList@ -> @Call@ [ctor prec 10] . *** prueba
-	op _() : @Token@ -> @Call@ [ctor prec 20] .
+	op _(_) : @Name@ @ArgList@ -> @Call@ [ctor prec 5] . *** prueba
+	op _() : @Name@ -> @Call@ [ctor prec 5] .
 
 
 	***Lista de expressiones
@@ -146,7 +146,7 @@ fmod VYPER-GRAMMAR is
 	op elif_:_ : @Exp@ @Body@ -> @elseif@ [ctor] .
 	op __ : @ListElseif@ @ListElseif@  -> @ListElseif@  [ctor] .
 	op if_:_ end : @Exp@ @Body@ -> @ifElse@ [ctor] .
-	op if_:_else:_ end : @Exp@ @Body@ @Body@ -> @ifElse@ [ctor] .
+	op if_:_ else:_ end : @Exp@ @Body@ @Body@ -> @ifElse@ [ctor] .
 	op if_:__else:_ end : @Exp@ @Body@ @ListElseif@ @Body@ -> @ifElse@ [ctor] .
 	
 	*** if parentesis
@@ -154,11 +154,11 @@ fmod VYPER-GRAMMAR is
 	
 	***Control flow
 	sort @DeclaracionControl@ .
-	ops break continue pass : -> @DeclaracionControl@ [ctor] .
+	ops break continue pass return : -> @DeclaracionControl@ [ctor] .
 	op raise _ : @Token@ -> @DeclaracionControl@ [ctor] . ***desencadena una expecion y revierte la llamada
 	op assert _ : @Exp@ -> @DeclaracionControl@ [ctor prec 65] .
 	op assert _,_ : @Exp@ String -> @DeclaracionControl@ [ctor prec 65] . *** si es falso se revierte la transaccion
-	op return _ : @Exp@ -> @DeclaracionControl@ [ctor] .
+	op return _ : @Exp@ -> @DeclaracionControl@ [ctor ] .
 	op return _,_ : @Exp@ @Exp@ -> @DeclaracionControl@ [ctor] . ***se puede devolver una tupla
 	op return [_] : @Bubble@ -> @DeclaracionControl@ [ctor] .
 
@@ -196,12 +196,12 @@ fmod META-SIGN is
              [special(
                (id-hook('Bubble, '1 '1)
                 op-hook('qidSymbol, '<Qids>, nil, 'Qid)
-				id-hook('Exclude, 'public 'HashMap 'constant 'indexed 'assert '`, '`( '`) '> 'not 'log '= ':: '+ '< '@external '@internal '@pure '@view '@payable '@nonpayables '>= '<= '+= '-= '`[ '`] ': 'return '!= 'break 'range '== 'and 'continue '* '-> 'and '/ '** '% ';)))] .
+				id-hook('Exclude, 'public 'HashMap 'constant 'indexed 'assert '`, '`( '`) '> 'not 'log '= ':: '+ '< '@external '@internal '@pure '@view '@payable '@nonpayables '>= '<= '+= '-= '`[ '`] ': 'return '!= 'break 'range '== 'and 'continue '* '-> 'and '/ '** '% '; 'if 'for 'else 'else: 'elif )))] .
         op 'logName : 'Qid -> '@Name@
              [special(
                (id-hook('Bubble, '1 '1)
                 op-hook('qidSymbol, '<Qids>, nil, 'Qid)
-				id-hook('Exclude, 'public 'HashMap 'constant 'indexed 'assert '`, '`( '`) '> 'not 'log '= )))] .
+				id-hook('Exclude, 'public 'HashMap 'constant 'indexed 'assert '`, '`( '`) '> 'not 'log '= 'return )))] .
         op 'bubble : 'QidList -> '@Bubble@
              [special(
                (id-hook('Bubble, '1 '-1 '`( '`))

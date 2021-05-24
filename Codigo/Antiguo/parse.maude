@@ -635,6 +635,9 @@ red metaParse(GRAMMAR, tokenize(" if x <= y : " +
             "refundIndex = nextFunderIndex ; " +
             "return " +
         "end" ), '@ifElse@ ) .
+red metaParse(GRAMMAR, tokenize(" for i in range(ind, ind + 30): " +
+            "refundIndex = nextFunderIndex " +
+        "end" ), anyType ) .
 red metaParse(GRAMMAR, tokenize(" x = 2 "), anyType) .
 set print attribute on .
 

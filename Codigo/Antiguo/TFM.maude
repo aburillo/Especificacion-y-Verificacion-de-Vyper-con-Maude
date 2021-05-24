@@ -134,9 +134,9 @@ fmod VYPER-GRAMMAR is
 	*** FOR
 	sort @For@ .
 	op bv : -> @Body@ [ctor] .
-	op for _ in range(_):_ end : @Token@ @Exp@ @Body@ -> @For@ [ctor] .
-	op for _ in range(_,_):_ end : @Token@ @Exp@ @Exp@ @Body@ -> @For@ [ctor] .
-	op for _ in _:_ end : @Token@ @Token@ @Body@ -> @For@ [ctor] .
+	op for _ in range(_):_ end : @Token@ @ArgList@ @Body@ -> @For@ [ctor] .
+	***op for _ in range(_,_):_ end : @Token@ @Exp@ @Exp@ @Body@ -> @For@ [ctor] .
+	op for _ in _:_ end : @Token@ @Name@ @Body@ -> @For@ [ctor] .
 	op for _ in [_]:_ end : @Token@ @Bubble@ @Body@ -> @For@ [ctor] .
 
 	*** IFELSE

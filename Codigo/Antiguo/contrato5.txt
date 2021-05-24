@@ -1,0 +1,25 @@
+struct Voter:
+    weight: int128
+    voted: bool
+    delegate: address
+    vote: int128
+end
+struct Proposal:
+    name: bytes32
+    voteCount: int128
+end
+voters: public(HashMap[address, Voter])
+proposals: public(HashMap[int128, Proposal])
+voterCount: public(int128)
+chairperson: public(address)
+int128Proposals: public(int128)
+@view
+@internal
+def _delegated(addr: address) -> bool:
+    x = 2
+end
+@view
+@external
+def delegated(addr: address) -> bool:
+       x = 2
+end
