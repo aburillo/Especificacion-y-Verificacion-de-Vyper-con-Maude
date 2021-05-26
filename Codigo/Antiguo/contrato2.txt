@@ -33,86 +33,66 @@ end
 @payable
 def bid(_blindedBid: bytes32):
     assert block.timestamp < self.biddingEnd
-
     numBids: int128 = self.bidCounts[msg.sender]
-    assert numBids < MAX_BIDS
-
-    self.bids[msg.sender][numBids] = Bid({
-        blindedBid: _blindedBid,
-        deposit: msg.value
-        })
+    assert numBids < MAX_BIDS 
+    self.bids[msg.sender][numBids] = Bid({blindedBid: _blindedBid, deposit: msg.value })
     self.bidCounts[msg.sender] += 1
 end
-@internal
 def placeBid(bidder: address, _value: uint256) :
     if (_value <= self.highestBid):
         return False
-    end
-
+    end ;
     if (self.highestBidder != ZERO_ADDRESS):
         self.pendingReturns[self.highestBidder] += self.highestBid
-    end
-
+    end ;
     self.highestBid = _value
     self.highestBidder = bidder
-
     return True
 end
 @external
 def reveal(_numBids: int128, _values: uint256[128], _fakes: bool[128], _secrets: bytes32[128]):
     assert block.timestamp > self.biddingEnd
-
     assert block.timestamp < self.revealEnd
-
     assert _numBids == self.bidCounts[msg.sender]
-
     refund: uint256 = 0
     for i in range(MAX_BIDS):
         if (i >= _numBids):
             break
-        end
+        end ;
         bidToCheck: Bid = self.bids[msg.sender][i]
-
         value: uint256 = _values[i]
         fake: bool = _fakes[i]
         secret: bytes32 = _secrets[i]
-
         if (blindedBid != bidToCheck.blindedBid):
             assert 1 == 0
             continue
-        end
-
+        end ;
         refund += bidToCheck.deposit
         if (not fake and bidToCheck.deposit >= value):
             if (self.placeBid(msg.sender, value)):
                 refund -= value
-            end
-        end
-
+            end ;
+        end ;
         zeroBytes32: bytes32 = EMPTY_BYTES32
         bidToCheck.blindedBid = zeroBytes32
-    end
+    end ;
     if (refund != 0):
         send(msg.sender, refund)
-    end
+    end ;
 end
 @external
 def withdraw():
     pendingAmount: uint256 = self.pendingReturns[msg.sender]
     if (pendingAmount > 0):
         self.pendingReturns[msg.sender] = 0
-
         send(msg.sender, pendingAmount)
-    end
+    end ;
 end
 @external
 def auctionEnd():
     assert block.timestamp > self.revealEnd
-
     assert not self.ended
-
     log AuctionEnded(self.highestBidder, self.highestBid)
     self.ended = True
-
     send(self.beneficiary, self.highestBid)
 end

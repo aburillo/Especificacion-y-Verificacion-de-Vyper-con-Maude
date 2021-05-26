@@ -37,9 +37,8 @@ def refund():
         if i >= self.nextFunderIndex:
             self.refundIndex = self.nextFunderIndex
             return
-        end
-        send(self.funders[i].sender, self.funders[i].value)
+        end ;
         self.funders[i] = empty(Funder)
-    end
+    end ;
     self.refundIndex = ind + 30
 end

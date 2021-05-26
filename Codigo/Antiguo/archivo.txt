@@ -1,10 +1,12 @@
 beneficiary: public(address)
-@external
-def refund():
-    assert block.timestamp >= self.deadline and self.balance < self.goal
-    ind: int128 = self.refundIndex
-        for i in range(ind, ind + 30):
-            self.refundIndex = self.nextFunderIndex
-        end
-    self.refundIndex = ind + 30
+def _forwardWeight(delegate_with_weight_to_forward: address):
+    assert x > 2
+        if x > 2 :
+            assert x > 2
+        elif x > 2:
+            break
+        else:
+            break
+        end ;
+    assert x > 2
 end

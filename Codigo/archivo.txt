@@ -1,10 +1,8 @@
 beneficiary: public(address)
 def _forwardWeight(delegate_with_weight_to_forward: address):
-    assert x > 2
+    assert x +2
         if x > 2 :
             assert x > 2
-        elif x > 2:
-            break
         else:
             break
         end ;

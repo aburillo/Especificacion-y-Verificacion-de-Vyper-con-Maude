@@ -24,11 +24,12 @@ ceq preparse(S) = preparseFinal(S3 S5)
     S5 := preparseDespues(S4) .
 eq preparse(S) = S [owise] .
 
-***prepreparse
+***prepreparse separa los dos puntos de la las palabras menos else
 op PrePreparse : QidList -> QidList .
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= ': /\
     St := string(Q) /\
+    St =/= "else:" /\
     N := find(St, ":", 0) /\
     St' := substr(St, 0, N) /\
     St1 := substr(St, N , length(St) ) /\
@@ -55,13 +56,24 @@ eq preparseAntes(S) = S [owise] .
 *** Preparse despues del primer def .
 op preparseDespues : QidList -> QidList .
 eq preparseDespues(S ': '; S1) = preparseDespues(S ': S1) .
+eq preparseDespues(S 'else: '; S1) = preparseDespues(S 'else: S1) .
 eq preparseDespues(S '; 'end ) = preparseDespues(S 'end) .
 eq preparseDespues(S '; 'end S1) = preparseDespues(S 'end S1) .
-eq preparseDespues(S 'end ';) = preparseDespues(S 'end) .
-eq preparseDespues(S 'end '; S1 ) = preparseDespues(S 'end S1) .
+eq preparseDespues(S 'end ';) = preparseDespues(S 'end) . 
+eq preparseDespues(S 'end '; '; ) = preparseDespues(S) 'end '; .
+***eq preparseDespues(S 'end '; S1 ) = preparseDespues(S 'end S1) .
+ceq preparseDespues(S 'end '; Q S1 ) = preparseDespues(S 'end Q S1) 
+    if Q =/= '; .
+eq preparseDespues(S 'end '; '; S1 ) = preparseDespues(S 'end ) '; preparseDespues(S1) .  
 ceq preparseDespues(S Q '; S1) = preparseDespues(S Q S1 ) 
 if    St := string(Q) /\
       N := find(St, "@", 0) .
+*** para los else y else if
+eq preparseDespues(S '; 'else: ) = preparseDespues(S 'else:) .
+eq preparseDespues(S '; 'else: S1) = preparseDespues(S 'else: S1) .
+eq preparseDespues(S '; 'elif ) = preparseDespues(S 'elif) .
+eq preparseDespues(S '; 'elif S1) = preparseDespues(S 'elif S1) .
+
 eq preparseDespues(S) = S [owise] .
 *** preparse final
 op preparseFinal : QidList -> QidList .

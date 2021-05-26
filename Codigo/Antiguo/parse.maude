@@ -537,6 +537,15 @@ rl [newLine] :
    else < example : EXAMPLE | file: FHIn, read: (Read + Text + " ; "), state: reading, Attrs >
         getLine(FHIn, example)
    fi [print Text ] .
+--- rl [newLine] :
+---    gotLine(example, FHIn, Text)
+---    < example : EXAMPLE | file: FHIn, read: Read, state: reading, Attrs >
+--- => if Text == ""
+---    then < example : EXAMPLE | file: FHIn, read: Read, state: parsing, Attrs >
+---         closeFile(FHIn, example)
+---    else < example : EXAMPLE | file: FHIn, read: (Read + Text ), state: reading, Attrs >
+---         getLine(FHIn, example)
+---    fi [print Text ] .
 
 crl [parsing] :
     < example : EXAMPLE | read: Read, state: parsing, Attrs >
@@ -633,12 +642,31 @@ red metaParse(GRAMMAR, tokenize(" x = funders[i].sender "), anyType) .
 red metaParse(GRAMMAR, tokenize(" send(self.funders[i].sender, self.funders[i].value) "), anyType) .
 red metaParse(GRAMMAR, tokenize(" if x <= y : " +
             "refundIndex = nextFunderIndex ; " +
+            "refundIndex = nextFunderIndex ; " +
             "return " +
         "end" ), '@ifElse@ ) .
-red metaParse(GRAMMAR, tokenize(" for i in range(ind, ind + 30): " +
-            "refundIndex = nextFunderIndex " +
-        "end" ), anyType ) .
-red metaParse(GRAMMAR, tokenize(" x = 2 "), anyType) .
+red metaParse(GRAMMAR, tokenize(" if x <= y : " +
+            "refundIndex = nextFunderIndex ; " +
+            "return " +
+            "else: " +
+            "refundIndex = nextFunderIndex ; " +
+            "return " +
+        "end" ), '@ifElse@ ) .
+red metaParse(GRAMMAR, tokenize(" if x > 2 : " +
+            "assert x > 2  " +
+            "elif x > 1 : " +
+            "break " +
+            "else:  " +
+            "break  " +
+        "end" ), '@ifElse@ ) .
+red metaParse(GRAMMAR, tokenize(" elif x > 2 : " +
+            "assert x > 2 ; " +
+            "break " ), '@elseif@ ) .
+red metaParse(GRAMMAR, tokenize(" return (totalShares - _stockAvailable()) * price"  ), '@DeclaracionControl@ ) .
+--- red metaParse(GRAMMAR, tokenize(" for i in range(ind, ind + 30): " +
+---             "refundIndex = nextFunderIndex " +
+---         "end" ), '@For@ ) .
+--- red metaParse(GRAMMAR, tokenize(" x = 2 "), '@asig@) .
 set print attribute on .
 
 erew run .
