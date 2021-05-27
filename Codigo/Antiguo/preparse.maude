@@ -5,7 +5,7 @@ fmod PREPARSE is
  var S S1 S2 S3 S4 S5 : QidList .
  var Q Q1 Q' : Qid .
  var N : Nat .
- vars St St' St1 : String .
+ vars St St' St1 St2 : String .
  op preparse : QidList -> QidList .
 ---  ***añadir PAV en los parentesis vacios que vengan con un def
 ---  eq preparse(S1 'def S '`( '`) S2) = preparse(S1) 'def preparse(S) '`( 'PaV '`) preparse(S2) .
@@ -33,6 +33,24 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     N := find(St, ":", 0) /\
     St' := substr(St, 0, N) /\
     St1 := substr(St, N , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1) .
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ if Q =/= '+ /\
+    St := string(Q) /\
+    N := find(St, "+", 0) /\
+    N =/= 0 /\
+    St' := substr(St, 0, N) /\
+    St1 := substr(St, N , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1) .
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ if Q =/= '+ /\
+    St := string(Q) /\
+    N := find(St, "+", 0) /\
+    N == 0 /\
+    St' := substr(St, 0, 1) /\
+    St1 := substr(St, 1 , length(St) ) /\
     Q' := qid(St') /\
     Q1 := qid(St1) .
 eq PrePreparse(S) = S [owise] .

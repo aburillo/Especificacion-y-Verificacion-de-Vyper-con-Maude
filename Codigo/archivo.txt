@@ -1,10 +1,47 @@
+
+struct Bid:
+  blindedBid: bytes32
+  deposit: uint256
+end
+MAX_BIDS: constant(int128) = 128
+
+event AuctionEnded:
+    highestBidder: address
+    highestBid: uint256
+end 
+
 beneficiary: public(address)
-def _forwardWeight(delegate_with_weight_to_forward: address):
-    assert x +2
-        if x > 2 :
-            assert x > 2
-        else:
-            break
-        end ;
-    assert x > 2
+biddingEnd: public(uint256)
+revealEnd: public(uint256)
+
+ended: public(bool)
+
+highestBid: public(uint256)
+highestBidder: public(address)
+
+bids: HashMap[address, Bid[128]]
+bidCounts: HashMap[address, int128]
+
+pendingReturns: HashMap[address, uint256]
+@external
+def __init__(_beneficiary: address, _biddingTime: uint256, _revealTime: uint256):
+    self.beneficiary = _beneficiary
+    self.biddingEnd = block.timestamp + _biddingTime
+    self.revealEnd = self.biddingEnd + _revealTime
+end
+@external
+@payable
+def bid(_blindedBid: bytes32):
+    assert block.timestamp < self.biddingEnd
+    numBids: int128 = self.bidCounts[msg.sender]
+    assert numBids < MAX_BIDS 
+    self.bids[msg.sender][numBids] = Bid({blindedBid: _blindedBid, deposit: msg.value })
+    self.bidCounts[msg.sender] += 1
+end
+def placeBid(bidder: address, _value: uint256) :
+    if (_value <= self.highestBid):
+        return False
+    end ;
+
+    self.highestBid = _value
 end

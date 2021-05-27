@@ -661,8 +661,11 @@ red metaParse(GRAMMAR, tokenize(" if x > 2 : " +
         "end" ), '@ifElse@ ) .
 red metaParse(GRAMMAR, tokenize(" elif x > 2 : " +
             "assert x > 2 ; " +
-            "break " ), '@elseif@ ) .
-red metaParse(GRAMMAR, tokenize(" return (totalShares - _stockAvailable()) * price"  ), '@DeclaracionControl@ ) .
+            "break " + 
+            " elif x > 2 : " +
+            "assert x > 2 ; " +
+            "break " ), '@ListElseif@ ) .
+red metaParse(GRAMMAR, tokenize(" assert ( msg.value + inicial >= (( balance - inicial - msg.value ) / 2) )"  ), '@DeclaracionControl@ ) .
 --- red metaParse(GRAMMAR, tokenize(" for i in range(ind, ind + 30): " +
 ---             "refundIndex = nextFunderIndex " +
 ---         "end" ), '@For@ ) .

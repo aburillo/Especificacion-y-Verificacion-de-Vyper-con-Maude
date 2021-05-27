@@ -1,4 +1,4 @@
-struct Funder :
+ struct Funder :
   sender: address
   value: uint256
 end
@@ -38,6 +38,7 @@ def refund():
             self.refundIndex = self.nextFunderIndex
             return
         end ;
+        send(self.funders[i].sender, self.funders[i].value)
         self.funders[i] = empty(Funder)
     end ;
     self.refundIndex = ind + 30
