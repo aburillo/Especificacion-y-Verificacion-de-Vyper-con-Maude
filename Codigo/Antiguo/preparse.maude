@@ -3,7 +3,7 @@ fmod PREPARSE is
  pr QID-LIST .
 
  var S S1 S2 S3 S4 S5 : QidList .
- var Q Q1 Q' : Qid .
+ var Q Q1 Q' Q2 : Qid .
  var N : Nat .
  vars St St' St1 St2 : String .
  op preparse : QidList -> QidList .
@@ -40,6 +40,7 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St := string(Q) /\
     N := find(St, "+", 0) /\
     N =/= 0 /\
+    substr(St, N, N + 1) != "=" /\
     St' := substr(St, 0, N) /\
     St1 := substr(St, N , length(St) ) /\
     Q' := qid(St') /\
@@ -49,6 +50,7 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St := string(Q) /\
     N := find(St, "+", 0) /\
     N == 0 /\
+    substr(St, 1, 2 ) != "=" /\
     St' := substr(St, 0, 1) /\
     St1 := substr(St, 1 , length(St) ) /\
     Q' := qid(St') /\
@@ -91,6 +93,18 @@ eq preparseDespues(S '; 'else: ) = preparseDespues(S 'else:) .
 eq preparseDespues(S '; 'else: S1) = preparseDespues(S 'else: S1) .
 eq preparseDespues(S '; 'elif ) = preparseDespues(S 'elif) .
 eq preparseDespues(S '; 'elif S1) = preparseDespues(S 'elif S1) .
+*** separar el punto
+ceq preparseDespues(S Q S1) = preparseDespues(S Q' Q1  S1)
+ if Q =/= '. /\
+    St := string(Q) /\
+    N := find(St, ".", 0) /\
+    N == 0 /\
+    St' := substr(St, 0, 1) /\
+    St1 := substr(St, 1 , length(St) ) /\
+    ***St2 := substr(St, N + 1 , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1) .
+    ***Q2 := qid(St2) .
 
 eq preparseDespues(S) = S [owise] .
 *** preparse final

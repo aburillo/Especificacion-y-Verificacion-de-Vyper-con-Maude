@@ -143,11 +143,11 @@ fmod VYPER-GRAMMAR is
 	sort @ifElse@ @elseif@ @ListElseif@ .
 	subsort @elseif@ < @ListElseif@ .
 
-	op elif_:_ : @Exp@ @Body@ -> @elseif@ [ctor prec 15] .
-	op __ : @ListElseif@ @ListElseif@  -> @ListElseif@  [ctor prec 17] .
-	op if_:_ end : @Exp@ @Body@ -> @ifElse@ [ctor] .
-	op if_:_ else:_ end : @Exp@ @Body@ @Body@ -> @ifElse@ [ctor] .
-	op if_:__else:_ end : @Exp@ @Body@ @ListElseif@ @Body@ -> @ifElse@ [ctor] .
+	op elif_:_ : @Exp@ @Body@ -> @elseif@ [ctor prec 95] .
+	op __ : @ListElseif@ @ListElseif@  -> @ListElseif@  [ctor assoc prec 99] .
+	op if_:_ end : @Exp@ @Body@ -> @ifElse@ [ctor prec 100 ] .
+	op if_:_ else:_ end : @Exp@ @Body@ @Body@ -> @ifElse@ [ctor prec 100 ] .
+	op if_:__else:_ end : @Exp@ @Body@ @ListElseif@ @Body@ -> @ifElse@ [ctor prec 100] .
 	
 	*** if parentesis
 	***op if(_):_ end : @Exp@ @Body@ -> @ifElse@ [ctor] .
@@ -362,12 +362,12 @@ fmod META-SIGN is
              [special(
                (id-hook('Bubble, '1 '1)
                 op-hook('qidSymbol, '<Qids>, nil, 'Qid)
-				id-hook('Exclude, 'public 'HashMap 'constant 'indexed 'assert '`, '`( '`) '> 'not 'log '= ':: '+ '< '@external '@internal '@pure '@view '@payable '@nonpayables '>= '<= '+= '-= '`[ '`] ': 'return '!= 'break 'range '== 'and 'continue '* '-> 'and '/ '** '% '; 'if 'for 'else 'else: 'elif )))] .
+				id-hook('Exclude, 'public 'HashMap 'constant 'indexed 'assert '`, '`( '`) '> 'not 'log '= ':: '+ '< '@external '@internal '@pure '@view '@payable '@nonpayables '>= '<= '+= '-= '`[ '`] ': 'return '!= 'break 'range '== 'and 'continue '* '-> 'and '/ '** '% '; 'if 'for 'else 'else: 'elif '. )))] .
         op 'logName : 'Qid -> '@Name@
              [special(
                (id-hook('Bubble, '1 '1)
                 op-hook('qidSymbol, '<Qids>, nil, 'Qid)
-				id-hook('Exclude, 'public 'HashMap 'constant 'indexed 'assert '`, '`( '`) '> 'not 'log '= 'return )))] .
+				id-hook('Exclude, 'public 'HashMap 'constant 'indexed 'assert '`, '`( '`) '> 'not 'log '= 'return '. )))] .
         op 'bubble : 'QidList -> '@Bubble@
              [special(
                (id-hook('Bubble, '1 '-1 '`( '`))

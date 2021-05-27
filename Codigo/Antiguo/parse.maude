@@ -638,13 +638,8 @@ red metaParse(GRAMMAR, tokenize("  bidToCheck : Bid = (bids[msg.sender])[i]"), '
 --- "    self.pendingReturns[msg.sender] = 0 ; " +
 --- "  end ; " + "@external ; " )) .
 
-red metaParse(GRAMMAR, tokenize(" x = funders[i].sender "), anyType) .
-red metaParse(GRAMMAR, tokenize(" send(self.funders[i].sender, self.funders[i].value) "), anyType) .
-red metaParse(GRAMMAR, tokenize(" if x <= y : " +
-            "refundIndex = nextFunderIndex ; " +
-            "refundIndex = nextFunderIndex ; " +
-            "return " +
-        "end" ), '@ifElse@ ) .
+red metaParse(GRAMMAR, tokenize(" x = funders[i] .sender "), '@asig@ ) .
+red metaParse(GRAMMAR, tokenize(" send(self.funders[i] . sender, self.funders[i] . value, jesus.paco ) "), '@asig@) .
 red metaParse(GRAMMAR, tokenize(" if x <= y : " +
             "refundIndex = nextFunderIndex ; " +
             "return " +
@@ -655,17 +650,14 @@ red metaParse(GRAMMAR, tokenize(" if x <= y : " +
 red metaParse(GRAMMAR, tokenize(" if x > 2 : " +
             "assert x > 2  " +
             "elif x > 1 : " +
+            "refundIndex = nextFunderIndex ; " +
             "break " +
             "else:  " +
             "break  " +
         "end" ), '@ifElse@ ) .
-red metaParse(GRAMMAR, tokenize(" elif x > 2 : " +
-            "assert x > 2 ; " +
-            "break " + 
-            " elif x > 2 : " +
-            "assert x > 2 ; " +
-            "break " ), '@ListElseif@ ) .
+red metaParse(GRAMMAR, tokenize(" elif  x > 2 : refundIndex = nextFunderIndex ; break elif  x > 2 : refundIndex = nextFunderIndex ; break "), '@ListElseif@) .
 red metaParse(GRAMMAR, tokenize(" assert ( msg.value + inicial >= (( balance - inicial - msg.value ) / 2) )"  ), '@DeclaracionControl@ ) .
+red metaParse(GRAMMAR, tokenize(" pendingReturns[highestBidder] += highestBid"  ), '@asig@ ) .
 --- red metaParse(GRAMMAR, tokenize(" for i in range(ind, ind + 30): " +
 ---             "refundIndex = nextFunderIndex " +
 ---         "end" ), '@For@ ) .

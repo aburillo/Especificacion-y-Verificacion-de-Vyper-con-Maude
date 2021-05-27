@@ -48,5 +48,6 @@ end
 def mitad():
 assert block.timestamp > self.empieza
 assert self.casa == msg.sender
+assert ( msg.value + self.inicial >= (( self.balance - self.inicial - msg.value ) / 2) )
 self.invertido = True
 end
