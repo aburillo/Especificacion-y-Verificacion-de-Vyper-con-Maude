@@ -655,9 +655,10 @@ red metaParse(GRAMMAR, tokenize(" if x > 2 : " +
             "else:  " +
             "break  " +
         "end" ), '@ifElse@ ) .
-red metaParse(GRAMMAR, tokenize(" elif  x > 2 : refundIndex = nextFunderIndex ; break elif  x > 2 : refundIndex = nextFunderIndex ; break "), '@ListElseif@) .
+***red metaParse(GRAMMAR, tokenize(" elif  x > 2 : refundIndex = nextFunderIndex ; break elif  x > 2 : refundIndex = nextFunderIndex ; break "), '@ListElseif@) .
 red metaParse(GRAMMAR, tokenize(" assert ( msg.value + inicial >= (( balance - inicial - msg.value ) / 2) )"  ), '@DeclaracionControl@ ) .
-red metaParse(GRAMMAR, tokenize(" pendingReturns[highestBidder] += highestBid"  ), '@asig@ ) .
+red metaParse(GRAMMAR, tokenize(" return voters[addr] . delegate != ZERO_ADDRESS"  ), '@DeclaracionControl@ ) .
+red metaParse(GRAMMAR, tokenize(" return _delegated(addr) "  ), '@DeclaracionControl@ ) .
 --- red metaParse(GRAMMAR, tokenize(" for i in range(ind, ind + 30): " +
 ---             "refundIndex = nextFunderIndex " +
 ---         "end" ), '@For@ ) .

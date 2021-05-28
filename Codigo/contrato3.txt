@@ -7,7 +7,7 @@ ended: public(bool)
 @payable
 def __init__():
     assert (msg.value % 2) == 0
-    self.value = msg.value 
+    self.value = msg.value / 2
     self.seller = msg.sender
     self.unlocked = True
 end
