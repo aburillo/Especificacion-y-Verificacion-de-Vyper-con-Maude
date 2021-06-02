@@ -170,7 +170,7 @@ fmod VYPER-GRAMMAR is
 	*** registrar eventos
 	op log _`(_`) : @Name@ @ArgList@ -> @RegistrarEventos@ [ctor] .
 	subsort @For@ @DeclaracionControl@ @asig@ @asigTupla@ @RegistrarEventos@ @DeclaracionValor@ @ifElse@ @DeclaracionValor@ @Call@ < @Body@ .
-	op _;_ : @Body@ @Body@ -> @Body@ [ctor assoc prec 79 ] .
+	op _;_ : @Body@ @Body@ -> @Body@ [ctor assoc prec 105 ] .
 
 	***Crea un contrato
 	sort @Contrato@ .

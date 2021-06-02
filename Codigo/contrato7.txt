@@ -51,3 +51,59 @@ assert self.casa == msg.sender
 assert ( msg.value + self.inicial >= (( self.balance - self.inicial - msg.value ) / 2) )
 self.invertido = True
 end
+@external
+def ganadores ( _eq1 : uint256 , _eq2 : uint256 ):
+    assert msg.sender == self.casa
+    assert block.timestamp > self.termina 
+    assert not self.apuntados
+    self.apuntados = True
+    self.pequipo1 = _eq1
+    self.pequipo2 = _eq2
+end
+@external
+def devolver() :
+    assert self.apuntados
+    assert self.casa == msg.sender
+    assert self.invertido
+    nive : uint256 = self.sigindice
+    for i in range ( nive , nive + 30) :
+        if i > self.indice :
+            selfdestruct (self.casa )
+        else:
+            if (( self.apostadores[i].equipo1 == self.pequipo1 ) and ( self.apostadores[i].equipo2 == self.pequipo2) ) :
+                send (self.apostadores[i].apostador , self.apostadores[i].apuesta + ( self.apostadores[i].apuesta / 2) )
+                self.sigindice = nive + 30
+                end ;
+        end ;
+    end ;
+end
+@external
+def ganadores(_eq1: uint256, _eq2: uint256):
+    assert msg.sender == self.casa
+    assert block.timestamp > self.termina
+    assert not self.apuntados
+    self.apuntados = True
+    self.pequipo1 = _eq1
+    self.pequipo2 = _eq2
+end
+@view
+@external
+def terminado()-> bool:
+    return block.timestamp > self.termina
+end
+@view
+@external
+def empezado() -> bool:
+    return block.timestamp > self.empieza
+end
+@view
+@external
+def ganar(apos: Juego)-> uint256:
+    return apos.apuesta + (apos.apuesta / 2)
+end
+@view
+@external
+def ganado(apos: Juego)-> bool:
+    assert self.apuntados
+    return (apos.equipo1 == self.pequipo1) and (apos.equipo2 == self.pequipo2)
+end

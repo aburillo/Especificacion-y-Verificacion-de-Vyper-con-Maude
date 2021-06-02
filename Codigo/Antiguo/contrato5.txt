@@ -16,22 +16,22 @@ int128Proposals: public(int128)
 @view
 @internal
 def _delegated(addr: address) -> bool:
-   return  x + 2
+   return self.voters[addr].delegate != ZERO_ADDRESS
 end
 @view
 @external
 def delegated(addr: address) -> bool:
-    return  x + 2
+    return self._delegated(addr)
 end
 @view
 @internal
 def _directlyVoted(addr: address) -> bool:
-    return  x + 2
+    return self.voters[addr].voted and (self.voters[addr].delegate == ZERO_ADDRESS)
 end
 @view
 @external
 def directlyVoted(addr: address) -> bool:
-    return  x + 2
+    return self._directlyVoted(addr)
 end
 @external
 def __init__(_proposalNames: bytes32[2]):

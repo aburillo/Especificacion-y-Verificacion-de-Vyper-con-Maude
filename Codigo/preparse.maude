@@ -40,7 +40,7 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St := string(Q) /\
     N := find(St, "+", 0) /\
     N =/= 0 /\
-    substr(St, N, N + 1) != =/= /\
+    substr(St, N, N + 1)  =/= "=" /\
     St' := substr(St, 0, N) /\
     St1 := substr(St, N , length(St) ) /\
     Q' := qid(St') /\
