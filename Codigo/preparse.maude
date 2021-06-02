@@ -26,15 +26,38 @@ eq preparse(S) = S [owise] .
 
 ***prepreparse separa los dos puntos de la las palabras menos else
 op PrePreparse : QidList -> QidList .
+*** EN CASO DE TENER ALGO COMO X:
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= ': /\
     St := string(Q) /\
     St =/= "else:" /\
     N := find(St, ":", 0) /\
+    N =/= 0 /\
     St' := substr(St, 0, N) /\
     St1 := substr(St, N , length(St) ) /\
     Q' := qid(St') /\
+    Q1 := qid(St1)  .
+*** EN CASO DE TENER ALGO COMO X:Y O X :Y
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ if Q =/= ': /\
+    St := string(Q) /\
+    St =/= "else:" /\
+    N := find(St, ":", 0) /\
+    N == 0 /\
+    St' := substr(St, 0, 1) /\
+    St1 := substr(St, 1 , length(St) ) /\
+    Q' := qid(St') /\
     Q1 := qid(St1) .
+*** en caso de ->x
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ if Q =/= '-> /\
+    St := string(Q) /\
+    N := find(St, "->", 0) /\
+    St' := substr(St, 0, 2) /\
+    St1 := substr(St, 2 , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1) [print St'].
+*** si es xxx+
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '+ /\
     St := string(Q) /\
@@ -44,7 +67,8 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St' := substr(St, 0, N) /\
     St1 := substr(St, N , length(St) ) /\
     Q' := qid(St') /\
-    Q1 := qid(St1) .
+    Q1 := qid(St1)  .
+**** si es +xxxx
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '+ /\
     St := string(Q) /\

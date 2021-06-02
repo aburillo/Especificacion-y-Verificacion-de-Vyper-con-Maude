@@ -4,22 +4,27 @@ struct Voter:
     delegate: address
     vote: int128
 end
-struct Proposal:
-    name: bytes32
-    voteCount: int128
-end
-voters: public(HashMap[address, Voter])
-proposals: public(HashMap[int128, Proposal])
-voterCount: public(int128)
-chairperson: public(address)
-int128Proposals: public(int128)
-@view
-@internal
-def _directlyVoted(addr: address) -> bool:
-    return self.voters[addr].voted and (self.voters[addr].delegate == ZERO_ADDRESS)
+@external
+def ganadores(_eq1: uint256, _eq2: uint256):
+    assert msg.sender == self.casa
+    assert block.timestamp > self.termina
+    assert not self.apuntados
+    self.apuntados = True
+    self.pequipo1 = _eq1
+    self.pequipo2 = _eq2
 end
 @view
 @external
-def directlyVoted(addr: address) -> bool:
-    return self._directlyVoted(addr)
+def terminado()-> bool:
+    return block.timestamp > self.termina
 end
+@view
+@external
+def empezado() -> bool:
+    return block.timestamp > self.empieza
+end
+@view
+@external
+def ganar(apos: Juego)-> uint256:
+    return apos.apuesta + (apos.apuesta / 2)
+end 

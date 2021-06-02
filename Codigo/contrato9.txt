@@ -1,0 +1,81 @@
+event Transaccion:
+    receptor: indexed(address)
+    emisor: indexed(address)
+    valor: uint256
+end 
+event Clave:
+    receptor: indexed(address)
+    emisor: indexed(address)
+    clave_:uint256
+end
+arrendador: public(address)
+fianza: public(uint256)
+mensualidad: public(uint256)
+tiempo: public(uint256)
+tiempo_contrato: public(uint256)
+tiempo_mensual:public(uint256)
+arrendatario: public(address)
+alquilada: public(bool)
+pagada: bool
+llave: uint256
+@payable
+@external
+def __init__( _mensualidad: uint256, _tiempo: uint256, _tiempo_contrato: uint256,_llave: uint256):
+    assert msg.value > 0
+    assert _mensualidad > 0
+    assert _tiempo > 0
+    assert _tiempo_contrato >= _tiempo
+    self.fianza = msg.value
+    self.arrendador = msg.sender
+    self.mensualidad = _mensualidad
+    self.tiempo = _tiempo
+    self.llave = _llave
+    self.tiempo_contrato = _tiempo_contrato
+end
+@payable    
+@external
+def alquilar():
+    assert not self.alquilada
+    assert msg.value == self.fianza + self.mensualidad
+    self.arrendatario = msg.sender
+    self.alquilada = True
+    self.tiempo_mensual = block.timestamp + self.tiempo
+    self.tiempo_contrato += block.timestamp
+    self.pagada = True
+    send(self.arrendador,self.mensualidad)
+    log Transaccion(self.arrendador,self.arrendatario,self.mensualidad)
+    log Clave(self.arrendatario,self.arrendador,self.llave)
+    self.llave = 0
+end
+@external
+def darllave(clave: uint256):
+    assert self.alquilada
+    assert msg.sender == self.arrendador
+    assert block.timestamp < self.tiempo_mensual
+    self.llave = clave
+end
+@external
+def cambio():
+    assert self.alquilada
+    assert block.timestamp > self.tiempo_mensual
+    assert msg.sender == self.arrendador or msg.sender == self.arrendatario
+    if block.timestamp > self.tiempo_contrato:
+        send(self.arrendatario,self.fianza)
+        selfdestruct(self.arrendador)
+    else:
+        if self.llave != 0:
+            if self.pagada:
+                log Transaccion(self.arrendador,self.arrendatario,self.mensualidad)
+                send(self.arrendador,self.mensualidad)
+                log Clave(self.arrendatario,self.arrendador,self.llave)
+                self.tiempo_mensual = block.timestamp + self.tiempo
+                self.llave = 0
+                self.pagada = False
+            else:
+                selfdestruct(self.arrendador)
+            end ;
+        else:
+            selfdestruct(self.arrendatario)
+        end ;
+    end ;
+end 

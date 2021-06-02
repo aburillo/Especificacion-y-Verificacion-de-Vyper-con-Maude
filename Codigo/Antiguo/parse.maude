@@ -555,7 +555,7 @@ crl [parsing] :
     QIL := tokenize(Read) /\
     QIL1 := preparse(QIL)  /\
     {T, Ty} := metaParse(GRAMMAR, QIL1, anyType) /\
-    T' := parse(T) [print  QIL T "\nParseado: " T' " " Ty] .
+    T' := parse(T) [print  QIL QIL1 T "\nParseado: " T' " " Ty] .
 
 var RP? : [ResultPair] .
 
@@ -585,7 +585,7 @@ crl [parsingError] :
     < example : EXAMPLE | file: FHIn, Attrs >
  => < example : EXAMPLE | file: noFile, Attrs > .
 
- ***                          ***
+ ***                          ***  
  ***          WROTE           ***
  ***                          ***
 
@@ -647,22 +647,27 @@ red metaParse(GRAMMAR, tokenize(" if x <= y : " +
             "refundIndex = nextFunderIndex ; " +
             "return " +
         "end" ), '@ifElse@ ) .
-red metaParse(GRAMMAR, tokenize(" if x > 2 : " +
-            "assert x > 2  " +
-            "elif x > 1 : " +
-            "refundIndex = nextFunderIndex ; " +
-            "break " +
-            "else:  " +
-            "break  " +
-        "end" ), '@ifElse@ ) .
+red metaParse(GRAMMAR, tokenize("  for i in range(x) :" +
+            "winning_proposal = i ; " +
+            "return " +
+            "end  "  ), '@For@ ) .
+red metaParse(GRAMMAR, tokenize("  for i in range(x) :" +
+            "bv " +
+            "end  "  ), '@For@ ) .
+
+red metaParse(GRAMMAR, tokenize(" for i in range(MAX_BIDS) :" +
+            "value : uint256 = _values[i] ;" +
+            "value : uint256 = y " +
+            "end  "  ), '@For@ ) .
 ***red metaParse(GRAMMAR, tokenize(" elif  x > 2 : refundIndex = nextFunderIndex ; break elif  x > 2 : refundIndex = nextFunderIndex ; break "), '@ListElseif@) .
 red metaParse(GRAMMAR, tokenize(" assert ( msg.value + inicial >= (( balance - inicial - msg.value ) / 2) )"  ), '@DeclaracionControl@ ) .
 red metaParse(GRAMMAR, tokenize(" return voters[addr] . delegate != ZERO_ADDRESS"  ), '@DeclaracionControl@ ) .
-red metaParse(GRAMMAR, tokenize(" return _delegated(addr) "  ), '@DeclaracionControl@ ) .
+red metaParse(GRAMMAR, tokenize(" winning_proposal = i "  ), '@DeclaracionControl@ ) .
+red metaParse(GRAMMAR, tokenize(" value : uint256 = y  "  ), '@DeclaracionValor@ ) .
 --- red metaParse(GRAMMAR, tokenize(" for i in range(ind, ind + 30): " +
 ---             "refundIndex = nextFunderIndex " +
 ---         "end" ), '@For@ ) .
---- red metaParse(GRAMMAR, tokenize(" x = 2 "), '@asig@) .
+--- red metaParse(GRAMMAR, tokenize(" x = 2 "), '@asig@) . return self.voters[addr].voted and (self.voters[addr].delegate == ZERO_ADDRESS)
 set print attribute on .
 
 erew run .

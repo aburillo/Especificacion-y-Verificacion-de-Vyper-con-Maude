@@ -65,7 +65,7 @@ fmod VYPER-GRAMMAR is
 	op _/_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 14] .
 	op _%_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 14] .
 	op _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc prec 16] .
-	op _-_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 16] .
+	op _-_ : @Exp@ @Exp@ -> @Exp@ [ctor assoc prec 16] .
 	op _>_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 18] .
 	op _>=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 18] .
 	op _<_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 18] .
@@ -158,9 +158,9 @@ fmod VYPER-GRAMMAR is
 	op raise _ : @Token@ -> @DeclaracionControl@ [ctor] . ***desencadena una expecion y revierte la llamada
 	op assert _ : @Exp@ -> @DeclaracionControl@ [ctor prec 65] .
 	op assert _,_ : @Exp@ String -> @DeclaracionControl@ [ctor prec 65] . *** si es falso se revierte la transaccion
-	op return _ : @Exp@ -> @DeclaracionControl@ [ctor ] .
-	op return _,_ : @Exp@ @Exp@ -> @DeclaracionControl@ [ctor] . ***se puede devolver una tupla
-	op return [_] : @ArgList@ -> @DeclaracionControl@ [ctor] .
+	op return _ : @Exp@ -> @DeclaracionControl@ [ctor prec 22 ] .
+	op return _,_ : @Exp@ @Exp@ -> @DeclaracionControl@ [ctor prec 20] . ***se puede devolver una tupla
+	op return [_] : @ArgList@ -> @DeclaracionControl@ [ctor prec 20 ] .
 
 	***igualr una tupla SEGURAMENTE TENGA PROBLEMAS PORQUE NO SERIA UN BUBBLE
 	sort @asigTupla@ .

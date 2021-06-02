@@ -42,6 +42,14 @@ def __init__(_proposalNames: bytes32[2]):
         self.int128Proposals += 1
     end ;
 end
+@external
+def giveRightToVote(voter: address):
+    assert msg.sender == self.chairperson
+    assert not self.voters[voter].voted
+    assert self.voters[voter].weight == 0
+    self.voters[voter].weight = 1
+    self.voterCount += 1
+end
 @internal
 def _forwardWeight(delegate_with_weight_to_forward: address):
     assert self._delegated(delegate_with_weight_to_forward)
@@ -62,4 +70,49 @@ def _forwardWeight(delegate_with_weight_to_forward: address):
         self.proposals[self.voters[target].vote].voteCount += weight_to_forward
         self.voters[target].weight = 0
     end ;
+end
+@external
+def forwardWeight(delegate_with_weight_to_forward: address):
+    self._forwardWeight(delegate_with_weight_to_forward)
+end
+@external
+def delegate(to: address):
+    assert not self.voters[msg.sender].voted
+    assert to != msg.sender
+    assert to != ZERO_ADDRESS
+    self.voters[msg.sender].voted = True
+    self.voters[msg.sender].delegate = to
+    self._forwardWeight(msg.sender)
+end
+@external
+def vote(proposal: int128):
+    assert not self.voters[msg.sender].voted
+    assert proposal < self.int128Proposals
+    self.voters[msg.sender].vote = proposal
+    self.voters[msg.sender].voted = True
+    self.proposals[proposal].voteCount += self.voters[msg.sender].weight
+    self.voters[msg.sender].weight = 0
+end
+@view
+@internal
+def _winningProposal() -> int128:
+    winning_vote_count: int128 = 0
+    winning_proposal: int128 = 0
+    for i in range(2):
+        if self.proposals[i].voteCount > winning_vote_count:
+            winning_vote_count = self.proposals[i].voteCount
+            winning_proposal = i
+        end ;
+    end ;
+    return winning_proposal
+end
+@view
+@external
+def winningProposal() -> int128:
+    return self._winningProposal()
+end
+@view
+@external
+def winnerName() -> bytes32:
+    return self.proposals[self._winningProposal()].name
 end

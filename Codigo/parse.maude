@@ -663,11 +663,15 @@ red metaParse(GRAMMAR, tokenize(" for i in range(MAX_BIDS) :" +
 red metaParse(GRAMMAR, tokenize(" assert ( msg.value + inicial >= (( balance - inicial - msg.value ) / 2) )"  ), '@DeclaracionControl@ ) .
 red metaParse(GRAMMAR, tokenize(" return voters[addr] . delegate != ZERO_ADDRESS"  ), '@DeclaracionControl@ ) .
 red metaParse(GRAMMAR, tokenize(" winning_proposal = i "  ), '@DeclaracionControl@ ) .
-red metaParse(GRAMMAR, tokenize(" value : uint256 = y  "  ), '@DeclaracionValor@ ) .
+red metaParse(GRAMMAR, tokenize(" tiempo_contrato += block.timestamp "  ), '@asig@ ) .
 --- red metaParse(GRAMMAR, tokenize(" for i in range(ind, ind + 30): " +
----             "refundIndex = nextFunderIndex " +
+---             "refundIndex = nextFunderIndex " + apostadores [ nfi ] = Juego ({apostador : msg.sender , equipo1 : eq1 , equipo2 : eq2 ,apuesta : msg.value})
 ---         "end" ), '@For@ ) .
---- red metaParse(GRAMMAR, tokenize(" x = 2 "), '@asig@) . return self.voters[addr].voted and (self.voters[addr].delegate == ZERO_ADDRESS)
+red metaParse(GRAMMAR, tokenize("datos = Datos ({nombre: _nombre, apellidos: _apellidos,direccion: _direccion,telefono: _telefono})"), '@asig@) .
+red metaParse(GRAMMAR, tokenize("apostadores [ nfi ] = Juego ({apostador : msg.sender , equipo1 : eq1 , equipo2 : eq2 ,apuesta : msg.value})"), '@asig@) .
+
+***red preparse(tokenize(" def datos = Datos({nombre: _nombre, apellidos: _apellidos,direccion: _direccion,telefono: _telefono}) ")) .
+***red preparse(tokenize(" tiempo_contrato += block.timestamp "  )) .
 set print attribute on .
 
 erew run .
