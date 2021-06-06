@@ -667,11 +667,15 @@ red metaParse(GRAMMAR, tokenize(" tiempo_contrato += block.timestamp "  ), '@asi
 --- red metaParse(GRAMMAR, tokenize(" for i in range(ind, ind + 30): " +
 ---             "refundIndex = nextFunderIndex " + apostadores [ nfi ] = Juego ({apostador : msg.sender , equipo1 : eq1 , equipo2 : eq2 ,apuesta : msg.value})
 ---         "end" ), '@For@ ) .
-red metaParse(GRAMMAR, tokenize("datos = Datos ({nombre: _nombre, apellidos: _apellidos,direccion: _direccion,telefono: _telefono})"), '@asig@) .
+red metaParse(GRAMMAR, tokenize("datos = Datos ({nombre : _nombre, apellidos : _apellidos,direccion : _direccion,telefono : _telefono})"), '@asig@) .
 red metaParse(GRAMMAR, tokenize("apostadores [ nfi ] = Juego ({apostador : msg.sender , equipo1 : eq1 , equipo2 : eq2 ,apuesta : msg.value})"), '@asig@) .
+red metaParse(GRAMMAR, tokenize(" assert x > 2 | \"hola adrian\" "), '@DeclaracionControl@) .
 
 ***red preparse(tokenize(" def datos = Datos({nombre: _nombre, apellidos: _apellidos,direccion: _direccion,telefono: _telefono}) ")) .
-***red preparse(tokenize(" tiempo_contrato += block.timestamp "  )) .
+red preparse(tokenize(" assert x > 2 | \"hola adrian\" ; "  )) .
+red preparse(tokenize(" assert not self.adoptado, \" No adoptado \" ; "  )) .
+red preparse(tokenize(" assert x, \" No adoptado \" ; "  )) .
+red preparse(tokenize(" assert not self.adoptado, \"No adoptado\" " )) .
 set print attribute on .
 
 erew run .

@@ -21,12 +21,16 @@ ceq preparse(S) = preparseFinal(S3 S5)
     S2 := hastaPrimerDef(S1) /\
     S3 := preparseAntes(S2) /\
     S4 := despuesPrimerDef(S1) /\ 
-    S5 := preparseDespues(S4) .
+    S5 := preparseDespues(S4) [print S] .
 eq preparse(S) = S [owise] .
 
 ***prepreparse separa los dos puntos de la las palabras menos else
 op PrePreparse : QidList -> QidList .
 *** EN CASO DE TENER ALGO COMO X:
+***eq PrePreparse(S 'assert 'S1 ', St) = PrePreparse(S 'assert 'S1 '| St) .w
+***eq PrePreparse(S 'assert S1 ) = PrePreparse(S 'asserta S1 ) .
+eq PrePreparse(S 'assert S1 '`, Q ';) = PrePreparse(S 'assert S1 '| Q '; ) . 
+eq PrePreparse( 'assert S1 '`, Q ';) = PrePreparse('assert S1 '| Q '; ) . 
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= ': /\
     St := string(Q) /\
@@ -117,6 +121,9 @@ eq preparseDespues(S '; 'else: ) = preparseDespues(S 'else:) .
 eq preparseDespues(S '; 'else: S1) = preparseDespues(S 'else: S1) .
 eq preparseDespues(S '; 'elif ) = preparseDespues(S 'elif) .
 eq preparseDespues(S '; 'elif S1) = preparseDespues(S 'elif S1) .
+***eq preparseDespues(S 'assert 'S1 ', S2) = preparseDespues(S 'assert 'S1 '| S2) .
+***eq preparseDespues(S 'assert 'S1 '`, S2) = preparseDespues(S 'assert 'S1 '| S2) .
+***eq preparseDespues(S 'assert S1 '`, Q S2) = preparseDespues(S 'assert S1 '| Q S2) . 
 *** separar el punto
 ceq preparseDespues(S Q S1) = preparseDespues(S Q' Q1  S1)
  if Q =/= '. /\
