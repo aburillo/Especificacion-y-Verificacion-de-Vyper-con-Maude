@@ -674,7 +674,7 @@ red metaParse(GRAMMAR, tokenize(" assert x > 2 | \"hola adrian\" "), '@Declaraci
 ***red preparse(tokenize(" def datos = Datos({nombre: _nombre, apellidos: _apellidos,direccion: _direccion,telefono: _telefono}) ")) .
 red preparse(tokenize(" assert x > 2 | \"hola adrian\" ; "  )) .
 red preparse(tokenize(" assert not self.adoptado, \" No adoptado \" ; "  )) .
-red preparse(tokenize(" assert x, \" No adoptado \" ; "  )) .
+red preparse(tokenize(" dale assert x, \" No adoptado \" ; dale "  )) .
 red preparse(tokenize(" assert not self.adoptado, \"No adoptado\" " )) .
 set print attribute on .
 

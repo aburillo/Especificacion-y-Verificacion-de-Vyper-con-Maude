@@ -29,9 +29,9 @@ end
  @external
  @payable
  def apostar (eq1: uint256 , eq2: uint256 ) :
- assert block.timestamp <= self.empieza 
- assert msg.sender != self.casa 
- assert msg.value > 0 
+assert block.timestamp <= self.empieza,"Antes de empezar"
+assert msg.sender != self.casa,"Jugador"
+assert msg.value > 0 ,"Apuesta positiva"
  nfi: uint256 = self.indice
  self.apostadores [ nfi ] = Juego ({apostador : msg.sender , equipo1 : eq1 , equipo2 : eq2 ,apuesta : msg.value})
  self.indice = nfi + 1
@@ -39,17 +39,17 @@ end
  @view
  @external
  def necesario () -> uint256 :
-    assert msg.sender == self.casa
-    assert block.timestamp > self.empieza
+    assert msg.sender == self.casa,"Casa"
+    assert  block.timestamp > self.empieza,"Despues de empezar"
     return ( self.balance - self.inicial ) / 2
 end
 @payable
 @external
 def mitad():
-assert block.timestamp > self.empieza
-assert self.casa == msg.sender
-assert ( msg.value + self.inicial >= (( self.balance - self.inicial - msg.value ) / 2) )
-self.invertido = True
+    assert block.timestamp > self.empieza,"Despues de empezar"
+    assert self.casa == msg.sender,"Casa"
+    assert msg.value + self.inicial  >= ((self.balance - self.inicial - msg.value) / 2),"Valor suficiente"
+    self.invertido = True
 end
 @external
 def ganadores ( _eq1 : uint256 , _eq2 : uint256 ):
@@ -62,9 +62,9 @@ def ganadores ( _eq1 : uint256 , _eq2 : uint256 ):
 end
 @external
 def devolver() :
-    assert self.apuntados
-    assert self.casa == msg.sender
-    assert self.invertido
+    assert self.apuntados,"Apuntados"
+    assert self.casa == msg.sender,"Casa"
+    assert self.invertido,"Ha invertido"
     nive : uint256 = self.sigindice
     for i in range ( nive , nive + 30) :
         if i > self.indice :
@@ -79,9 +79,9 @@ def devolver() :
 end
 @external
 def ganadores(_eq1: uint256, _eq2: uint256):
-    assert msg.sender == self.casa
-    assert block.timestamp > self.termina
-    assert not self.apuntados
+    assert msg.sender == self.casa,"Casa"
+    assert block.timestamp > self.termina,"Despues de terminar"
+    assert not self.apuntados,"No apuntados"
     self.apuntados = True
     self.pequipo1 = _eq1
     self.pequipo2 = _eq2
