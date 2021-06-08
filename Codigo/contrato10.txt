@@ -1,0 +1,65 @@
+
+event Transaccion:
+    receptor: indexed(address)
+    emisor: indexed(address)
+    valor: uint256
+end
+event Clave:
+    receptor: indexed(address)
+    emisor: indexed(address)
+    clave_: uint256
+end
+struct Caja:
+    propietario: address
+    tdisfrute: uint256
+    ttope: uint256
+    pagada: bool
+    llave: uint256
+    dejar: bool
+    primera: bool
+end
+tienda: public(address)
+cajas : public(uint256)
+mensualidad: public(uint256)
+tiempo_disfrute: public(uint256)
+clientes: public(HashMap[uint256, Caja])
+indice: uint256
+fianza: public(uint256)
+tiempo_pagar : public(uint256)
+cajas_totales: uint256
+indice_libres: uint256
+cajaslibres: HashMap[uint256,uint256]
+uso: public(HashMap[uint256, bool])
+@external
+def __init__(_cajas: uint256, _mensualidad: uint256, _tiempo_disfrute: uint256,_tiempo_pagar: uint256,_fianza: uint256):
+    assert _cajas > 0
+    assert _mensualidad > 0
+    assert _tiempo_disfrute > 0
+    assert _tiempo_pagar> 0
+    self.tienda = msg.sender
+    self.cajas = _cajas
+    self.cajas_totales = _cajas
+    self.mensualidad = _mensualidad
+    self.tiempo_disfrute = _tiempo_disfrute
+    self.tiempo_pagar = _tiempo_pagar
+    self.fianza = _fianza
+end
+@payable    
+@external
+def alquilar():
+    assert self.cajas > 0,"Suficientes cajas"
+    assert msg.value == self.mensualidad + self.fianza,"Valor exacto"
+    if self.indice <= self.cajas_totales:
+        self.clientes[self.indice]=Caja({propietario: msg.sender, tdisfrute: block.timestamp + self.tiempo_disfrute, 
+                                         ttope: block.timestamp + self.tiempo_disfrute + self.tiempo_pagar,
+                                         pagada: True,llave:1, dejar: False,primera:True})
+        self.uso[self.indice] = True
+        self.indice += 1
+    else:
+        index: uint256 = self.cajaslibres [self.indice_libres - 1]
+        self.clientes[index]=Caja({propietario: msg.sender,tdisfrute: block.timestamp + self.tiempo_disfrute,  ttope: block.timestamp + self.tiempo_disfrute + self.tiempo_pagar, pagada: True,llave:1, dejar: False,primera:True})
+        self.uso[index] = True
+        self.indice_libres -= 1
+    self.cajas -= 1
+    end ;
+end

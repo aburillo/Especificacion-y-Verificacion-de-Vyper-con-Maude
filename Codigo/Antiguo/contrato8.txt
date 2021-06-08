@@ -37,10 +37,10 @@ def adoptar(_direccion: String[20],_telefono: String[9],_nombre: String[20],_ape
 end
 @external
 def vacunar(maltrato: bool, operaciones: bool,_chip:String[15]):
-    assert self.adoptado
-    assert msg.sender == self.veterinario
-    assert block.timestamp < self.tope
-    assert self.microchip == _chip
+    assert self.adoptado,"Adoptado"
+    assert msg.sender == self.veterinario,"Veterinario"
+    assert block.timestamp < self.tope,"Dentro de tiempo"
+    assert self.microchip == _chip,"Microchip correcto"
     self.vacunado = True
     if maltrato or operaciones:
         self.adoptado = False
@@ -50,10 +50,10 @@ def vacunar(maltrato: bool, operaciones: bool,_chip:String[15]):
 end
 @external
 def revision(apto: bool,_chip:String[15]):
-    assert self.adoptado
-    assert msg.sender == self.protectora
-    assert block.timestamp > self.tope
-    assert self.microchip == _chip
+    assert self.adoptado,"Adoptado"
+    assert msg.sender == self.protectora,"Protectora"
+    assert block.timestamp > self.tope,"Superior al tope"
+    assert self.microchip == _chip,"Microchip correcto"
     if apto or not self.vacunado:
         self.adoptado = False
         self.dueno = self.protectora
@@ -65,43 +65,43 @@ def revision(apto: bool,_chip:String[15]):
 end
 @external
 def ceder(_chip:String[15]):
-    assert self.adoptado
-    assert self.microchip == _chip
-    assert msg.sender == self.dueno
+    assert self.adoptado,"Adoptado"
+    assert self.microchip == _chip,"Microchip correcto"
+    assert msg.sender == self.dueno,"Dueno"
     self.adoptado = False
     self.dueno = self.protectora
     self.datos = empty(Datos)
 end
 @external
 def dar_baja(_chip:String[15]):
-    assert msg.sender == self.veterinario
-    assert self.microchip == _chip
+    assert msg.sender == self.veterinario,"Veterinario"
+    assert self.microchip == _chip,"Microchip correcto"
     selfdestruct(self.protectora)
 end
 @external
 def cambio_domicilio(_domicilio: String[20],_chip:String[15]):
-    assert self.adoptado
-    assert msg.sender == self.dueno
-    assert self.microchip == _chip
+    assert self.adoptado,"Adoptado"
+    assert msg.sender == self.dueno,"Dueno"
+    assert self.microchip == _chip,"Microchip correcto"
     self.datos.direccion = _domicilio
 end
 @external
 def cambio_telefono(_telefono: String[9],_chip:String[15]):
-    assert self.adoptado
-    assert msg.sender == self.dueno
-    assert self.microchip == _chip
+    assert self.adoptado,"Adoptado"
+    assert msg.sender == self.dueno,"Dueno"
+    assert self.microchip == _chip,"Microchip correcto"
     self.datos.telefono = _telefono
 end
 @external
 def cambio_veterinario(_veterinario: address,_chip:String[15]):
-    assert msg.sender == self.dueno or msg.sender == self.protectora
-    assert self.microchip == _chip
+    assert msg.sender == self.dueno or msg.sender == self.protectora,"Dueno o protectora"
+    assert self.microchip == _chip,"Microchip correcto"
     self.veterinario = _veterinario
 end
 @view
 @external
 def consultar_datos()-> Datos:
-    assert msg.sender == self.protectora
+    assert msg.sender == self.protectora,"Protectora"
     return self.datos
 end
 @view

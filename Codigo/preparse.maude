@@ -84,6 +84,49 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St1 := substr(St, 1 , length(St) ) /\
     Q' := qid(St') /\
     Q1 := qid(St1) .
+*** si es xxx<
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ if Q =/= '< /\
+    St := string(Q) /\
+    N := find(St, "<", 0) /\
+    N =/= 0 /\
+    substr(St, N, N + 1)  =/= "=" /\
+    St' := substr(St, 0, N) /\
+    St1 := substr(St, N , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1)  .
+**** si es <xxxx
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ if Q =/= '< /\
+    St := string(Q) /\
+    N := find(St, "<", 0) /\
+    N == 0 /\
+    substr(St, 1, 2 ) =/= "=" /\
+    St' := substr(St, 0, 1) /\
+    St1 := substr(St, 1 , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1) .
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ if Q =/= '> /\
+    St := string(Q) /\
+    N := find(St, ">", 0) /\
+    N =/= 0 /\
+    substr(St, N, N + 1)  =/= "=" /\
+    St' := substr(St, 0, N) /\
+    St1 := substr(St, N , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1)  .
+**** si es <xxxx
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ if Q =/= '< /\
+    St := string(Q) /\
+    N := find(St, "<", 0) /\
+    N == 0 /\
+    substr(St, 1, 2 ) =/= "=" /\
+    St' := substr(St, 0, 1) /\
+    St1 := substr(St, 1 , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1) .
 eq PrePreparse(S) = S [owise] .
 *** codigo antes del primer def
 op hastaPrimerDef : QidList -> QidList .
@@ -104,6 +147,11 @@ eq preparseAntes(S '; S1) = preparseAntes(S S1) .
 eq preparseAntes(S) = S [owise] .
 *** Preparse despues del primer def .
 op preparseDespues : QidList -> QidList .
+*** para los else y else if
+eq preparseDespues(S '; 'else: S1) = preparseDespues(S 'else: S1) .
+eq preparseDespues(S '; 'elif ) = preparseDespues(S 'elif) .
+eq preparseDespues(S '; 'elif S1) = preparseDespues(S 'elif S1) .
+
 eq preparseDespues(S ': '; S1) = preparseDespues(S ': S1) .
 eq preparseDespues(S 'else: '; S1) = preparseDespues(S 'else: S1) .
 eq preparseDespues(S '; 'end ) = preparseDespues(S 'end) .
@@ -118,10 +166,11 @@ ceq preparseDespues(S Q '; S1) = preparseDespues(S Q S1 )
 if    St := string(Q) /\
       N := find(St, "@", 0) .
 *** para los else y else if
-eq preparseDespues(S '; 'else: ) = preparseDespues(S 'else:) .
-eq preparseDespues(S '; 'else: S1) = preparseDespues(S 'else: S1) .
-eq preparseDespues(S '; 'elif ) = preparseDespues(S 'elif) .
-eq preparseDespues(S '; 'elif S1) = preparseDespues(S 'elif S1) .
+***eq preparseDespues(S '; 'else: ) = preparseDespues(S 'else:) .
+***eq preparseDespues(S '; 'else: S1) = preparseDespues(S 'else: S1) .
+***eq preparseDespues(S '; '; 'else: S1) = preparseDespues(S 'else: S1) .
+***eq preparseDespues(S '; 'elif ) = preparseDespues(S 'elif) .
+***eq preparseDespues(S '; 'elif S1) = preparseDespues(S 'elif S1) .
 ***eq preparseDespues(S 'assert 'S1 ', S2) = preparseDespues(S 'assert 'S1 '| S2) .
 ***eq preparseDespues(S 'assert 'S1 '`, S2) = preparseDespues(S 'assert 'S1 '| S2) .
 ***eq preparseDespues(S 'assert S1 '`, Q S2) = preparseDespues(S 'assert S1 '| Q S2) . 

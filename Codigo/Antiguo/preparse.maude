@@ -29,8 +29,9 @@ op PrePreparse : QidList -> QidList .
 *** EN CASO DE TENER ALGO COMO X:
 ***eq PrePreparse(S 'assert 'S1 ', St) = PrePreparse(S 'assert 'S1 '| St) .w
 ***eq PrePreparse(S 'assert S1 ) = PrePreparse(S 'asserta S1 ) .
-eq PrePreparse(S 'assert S1 '`, Q ';) = PrePreparse(S 'assert S1 '| Q '; ) . 
-eq PrePreparse( 'assert S1 '`, Q ';) = PrePreparse('assert S1 '| Q '; ) . 
+--- eq PrePreparse(S 'assert S1 '`, Q ';) = PrePreparse(S 'assert S1 '| Q '; ) . 
+--- eq PrePreparse( 'assert S1 '`, Q ';) = PrePreparse('assert S1 '| Q '; ) .
+eq PrePreparse( S 'assert S1 '`, Q '; S2) = PrePreparse( S 'assert S1 '| Q '; S2 ) . 
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= ': /\
     St := string(Q) /\

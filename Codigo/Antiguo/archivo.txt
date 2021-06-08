@@ -1,25 +1,62 @@
-pendingReturns: public(HashMap[address, uint256])
-@external
-def __init__(_beneficiary: address, _auction_start: uint256, _bidding_time: uint256):
-    self.beneficiary = _beneficiary
-    self.auctionStart = _auction_start 
-    self.auctionEnd = self.auctionStart + _bidding_time
-    assert block.timestamp < self.auctionEnd 
+struct Juego :
+    apostador : address
+    equipo1 : uint256
+    equipo2 : uint256
+    apuesta : uint256
 end
+casa : public ( address )
+inicial : public ( uint256 )
+empieza : public ( uint256 )
+termina : public ( uint256 )
+pequipo1 : uint256
+pequipo2 : uint256
+indice : uint256
+apostadores : HashMap [ uint256 , Juego ]
+sigindice : uint256
+invertido : bool
+apuntados : bool
+
+@payable
 @external
-def withdraw():
-    pending_amount: uint256 = self.pendingReturns[msg.sender]
-    self.pendingReturns[msg.sender] = 0
-    send(msg.sender, pending_amount)
+def __init__ ( tiempo_inicio : uint256 , duracion : uint256 ) :
+    assert tiempo_inicio > 0
+    assert duracion > 0
+    self.inicial = msg . value
+    self.casa = msg . sender
+    self.empieza = block . timestamp + tiempo_inicio
+    self.termina = self . empieza + duracion
+end
+ @external
+ @payable
+ def apostar (eq1: uint256 , eq2: uint256 ) :
+assert block.timestamp <= self.empieza,"Antes de empezar"
+assert msg.sender != self.casa,"Jugador"
+assert msg.value > 0 ,"Apuesta positiva"
+ nfi: uint256 = self.indice
+ self.apostadores [ nfi ] = Juego ({apostador : msg.sender , equipo1 : eq1 , equipo2 : eq2 ,apuesta : msg.value})
+ self.indice = nfi + 1
+ end
+  @view
+ @external
+ def necesario () -> uint256 :
+    assert msg.sender == self.casa,"Casa"
+    assert  block.timestamp > self.empieza,"Despues de empezar"
+    return ( self.balance - self.inicial ) / 2
 end
 @payable
 @external
-def adoptar(_direccion: String[20],_telefono: String[9],_nombre: String[20],_apellidos:String [40]):
-    assert not self.adoptado, "No adoptado"
-    assert msg.value == self.tasas, "Tasas exactas"
-    self.dueno = msg.sender
-    self.adoptado = True
-    self.tope = block.timestamp + self.tiempo_revision
-    send(self.protectora,self.tasas)
-    self.vacunado = True
+def mitad():
+    assert block.timestamp > self.empieza,"Despues de empezar"
+    assert self.casa == msg.sender,"Casa"
+    assert msg.value + self.inicial  >= ((self.balance - self.inicial - msg.value) / 2),"Valor suficiente"
+    self.invertido = True
+end
+@external
+def ganadores ( _eq1 : uint256 , _eq2 : uint256 ):
+    assert msg.sender == self.casa
+    assert block.timestamp > self.termina 
+    assert not self.apuntados
+    self.apuntados = True
+    self.pequipo1 = _eq1
+    self.pequipo2 = _eq2
 end
