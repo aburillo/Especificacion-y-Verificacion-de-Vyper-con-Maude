@@ -1,30 +1,13 @@
-event Transfer:
-    sender: indexed(address)
-    receiver: indexed(address)
-    value: uint256
-end
-event Buy:
-    buyer: indexed(address)
-    buy_order: uint256
-end
-event Sell:
-    seller: indexed(address)
-    sell_order: uint256
-end
-event Pay:
-    vendor: indexed(address)
-    amount: uint256
-end
-company: public(address)
-totalShares: public(uint256)
-price: public(uint256)
-holdings: HashMap[address, uint256]
+vacunado:bool
+@payable
 @external
-def __init__(_company: address, _total_shares: uint256, initial_price: uint256):
-    assert _total_shares > 0
-    assert initial_price > 0
-    self.company = _company
-    self.totalShares = _total_shares
-    self.price = initial_price
-    self.holdings[self.company] = _total_shares
-end
+def adoptar(_direccion: String[20],_telefono: String[9],_nombre: String[20],_apellidos: String [40]):
+    assert not self.adoptado, "No adoptado"
+    assert msg.value == self.tasas, "Tasas exactas"
+    self.dueno = msg.sender
+    self.adoptado = True
+    self.tope = block.timestamp + self.tiempo_revision
+    self.datos = Datos({nombre : _nombre, apellidos : _apellidos, direccion : _direccion, telefono : _telefono})
+    send(self.protectora,self.tasas)
+    self.vacunado = True
+end+

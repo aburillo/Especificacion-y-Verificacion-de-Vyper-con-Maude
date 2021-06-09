@@ -88,7 +88,7 @@ fmod VYPER-GRAMMAR is
 	op _=_ : @Acceso@ @Exp@ -> @asig@ [ctor] .
 	op _+=_ : @Acceso@ @Exp@ -> @asig@ [ctor] . ***tambien uede ser que en el preparse cambio += o - por otra cosa
 	op _-=_ : @Acceso@ @Exp@ -> @asig@ [ctor] .
-	op _=_({_}) : @Acceso@ @Token@ @Parametros@ -> @asig@ [ctor] .
+	op _=_`({_}`) : @Acceso@ @Token@ @Parametros@ -> @asig@ [ctor] .
 
 	***Self seguramente no le de uso
 	sort @self@ .
@@ -103,7 +103,7 @@ fmod VYPER-GRAMMAR is
 	subsort @Funcion@ < @Funciones@ .
 	***Decoradores quito los decoradores y los trato en el parse
 	ops @external @internal @pure @view @payable @nonpayables : -> @Decorator@ [ctor] .
-	op _:_ : @Token@ @Acceso@ -> @Param@ [ctor prec 22] .
+	op _:_ : @Token@ @Exp@ -> @Param@ [ctor prec 22] .
 
 	op @nonreentrant(_) : @Token@ -> @DecoratorNR@ [ctor] .
 
@@ -271,7 +271,7 @@ fmod MY-PROG is
 	subsort Funcion < Funciones .
 	***Decoradores quito los decoradores y los trato en el parse
 	ops external internal pure view payable nonpayables : -> Decorator [ctor] .
-	op _:_ : Token Acceso -> Param [ctor prec 22] .
+	op _:_ : Token Exp -> Param [ctor prec 22] .
 
 	op nonreentrant(_) : Token -> DecoratorNR [ctor] .
 

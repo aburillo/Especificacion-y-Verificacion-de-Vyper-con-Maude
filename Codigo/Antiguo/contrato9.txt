@@ -35,8 +35,8 @@ end
 @payable    
 @external
 def alquilar():
-    assert not self.alquilada
-    assert msg.value == self.fianza + self.mensualidad
+    assert not self.alquilada,"No esta alquilada"
+    assert msg.value == self.fianza + self.mensualidad,"Valor exacto"
     self.arrendatario = msg.sender
     self.alquilada = True
     self.tiempo_mensual = block.timestamp + self.tiempo
@@ -49,16 +49,16 @@ def alquilar():
 end
 @external
 def darllave(clave: uint256):
-    assert self.alquilada
-    assert msg.sender == self.arrendador
-    assert block.timestamp < self.tiempo_mensual
+    assert self.alquilada,"Alquilada"
+    assert msg.sender == self.arrendador,"Arrendador"
+    assert block.timestamp < self.tiempo_mensual,"Dentro de plazo"
     self.llave = clave
 end
 @external
 def cambio():
-    assert self.alquilada
-    assert block.timestamp > self.tiempo_mensual
-    assert msg.sender == self.arrendador or msg.sender == self.arrendatario
+    assert self.alquilada,"Alquilada"
+    assert block.timestamp > self.tiempo_mensual,"Plazo cumplido"
+    assert msg.sender == self.arrendador or msg.sender == self.arrendatario,"Arrendador o arrendatario"
     if block.timestamp > self.tiempo_contrato:
         send(self.arrendatario,self.fianza)
         selfdestruct(self.arrendador)
@@ -79,3 +79,21 @@ def cambio():
         end ;
     end ;
 end 
+@external
+def pagar():
+    assert self.alquilada,"Alquilada"
+    assert msg.sender == self.arrendatario,"Arrendatario"
+    assert block.timestamp < self.tiempo_mensual,"Dentro del plazo"
+    assert msg.value == self.mensualidad,"Mensualidad"
+    self.pagada = True
+end
+@external
+def eliminarcontrato():
+    assert msg.sender == self.arrendador,"Arrendador"
+    assert block.timestamp < self.tiempo_contrato,"Dentro del tiempo del contrato"
+    if self.alquilada :
+        selfdestruct(self.arrendatario)
+    else:
+        selfdestruct(self.arrendador)
+    end ;
+end

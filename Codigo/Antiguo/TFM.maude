@@ -313,7 +313,7 @@ fmod MY-PROG is
 
 	op elif_:_ : Exp Body -> elseif [ctor prec 15] .
 	op __ : ListElseif ListElseif  -> ListElseif  [ctor prec 17] .
-	op if_:_ end : Exp Body -> ifElse [ctor] .
+	op if_:_ end : Exp Body -> ifElse [ctor ] .
 	op if_:_ else:_ end : Exp Body Body -> ifElse [ctor] .
 	op if_:__else:_ end : Exp Body ListElseif Body -> ifElse [ctor] .
 	

@@ -50,14 +50,16 @@ def alquilar():
     assert self.cajas > 0,"Suficientes cajas"
     assert msg.value == self.mensualidad + self.fianza,"Valor exacto"
     if self.indice <= self.cajas_totales:
-        self.clientes[self.indice]=Caja({propietario: msg.sender, tdisfrute: block.timestamp + self.tiempo_disfrute, ttope: block.timestamp + self.tiempo_disfrute + self.tiempo_pagar,pagada: True,llave:1, dejar: False,primera:True})
+        self.clientes[self.indice]=Caja({propietario: msg.sender, tdisfrute: block.timestamp + self.tiempo_disfrute, 
+                                         ttope: block.timestamp + self.tiempo_disfrute + self.tiempo_pagar,
+                                         pagada: True,llave:1, dejar: False,primera:True})
         self.uso[self.indice] = True
         self.indice += 1
     else:
         index: uint256 = self.cajaslibres [self.indice_libres - 1]
-        self.clientes[index] = Caja({propietario: msg.sender,tdisfrute: block.timestamp + self.tiempo_disfrute,  ttope: block.timestamp + self.tiempo_disfrute + self.tiempo_pagar, pagada: True,llave:1, dejar: False,primera:True})
+        self.clientes[index]=Caja({propietario: msg.sender,tdisfrute: block.timestamp + self.tiempo_disfrute,  ttope: block.timestamp + self.tiempo_disfrute + self.tiempo_pagar, pagada: True,llave:1, dejar: False,primera:True})
         self.uso[index] = True
         self.indice_libres -= 1
-    end ;
     self.cajas -= 1
+    end ;
 end
