@@ -37,8 +37,8 @@ fmod VYPER-GRAMMAR is
 	***ACCESOS A MEMORIA
 	sort @Acceso@ .
 	subsort @Token@ < @Acceso@ .
-	op _[_] : @Exp@ @Exp@ -> @Acceso@ [ctor prec 14] . *** op _[_] : @Acceso@ @Exp@ -> @Acceso@ [ctor prec 14] .
-	op _._ :  @Exp@ @Exp@ -> @Acceso@ [ctor prec 15] . *** op _._ :  @Acceso@ @Acceso@ -> @Acceso@ [ctor prec 15] .
+	op _[_] : @Exp@ @Exp@ -> @Acceso@ [ctor prec 6] . *** op _[_] : @Acceso@ @Exp@ -> @Acceso@ [ctor prec 14] .
+	op _._ :  @Exp@ @Exp@ -> @Acceso@ [ctor prec 7] . *** op _._ :  @Acceso@ @Acceso@ -> @Acceso@ [ctor prec 15] .
 
 	***Operaciones
 	sorts @Exp@ @Body@ @asig@ @al@ @Call@ .
@@ -70,10 +70,10 @@ fmod VYPER-GRAMMAR is
 	op _>=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 18] .
 	op _<_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 18] .
 	op _<=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 18] .
-	op _==_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 19] .
+	op _==_ : @Exp@ @Exp@ -> @Exp@ [ctor assoc prec 19] .
 	op _!=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 19] .
 	op _and_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 20] .
-	op _or_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 21] .
+	op _or_ : @Exp@ @Exp@ -> @Exp@ [ctor assoc prec 21] .
 	***quizas deberia ser una expression
 	op _(_) : @Name@ @ArgList@ -> @Call@ [ctor prec 5] . *** prueba
 	op _() : @Name@ -> @Call@ [ctor prec 5] .
@@ -143,7 +143,7 @@ fmod VYPER-GRAMMAR is
 	sort @ifElse@ @elseif@ @ListElseif@ .
 	subsort @elseif@ < @ListElseif@ .
 
-	op elif_:_ : @Exp@ @Body@ -> @elseif@ [ctor prec 95] .
+	op elif_:_end : @Exp@ @Body@ -> @elseif@ [ctor prec 95] .
 	op __ : @ListElseif@ @ListElseif@  -> @ListElseif@  [ctor assoc prec 99] .
 	op if_:_ end : @Exp@ @Body@ -> @ifElse@ [ctor prec 100 ] .
 	op if_:_ else:_ end : @Exp@ @Body@ @Body@ -> @ifElse@ [ctor prec 100 ] .
@@ -190,7 +190,7 @@ fmod MY-PROG is
 	sorts DeclaracionIndexada DeclaracionEvento RegistrarEventos .
 	subsort Declaracion DConstante DcHashMap DcStruct DeclaracionIndexada DeclaracionEvento  < Declaraciones .
 	***declaracion valida para x :: int128 y x :: int128 [12]
-	op _::_ : Token Acceso -> Declaracion [ctor prec 22 ] .
+    op _::_ : Token Acceso -> Declaracion [ctor prec 22 ] .
 	op _:: public( _ ) : Token Acceso -> Declaracion [ctor prec 22 ] . *** ! al ser declaracion se podria meter en los parametros de una fun
 
 	***Declarar dando un valor, solo valido dentro de una funcion
@@ -220,28 +220,28 @@ fmod MY-PROG is
 	***ACCESOS A MEMORIA
 	sort Acceso .
 	subsort Token < Acceso .
-	op _[_] : Exp Exp -> Acceso [ctor prec 14] . *** op _[_] : Acceso Exp -> Acceso [ctor prec 14] .
-	op _._ :  Exp Exp -> Acceso [ctor prec 15] . *** op _._ :  Acceso Acceso -> Acceso [ctor prec 15] .
+	op _[_] : Exp Exp -> Acceso [ctor prec 6] . *** op _[_] : Acceso Exp -> Acceso [ctor prec 14] .
+	op _._ :  Exp Exp -> Acceso [ctor prec 7] . *** op _._ :  Acceso Acceso -> Acceso [ctor prec 15] .
 
 	***Operaciones
 	sorts Exp Body asig al Call .
-	subsort Acceso Call Float < Exp .
+	subsort Acceso Call < Exp .
 	op `(_`) : Exp -> Exp [ctor prec 8] .
-	op -._ : Exp -> Exp [ctor prec 10] .
-	op not._ : Exp -> Exp [ctor prec 10] .
-	op _*._ : Exp Exp -> Exp [ctor comm assoc prec 14] .
-	op _/._ : Exp Exp -> Exp [ctor prec 14] .
-	op _%._ : Exp Exp -> Exp [ctor prec 14] .
-	op _+._ : Exp Exp -> Exp [ctor comm assoc prec 16] .
-	op _-._ : Exp Exp -> Exp [ctor prec 16] .
-	op _>._ : Exp Exp -> Exp [ctor prec 18] .
-	op _>=._ : Exp Exp -> Exp [ctor prec 18] .
-	op _<._ : Exp Exp -> Exp [ctor prec 18] .
-	op _<=._ : Exp Exp -> Exp [ctor prec 18] .
-	op _==._ : Exp Exp -> Exp [ctor prec 19] .
-	op _!=._ : Exp Exp -> Exp [ctor prec 19] .
-	op _and._ : Exp Exp -> Exp [ctor prec 20] .
-	op _or._ : Exp Exp -> Exp [ctor prec 21] .
+	op -_ : Exp -> Exp [ctor prec 10] .
+	op not_ : Exp -> Exp [ctor prec 10] .
+	op _*_ : Exp Exp -> Exp [ctor comm assoc prec 14] .
+	op _/_ : Exp Exp -> Exp [ctor prec 14] .
+	op _%_ : Exp Exp -> Exp [ctor prec 14] .
+	op _+_ : Exp Exp -> Exp [ctor comm assoc prec 16] .
+	op _-_ : Exp Exp -> Exp [ctor assoc prec 16] .
+	op _>_ : Exp Exp -> Exp [ctor prec 18] .
+	op _>=_ : Exp Exp -> Exp [ctor prec 18] .
+	op _<_ : Exp Exp -> Exp [ctor prec 18] .
+	op _<=_ : Exp Exp -> Exp [ctor prec 18] .
+	op _==_ : Exp Exp -> Exp [ctor assoc prec 19] .
+	op _!=_ : Exp Exp -> Exp [ctor prec 19] .
+	op _and_ : Exp Exp -> Exp [ctor prec 20] .
+	op _or_ : Exp Exp -> Exp [ctor assoc prec 21] .
 	***quizas deberia ser una expression
 	op _(_) : Name ArgList -> Call [ctor prec 5] . *** prueba
 	op _() : Name -> Call [ctor prec 5] .
@@ -256,7 +256,7 @@ fmod MY-PROG is
 	op _=_ : Acceso Exp -> asig [ctor] .
 	op _+=_ : Acceso Exp -> asig [ctor] . ***tambien uede ser que en el preparse cambio += o - por otra cosa
 	op _-=_ : Acceso Exp -> asig [ctor] .
-	op _=_({_}) : Acceso Token Parametros -> asig [ctor] .
+	op _=_`({_}`) : Acceso Token Parametros -> asig [ctor] .
 
 	***Self seguramente no le de uso
 	sort self .
@@ -311,11 +311,11 @@ fmod MY-PROG is
 	sort ifElse elseif ListElseif .
 	subsort elseif < ListElseif .
 
-	op elif_:_ : Exp Body -> elseif [ctor prec 15] .
-	op __ : ListElseif ListElseif  -> ListElseif  [ctor prec 17] .
-	op if_:_ end : Exp Body -> ifElse [ctor ] .
-	op if_:_ else:_ end : Exp Body Body -> ifElse [ctor] .
-	op if_:__else:_ end : Exp Body ListElseif Body -> ifElse [ctor] .
+	op elif_:_end : Exp Body -> elseif [ctor prec 95] .
+	op __ : ListElseif ListElseif  -> ListElseif  [ctor assoc prec 99] .
+	op if_:_ end : Exp Body -> ifElse [ctor prec 100 ] .
+	op if_:_ else:_ end : Exp Body Body -> ifElse [ctor prec 100 ] .
+	op if_:__else:_ end : Exp Body ListElseif Body -> ifElse [ctor prec 100] .
 	
 	*** if parentesis
 	***op if(_):_ end : Exp Body -> ifElse [ctor] .
@@ -325,10 +325,10 @@ fmod MY-PROG is
 	ops break continue pass return : -> DeclaracionControl [ctor] .
 	op raise _ : Token -> DeclaracionControl [ctor] . ***desencadena una expecion y revierte la llamada
 	op assert _ : Exp -> DeclaracionControl [ctor prec 65] .
-	op assert _,_ : Exp String -> DeclaracionControl [ctor prec 65] . *** si es falso se revierte la transaccion
-	op return _ : Exp -> DeclaracionControl [ctor ] .
-	op return _,_ : Exp Exp -> DeclaracionControl [ctor] . ***se puede devolver una tupla
-	op return [_] : ArgList -> DeclaracionControl [ctor] .
+	op assert _|_ : Exp String -> DeclaracionControl [ctor prec 65] . *** si es falso se revierte la transaccion
+	op return _ : Exp -> DeclaracionControl [ctor prec 22 ] .
+	op return _,_ : Exp Exp -> DeclaracionControl [ctor prec 20] . ***se puede devolver una tupla
+	op return [_] : ArgList -> DeclaracionControl [ctor prec 20 ] .
 
 	***igualr una tupla SEGURAMENTE TENGA PROBLEMAS PORQUE NO SERIA UN BUBBLE
 	sort asigTupla .
@@ -338,7 +338,7 @@ fmod MY-PROG is
 	*** registrar eventos
 	op log _`(_`) : Name ArgList -> RegistrarEventos [ctor] .
 	subsort For DeclaracionControl asig asigTupla RegistrarEventos DeclaracionValor ifElse DeclaracionValor Call < Body .
-	op _;_ : Body Body -> Body [ctor assoc prec 79 ] .
+	op _;_ : Body Body -> Body [ctor assoc prec 105 ] .
 
 	***Crea un contrato
 	sort Contrato .

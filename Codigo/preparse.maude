@@ -4,7 +4,7 @@ fmod PREPARSE is
 
  var S S1 S2 S3 S4 S5 : QidList .
  var Q Q1 Q' Q2 : Qid .
- var N : Nat .
+ var N N1 : Nat .
  vars St St' St1 St2 : String .
  op preparse : QidList -> QidList .
 ---  ***añadir PAV en los parentesis vacios que vengan con un def
@@ -62,28 +62,158 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St1 := substr(St, 2 , length(St) ) /\
     Q' := qid(St') /\
     Q1 := qid(St1) .
+*** si es xxx=
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ if Q =/= '= /\
+    St := string(Q) /\
+    N := find(St, "=", 0) /\
+    N =/= 0 /\
+    substr(St, N - 1, 1 )  =/= "+" /\
+    substr(St, N - 1, 1 )  =/= "-" /\
+    substr(St, N + 1, 1 )  =/= "=" /\
+    substr(St, N - 1, 1 )  =/= "<" /\
+    substr(St, N - 1, 1 )  =/= ">" /\
+    substr(St, N - 1, 1 )  =/= "!" /\
+    St' := substr(St, 0, N) /\
+    St1 := substr(St, N , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1) [print "klk1" St] .
+*** si es =xxx
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ if Q =/= '= /\
+    St := string(Q) /\
+    N := find(St, "=", 0) /\
+    N == 0 /\
+    substr(St, 1, 1) =/= "=" /\
+    St' := substr(St, 0, 1) /\
+    St1 := substr(St, 1 , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1) [print "klk2" Q]  .
+*** si es xxx==
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ if Q =/= '== /\
+    St := string(Q) /\
+    N := find(St, "==", 0) /\
+    N =/= 0 /\
+    St' := substr(St, 0, N) /\
+    St1 := substr(St, N , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1) [print "klk==" St] .
+*** si es ==xxx
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ ***if ((Q =/= '+=) or (Q =/= '-= )) /\
+ if Q =/= '==  /\
+    St := string(Q) /\
+    N := find(St, "==", 0) /\
+    N == 0 /\
+    St' := substr(St, 0, 2) /\
+    St1 := substr(St, 2 , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1) [print "klk4 " Q  Q1]  .
+*** si es xxx+=
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ if Q =/= '+= /\
+    St := string(Q) /\
+    N := find(St, "+=", 0) /\
+    N =/= 0 /\
+    St' := substr(St, 0, N) /\
+    St1 := substr(St, N , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1) [print Q' Q1 "klk 3 "] .
+*** si es +=xxx
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ ***if ((Q =/= '+=) or (Q =/= '-= )) /\
+ if Q =/= '+=  /\
+    St := string(Q) /\
+    N := find(St, "+=", 0) /\
+    N == 0 /\
+    St' := substr(St, 0, 2) /\
+    St1 := substr(St, 2 , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1) [print "klk4 " Q  Q1]  .
+
+*** si es xxx<=
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ if Q =/= '<= /\
+    St := string(Q) /\
+    N := find(St, "<=", 0) /\
+    N =/= 0 /\
+    St' := substr(St, 0, N) /\
+    St1 := substr(St, N , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1) [print Q' Q1 "klk 3 "] .
+*** si es <=xxx
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ if Q =/= '<=  /\
+    St := string(Q) /\
+    N := find(St, "<=", 0) /\
+    N == 0 /\
+    St' := substr(St, 0, 2) /\
+    St1 := substr(St, 2 , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1) [print "klk4 " Q  Q1]  .
+*** si es xxx>=
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ if Q =/= '>= /\
+    St := string(Q) /\
+    N := find(St, ">=", 0) /\
+    N =/= 0 /\
+    St' := substr(St, 0, N) /\
+    St1 := substr(St, N , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1) [print Q' Q1 "klk 3 "] .
+*** si es >=xxx
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ if Q =/= '>=  /\
+    St := string(Q) /\
+    N := find(St, ">=", 0) /\
+    N == 0 /\
+    St' := substr(St, 0, 2) /\
+    St1 := substr(St, 2 , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1) [print "klk4 " Q  Q1]  .
+*** si es xxx!=
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ if Q =/= '!= /\
+    St := string(Q) /\
+    N := find(St, "!=", 0) /\
+    N =/= 0 /\
+    St' := substr(St, 0, N) /\
+    St1 := substr(St, N , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1) [print Q' Q1 "klk 3 "] .
+*** si es !=xxx
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
+ if Q =/= '!=  /\
+    St := string(Q) /\
+    N := find(St, "!=", 0) /\
+    N == 0 /\
+    St' := substr(St, 0, 2) /\
+    St1 := substr(St, 2 , length(St) ) /\
+    Q' := qid(St') /\
+    Q1 := qid(St1) [print "klk4 " Q  Q1]  .
 *** si es xxx+
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '+ /\
     St := string(Q) /\
     N := find(St, "+", 0) /\
     N =/= 0 /\
-    substr(St, N, N + 1)  =/= "=" /\
+    substr(St, N, 1)  =/= "=" /\
     St' := substr(St, 0, N) /\
-    St1 := substr(St, N , length(St) ) /\
+    St1 := substr(St, N , length(St) ) /\ 
     Q' := qid(St') /\
-    Q1 := qid(St1)  .
-**** si es +xxxx
+    Q1 := qid(St1)  [print "KLK5" N Q' Q1  "hola" ] .
+**** si es +xxxx 
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '+ /\
     St := string(Q) /\
     N := find(St, "+", 0) /\
     N == 0 /\
-    substr(St, 1, 2 ) =/= "=" /\
+    substr(St, 1, 1) =/= "=" /\
     St' := substr(St, 0, 1) /\
     St1 := substr(St, 1 , length(St) ) /\
     Q' := qid(St') /\
-    Q1 := qid(St1) .
+    Q1 := qid(St1) [print "KLK6"] .
 *** si es xxx<
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '< /\

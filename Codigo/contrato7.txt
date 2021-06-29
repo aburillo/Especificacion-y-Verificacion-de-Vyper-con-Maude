@@ -4,41 +4,41 @@ struct Juego :
     equipo2 : uint256
     apuesta : uint256
 end
-casa : public ( address )
-inicial : public ( uint256 )
-empieza : public ( uint256 )
-termina : public ( uint256 )
+casa : public(address)
+inicial : public (uint256)
+empieza : public (uint256)
+termina : public (uint256)
 pequipo1 : uint256
 pequipo2 : uint256
 indice : uint256
-apostadores : HashMap [ uint256 , Juego ]
+apostadores : HashMap [uint256 ,Juego]
 sigindice : uint256
 invertido : bool
 apuntados : bool
 
 @payable
 @external
-def __init__ ( tiempo_inicio : uint256 , duracion : uint256 ) :
+def __init__( tiempo_inicio: uint256 , duracion: uint256 ):
     assert tiempo_inicio > 0
     assert duracion > 0
-    self.inicial = msg . value
-    self.casa = msg . sender
-    self.empieza = block . timestamp + tiempo_inicio
-    self.termina = self . empieza + duracion
+    self.inicial = msg.value
+    self.casa = msg.sender
+    self.empieza = block.timestamp + tiempo_inicio
+    self.termina = self.empieza + duracion
 end
- @external
- @payable
- def apostar (eq1: uint256 , eq2: uint256 ) :
-assert block.timestamp <= self.empieza,"Antes de empezar"
-assert msg.sender != self.casa,"Jugador"
-assert msg.value > 0 ,"Apuesta positiva"
- nfi: uint256 = self.indice
- self.apostadores [ nfi ] = Juego ({apostador : msg.sender , equipo1 : eq1 , equipo2 : eq2 ,apuesta : msg.value})
- self.indice = nfi + 1
- end
- @view
- @external
- def necesario () -> uint256 :
+@external
+@payable
+def apostar (eq1: uint256 , eq2: uint256 ) :
+    assert block.timestamp <= self.empieza,"Antes de empezar"
+    assert msg.sender != self.casa,"Jugador"
+    assert msg.value > 0 ,"Apuesta positiva"
+    nfi: uint256 = self.indice
+    self.apostadores [ nfi ] = Juego ({apostador : msg.sender , equipo1 : eq1 , equipo2 : eq2 ,apuesta : msg.value})
+    self.indice = nfi + 1
+end
+@view
+@external
+def necesario() -> uint256 :
     assert msg.sender == self.casa,"Casa"
     assert  block.timestamp > self.empieza,"Despues de empezar"
     return ( self.balance - self.inicial ) / 2

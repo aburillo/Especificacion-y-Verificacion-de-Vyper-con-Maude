@@ -99,12 +99,9 @@ var  Ct : Constant .
      not isTipo(S)  /\
      not isVariableEntorno(S) [print "ecuacionQid" S ] .
 
-*** PARSEA QID
- ceq parse('logName[T]) =  T
-  if Q := downQid(T) /\
-     S := string(Q) /\
-     not (float(S) :: Float) /\
-     not (rat(S, 10) :: Nat) [print "ecuacionl LogName" S ] .
+*** PARSEA LOGNAME
+ ceq parse('logName[T]) =  T1
+  if T1 := parse('token[T])  .
 
 *** PARSEA BUBBLE!
 ***['__[''2.Qid,''`,.Qid,''x.Qid]]
@@ -202,7 +199,7 @@ var  Ct : Constant .
    ceq parse('for_in`range`(_`):_end[T1,T2,TL]) =  'for[T1', T2', TL']
    if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
-       TL'  := parseL(TL) .
+       TL'  := parse(TL) .
 ***Parseando un for_in range(_,_)
    ceq parse('for_in`range`(_`,_`);_end[T1,T2,T3,TL]) =  'for[T1', T2', T3, TL']
    if  T1'  := parse (T1) /\
@@ -218,7 +215,7 @@ var  Ct : Constant .
 
 ***PARSEA IF-ELSE
 *** if sencillo
-   ceq parse('if_:_end[T1,TL]) =  'If_Else[T1', TL']
+   ceq parse('if_:_end[T1,TL]) =  'If_[T1', TL']
    if  T1'  := parse (T1) /\
        TL'  := parseL (TL)  [print "ecuacionIFELSE sin else:"  ] .
 *** if sencillo parentesis
@@ -257,6 +254,17 @@ var  Ct : Constant .
    if T1' := parse (T1) /\
       S1 := string(T1') /\
       S1 == "@external.@Decorator@" /\
+      Q := downQid(T) /\
+      S := string(Q) /\
+      S == "__init__" /\
+         TL'  := parse (TL) [print "ecuacionFuncionesInit:" S ] .
+   *** Cabecera init
+   ceq parse('__def_`(_`)[T1,T2,'token[T],TL]) = 'init[ TL']
+   if T1' := parse (T1) /\
+      S1 := string(T1') /\
+      T2' := parse (T2) /\
+      S2 := string(T2') /\
+      (S1 == "@external.@Decorator@" or S2 == "@external.@Decorator@") /\
       Q := downQid(T) /\
       S := string(Q) /\
       S == "__init__" /\
@@ -308,7 +316,7 @@ var  Ct : Constant .
        T2'  := parse (T2) /\
        T3'  := parse (T3) /\
        TL'  := parse (TL) /\
-       T4'  := parse (T4) [print "ecuacionFunciones6:" TL' ] .
+       T4'  := parse (T4) [print "ecuacionFuncionesRetur:" T4 ] .
 
 *** Cabecera sin decoradores CON return tupla FUN
    ceq parse('def_`(_`)->`(_:_`)[T1,TL,T2,T3]) = 'cab[T1' , T2' , T3' , TL' ]
@@ -343,6 +351,9 @@ var  Ct : Constant .
    ceq parse('_`(_`)[T1,TL]) = 'Call[T1',TL']
    if  T1'  := parse (T1) /\
       TL'  := parse (TL) [print "ecuacionCall:" TL' ] .
+   
+   ceq parse('_`(`)[T1]) = 'Call[T1']
+   if  T1'  := parse (T1)  .
    --- ***Parametros de la llamada
    --- ceq parse('`(_`)[TL]) = 'parametros[TL']
    --- if  TL'  := parse (TL) [print "ecuacionCall:" TL' ] .
@@ -358,7 +369,8 @@ var  Ct : Constant .
    ***Assert
    ceq parse('assert_[TL]) = 'Assert[ TL']
    if  TL'  := parse (TL)  [print "Assert:" TL' ] .
-   ceq parse('assert_`,_[T1,T2]) = 'Assert[ T1' , T2' ]
+
+   ceq parse('assert_|_[T1,T2]) = 'Assert[ T1' , T2' ]
    if  T1'  := parse (T1) /\
        T2'  := parse (T2) [print "AssertString:" T1' ] .
    ***Return
@@ -410,6 +422,16 @@ var  Ct : Constant .
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) .
 
+ *** Parseando un - .
+ ceq parse('_-_[T1,T2]) = '_-._[T1', T2']
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) .
+
+ *** Parseando una suma .
+ ceq parse('_*_[T1,T2]) = '_*._[T1', T2']
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) .
+
 ***PARSEO UN <
  ceq parse('_<_[T1,T2]) =  '_<._[T1', T2']
     if  T1'  := parse (T1) /\
@@ -432,14 +454,35 @@ var  Ct : Constant .
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) .
 
-***PARSEO UN <
+***PARSEO UN ==
  ceq parse('_==_[T1,T2]) = '_==._[T1', T2']
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) .
+
+***PARSEO UN %
+ ceq parse('_%_[T1,T2]) = '_%._[T1', T2']
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) .
+
+***PARSEO UN /
+ ceq parse('_/_[T1,T2]) = '_/._[T1', T2']
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) .
 
 *** Parseo not
  ceq parse('not_[T1]) = 'not._[T1']
     if  T1'  := parse (T1) .
+
+***PARSEO and
+ ceq parse('_and_[T1,T2]) = '_and._[T1', T2']
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) .
+
+*** paseo or
+
+ ceq parse('_or_[T1,T2]) = '_or._[T1', T2']
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) .
 
 *** Parseo () 
  ceq parse('`(_`)[T1]) = '`(`)_.[T1']
@@ -667,25 +710,6 @@ red metaParse(GRAMMAR, tokenize("  bidToCheck : Bid = (bids[msg.sender])[i]"), '
 
 red metaParse(GRAMMAR, tokenize(" x = funders[i] .sender "), '@asig@ ) .
 red metaParse(GRAMMAR, tokenize(" send(self.funders[i] . sender, self.funders[i] . value, jesus.paco ) "), '@asig@) .
-red metaParse(GRAMMAR, tokenize(" if x <= y : " +
-            "refundIndex = nextFunderIndex ; " +
-            "return " +
-            "else: " +
-            "refundIndex = nextFunderIndex ; " +
-            "return " +
-        "end" ), '@ifElse@ ) .
-red metaParse(GRAMMAR, tokenize("  for i in range(x) :" +
-            "winning_proposal = i ; " +
-            "return " +
-            "end  "  ), '@For@ ) .
-red metaParse(GRAMMAR, tokenize("  for i in range(x) :" +
-            "bv " +
-            "end  "  ), '@For@ ) .
-
-red metaParse(GRAMMAR, tokenize(" for i in range(MAX_BIDS) :" +
-            "value : uint256 = _values[i] ;" +
-            "value : uint256 = y " +
-            "end  "  ), '@For@ ) .
 ***red metaParse(GRAMMAR, tokenize(" elif  x > 2 : refundIndex = nextFunderIndex ; break elif  x > 2 : refundIndex = nextFunderIndex ; break "), '@ListElseif@) .
 red metaParse(GRAMMAR, tokenize(" assert ( msg.value + inicial >= (( balance - inicial - msg.value ) / 2) )"  ), '@DeclaracionControl@ ) .
 red metaParse(GRAMMAR, tokenize(" return voters[addr] . delegate != ZERO_ADDRESS"  ), '@DeclaracionControl@ ) .
@@ -696,9 +720,30 @@ red metaParse(GRAMMAR, tokenize(" tiempo_contrato += block.timestamp "  ), '@asi
 ---         "end" ), '@For@ ) .
 red metaParse(GRAMMAR, tokenize("datos = Datos ({nombre : _nombre, apellidos : _apellidos,direccion : _direccion,telefono : _telefono})"), anyType) .
 red metaParse(GRAMMAR, tokenize("clientes[indice]= Caja({propietario : msg.sender, tdisfrute : block.timestamp + tiempo_disfrute, ttope : block.timestamp + tiempo_disfrute + tiempo_pagar,pagada : True,llave : 1, dejar : False,primera : True})"), '@asig@ ) .
-red metaParse(GRAMMAR, tokenize(" assert x > 2 | \"hola adrian\" "), '@DeclaracionControl@) .
-
 red preparse(tokenize("def  self.datos = Datos({nombre: _nombre, apellidos: _apellidos,direccion: _direccion,telefono: _telefono})" )) .
+red preparse( tokenize(" winning_proposal<=iASAS " )) .
+red metaParse(GRAMMAR, tokenize(" if x <= y : " +
+            "refundIndex = nextFunderIndex ; " +
+            "return " +
+            "elif x : " +
+            "refundIndex = nextFunderIndex ; " +
+            "return " +
+            "end " +
+            "else: " +
+            "refundIndex = nextFunderIndex ; " +
+            "return " +
+            "end" ), '@ifElse@ ) .
+red metaParse(GRAMMAR, tokenize("elif x : " +
+            "refundIndex = nextFunderIndex ; " +
+            "return " +
+            "end " +
+            "elif x : " +
+            "refundIndex = nextFunderIndex ; " +
+            "return " +
+            "end" ), '@ListElseif@ ) .
+red metaParse(GRAMMAR, tokenize("elif x : " +
+            "refundIndex = nextFunderIndex ; " +
+            "return " +
+            "end "  ), '@elseif@ ) .
 set print attribute on .
-
 erew run .

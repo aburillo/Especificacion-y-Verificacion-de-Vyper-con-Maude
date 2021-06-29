@@ -99,6 +99,13 @@ var  Ct : Constant .
      not isTipo(S)  /\
      not isVariableEntorno(S) [print "ecuacionQid" S ] .
 
+*** PARSEA QID
+ ceq parse('logName[T]) =  T
+  if Q := downQid(T) /\
+     S := string(Q) /\
+     not (float(S) :: Float) /\
+     not (rat(S, 10) :: Nat) [print "ecuacionl LogName" S ] .
+
 *** PARSEA BUBBLE!
 ***['__[''2.Qid,''`,.Qid,''x.Qid]]
 *** parsea lista de bubble
@@ -179,22 +186,23 @@ var  Ct : Constant .
    ceq parse('_-=_[T1,T2]) = '_-=._[T1', T2']
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) [print "asignacion-=:" T1' ] .
-    ceq parse('_=_`(`{_`}`)[T1,T2,TL]) = '_=._[T1', T2', TL']
+
+   ceq parse('_=_`(`{_`}`)[T1,T2,TL]) = '_=St._[T1', T2', TL']
     if  T1'  := parse (T1) /\
-        T2'  := parse (T2) /\
-        TL'  := parse (TL) [print "asignacionStruC:" TL' ] .
+      T2'  := parse (T2) /\
+      TL'  := parse (TL) [print "asignacion{}:" TL' ] .
 
 *** PARSEA FOR
 *** Parseando un for_in_
-   ceq parse('for_in_;_end[T1,T2,TL]) =  'for[T1', T2', TL']
+   ceq parse('for_in_:_end[T1,T2,TL]) =  'for[T1', T2', TL']
    if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
-       TL'  := parseL (TL) .
+       TL'  := parse (TL) .
 ***Parseando range
-   ceq parse('for_in`range`(_`);_end[T1,T2,TL]) =  'for[T1', T2', TL']
+   ceq parse('for_in`range`(_`):_end[T1,T2,TL]) =  'for[T1', T2', TL']
    if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
-       TL'  := parseL (TL) .
+       TL'  := parseL(TL) .
 ***Parseando un for_in range(_,_)
    ceq parse('for_in`range`(_`,_`);_end[T1,T2,T3,TL]) =  'for[T1', T2', T3, TL']
    if  T1'  := parse (T1) /\
@@ -212,11 +220,11 @@ var  Ct : Constant .
 *** if sencillo
    ceq parse('if_:_end[T1,TL]) =  'If_Else[T1', TL']
    if  T1'  := parse (T1) /\
-       TL'  := parseL (TL)  [print "ecuacionIFELSE sin else:" TL ] .
+       TL'  := parseL (TL)  [print "ecuacionIFELSE sin else:"  ] .
 *** if sencillo parentesis
-   ceq parse('if`(_`):_end[T1,TL]) =  'If_Else[T1', TL']
-   if  T1'  := parse (T1) /\
-       TL'  := parseL (TL)  [print "ecuacionIFELSE sin else:" TL ] .
+   --- ceq parse('if`(_`):_end[T1,TL]) =  'If_Else[T1', TL']
+   --- if  T1'  := parse (T1) /\
+   ---     TL'  := parseL (TL)  [print "ecuacionIFELSE sin else:" TL ] .
 *** if else sin elseif
    ceq parse('if_:_else:_end[T1,TL,TL2]) =  'If_Else[T1', TL', TL2']
    if  T1'  := parse (T1) /\
@@ -395,6 +403,7 @@ var  Ct : Constant .
    ceq parse('log_`(_`)[T1,TL]) = 'logE[T1', 'L[TL']]
     if  T1'  := parse (T1) /\
         TL'  := parse (TL) [print "ecuacionLogEvent:" T1 ] .
+
 *** PARSEO EXPRESIONES Y OPERACIONES
  *** Parseando una suma .
  ceq parse('_+_[T1,T2]) = '_+._[T1', T2']
@@ -417,6 +426,24 @@ var  Ct : Constant .
  ceq parse('_>=_[T1,T2]) = '_>=._[T1', T2']
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) .
+
+***PARSEO UN !=
+ ceq parse('_!=_[T1,T2]) = '_!=._[T1', T2']
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) .
+
+***PARSEO UN <
+ ceq parse('_==_[T1,T2]) = '_==._[T1', T2']
+    if  T1'  := parse (T1) /\
+        T2'  := parse (T2) .
+
+*** Parseo not
+ ceq parse('not_[T1]) = 'not._[T1']
+    if  T1'  := parse (T1) .
+
+*** Parseo () 
+ ceq parse('`(_`)[T1]) = '`(`)_.[T1']
+   if  T1'  := parse (T1) .
 
  eq parse(T) =  T  [owise] .
 *** Parsea una lista
@@ -555,7 +582,7 @@ crl [parsing] :
     QIL := tokenize(Read) /\
     QIL1 := preparse(QIL)  /\
     {T, Ty} := metaParse(GRAMMAR, QIL1, '@Contrato@) /\
-    T' := T [print  QIL " Preparseado \n" QIL1 T "\nParseado: " T' " " Ty] . *** T' := parse(T) [print  QIL " Preparseado \n" QIL1 T "\nParseado: " T' " " Ty] .
+    T' := parse(T) [print  QIL " Preparseado \n" QIL1 T "\nParseado: " T' " " Ty] .
 
 var RP? : [ResultPair] .
 
