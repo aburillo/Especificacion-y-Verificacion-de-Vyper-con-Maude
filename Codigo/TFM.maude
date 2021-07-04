@@ -85,10 +85,10 @@ fmod VYPER-GRAMMAR is
 	op _,_ : @ArgList@ @ArgList@ -> @ArgList@ [ctor assoc prec 60] .
 
 	***Asignaciones
-	op _=_ : @Acceso@ @Exp@ -> @asig@ [ctor] .
-	op _+=_ : @Acceso@ @Exp@ -> @asig@ [ctor] . ***tambien uede ser que en el preparse cambio += o - por otra cosa
-	op _-=_ : @Acceso@ @Exp@ -> @asig@ [ctor] .
-	op _=_`({_}`) : @Acceso@ @Token@ @Parametros@ -> @asig@ [ctor] .
+	op _=_ : @Acceso@ @Exp@ -> @asig@ [ctor assoc] .
+	op _+=_ : @Acceso@ @Exp@ -> @asig@ [ctor assoc] . ***tambien uede ser que en el preparse cambio += o - por otra cosa
+	op _-=_ : @Acceso@ @Exp@ -> @asig@ [ctor assoc ] .
+	op _=_`({_}`) : @Acceso@ @Name@ @Parametros@ -> @asig@ [ctor assoc ] .
 
 	***Self seguramente no le de uso
 	sort @self@ .
@@ -144,10 +144,10 @@ fmod VYPER-GRAMMAR is
 	subsort @elseif@ < @ListElseif@ .
 
 	op elif_:_end : @Exp@ @Body@ -> @elseif@ [ctor prec 95] .
-	op __ : @ListElseif@ @ListElseif@  -> @ListElseif@  [ctor assoc prec 99] .
+	op __ : @ListElseif@ @ListElseif@  -> @ListElseif@  [ctor assoc prec 97] .
 	op if_:_ end : @Exp@ @Body@ -> @ifElse@ [ctor prec 100 ] .
 	op if_:_ else:_ end : @Exp@ @Body@ @Body@ -> @ifElse@ [ctor prec 100 ] .
-	op if_:__else:_ end : @Exp@ @Body@ @ListElseif@ @Body@ -> @ifElse@ [ctor prec 100] .
+	op if_:_end_else:_ end : @Exp@ @Body@ @ListElseif@ @Body@ -> @ifElse@ [ctor prec 100] .
 	
 	*** if parentesis
 	***op if(_):_ end : @Exp@ @Body@ -> @ifElse@ [ctor] .
@@ -184,7 +184,7 @@ fmod MY-PROG is
   	pr FLOAT .
   	pr QID .
 	sorts Token Name .
-	subsort Qid < Name < Token .
+	subsort Qid < Name < Token . ***falta en float
 	sorts Declaracion DeclaracionValor DConstante DcHashMap DcStruct Declaraciones .
 	*** Subsort eventos
 	sorts DeclaracionIndexada DeclaracionEvento RegistrarEventos .
@@ -547,7 +547,7 @@ endfm
 *** red | "a", ["b", bool , true, 3] | .
 fmod MAPA is
 	pr TIPOS .
-	sort Mapa Map ClaveValor TipoMap .
+	sort Mapa Map ClaveValor TipoMap TMapas .
 	***subsort Boolean Float String < TipoMap .
 	subsort ClaveValor < Map .
 	op _->_ : Nat Nat -> ClaveValor [ctor] .
@@ -559,6 +559,13 @@ fmod MAPA is
 	op |_,_,_,_| : String Map Tipos Tipos -> Mapa [ctor] .
 	op |_,_,_,_| : String Map Tipos String -> Mapa [ctor] .
 	op |_,_,_,_,_| : String Map Tipos String Nat -> Mapa [ctor] .
+	***actualizado tipo1 tipo2 cantidad de tipo2
+	op [_,_,_] : Tipos Tipos Nat -> TMapas [ctor] .
+	op [_,_,_] : Tipos Qid Nat -> TMapas [ctor] .
+	*** creo que mapa tiene que tener
+	op _->_ : Token ArgList -> ClaveValor [ctor assoc ] .
+	op _->_  : Token LStruct -> ClaveValor [ctor assoc] .
+	op M|_,_| : TMapas Map -> Mapa [ctor] .
 endfm
 fmod CONSTANTES is
 	pr TIPOS .
@@ -587,17 +594,18 @@ fmod MEMORIA is
 	sorts Variable Memoria Visibilidad .
 	subsort Variable ConstanteValor < Memoria .
 	ops public private : -> Visibilidad [ctor] .
+	ops constante indexed normal : -> ConsIndexNorm [ctor] .
 	*** [nombreVaraible,tipodelaVariable,valor de la variable,numero de atributos,publica o priovada,true si es constante]
-	op [_,_,_,_,_,_] : Qid Tipos ArgList Nat Visibilidad Bool -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid Tipos ArgList Nat Visibilidad ConsIndexNorm -> Variable [ctor] .
 	--- op [_,_,_,_,_,_] : Qid Tipos LInt Nat Visibilidad Bool -> Variable [ctor] .
 	--- op [_,_,_,_,_,_] : Qid Tipos LInt Nat Visibilidad Bool -> Variable [ctor] .
 	--- op [_,_,_,_,_,_] : Qid Tipos LFloat Nat Visibilidad Bool -> Variable [ctor] .
-	op [_,_,_,_,_,_] : Qid Tipos String Nat Visibilidad Bool -> Variable [ctor] .
-	op [_,_,_,_,_,_] : Qid Tipos Direccion Nat Visibilidad Bool -> Variable [ctor] .
-	op [_,_,_,_,_,_] : Qid Tipos Bytes32 Nat Visibilidad Bool -> Variable [ctor] .
-	op [_,_,_,_,_,_] : Qid Tipos bytes Nat Visibilidad Bool -> Variable [ctor] .
-	op [_,_,_,_,_,_] : Qid Tipos LStruct Nat Visibilidad Bool -> Variable [ctor] .
-	op [_,_,_,_,_,_] : Qid Tipos Mapa Nat Visibilidad Bool -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid Tipos String Nat Visibilidad ConsIndexNorm -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid Tipos Direccion Nat Visibilidad ConsIndexNorm -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid Tipos Bytes32 Nat Visibilidad ConsIndexNorm -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid Tipos bytes Nat Visibilidad ConsIndexNorm -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid Tipos LStruct Nat Visibilidad ConsIndexNorm -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid Tipos Mapa Nat Visibilidad ConsIndexNorm -> Variable [ctor] .
 	op mv : -> Memoria [ctor] .
 	op __ : Memoria Memoria -> Memoria [ctor assoc comm id: mv] .
 	op inicMemoria : -> Memoria .
@@ -608,10 +616,11 @@ fmod MEMORIAFUNCIONES is
 	pr MY-PROG .
 	sorts DatoFuncion Entra LEntra MemoriaFunciones .
 	subsort Entra < LEntra .
-	subsort DatoFuncion < MemoriaFunciones . 
-	op (_,_,_) : Qid Qid Nat -> Entra [ctor] .
+	subsort DatoFuncion < MemoriaFunciones .
+	*** parametro de una funcion 
+	op (_,_,_) : Qid Tipos Nat -> Entra [ctor] .
 	op pV : -> LEntra [ctor] .
-	op __ : LEntra LEntra -> LEntra [ctor assoc ] .
+	op __ : LEntra LEntra -> LEntra [ctor assoc comm ] .
 	*** [nombreFuncion,Decorador , Decorador ,parametros , dato devuelto ,deberia tener el cuerpo?  ]
 	op F[_,_,_,_,_] : Qid Decorator Decorator LEntra Qid -> DatoFuncion [ctor] .
 	op mfv : -> MemoriaFunciones [ctor] .
@@ -655,6 +664,7 @@ mod AlmacenaVariables is
 	var D : Declaraciones .
 	var S : String .
 	var N : Nat .
+	var M : Memoria .
 	***var MS : Map{String , String} .
 	***var M128 M256 : Map{String , Int} .
 	***var MF : Map{String , Float} .
@@ -662,4 +672,6 @@ mod AlmacenaVariables is
 	***	if (existeVariable(S,MS,M128,M256,MF)) == false .
 		***crl[AlmacenaInt]:  S : int128 D, MS, M128, M256, MF => D, MS, insert(S,0,M128), M256, MF
 	***	if (existeVariable(S,MS,M128,M256,MF)) == false .
+	***rl[anadeMM] : M => M ¿POR EJEMPLO SI QUISIESE AÑADIR YN MAPA A MEMORIA COMO LO HARIA AL LEER LA DECLARACION DE HASMAP DEBERIA LLAMAR A UNA FUNCION QUE SEA AÑADE A MEMORIA ?
+	***¿nECESITO TENER UN CODIGO Y UNA MEMORIA Y MEMORIA DE FUNCIONES O COMO , EN CUANTO A MEMORIA DE FUNCIONES, CREO UNA SEGUNDA MEMORIA QUE SEA AL EMPEZAR UNA FUNCION Y LA BORRO AL ACABAR ? ?
 endm

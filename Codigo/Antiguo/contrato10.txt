@@ -50,7 +50,7 @@ def alquilar():
     assert self.cajas > 0,"Suficientes cajas"
     assert msg.value == self.mensualidad + self.fianza,"Valor exacto"
     if self.indice <= self.cajas_totales:
-        self.clientes[self.indice]=Caja({propietario: msg.sender, tdisfrute: block.timestamp + self.tiempo_disfrute, ttope: block.timestamp + self.tiempo_disfrute + self.tiempo_pagar,pagada: True,llave:1, dejar: False,primera:True})
+        self.clientes[self.indice]= Caja({propietario: msg.sender, tdisfrute: block.timestamp + self.tiempo_disfrute, ttope: block.timestamp + self.tiempo_disfrute + self.tiempo_pagar,pagada: True,llave:1, dejar: False,primera:True})
         self.uso[self.indice] = True
         self.indice += 1
     else:
@@ -60,4 +60,101 @@ def alquilar():
         self.indice_libres -= 1
     end ;
     self.cajas -= 1
+end
+@external
+def asignarllave(clave: uint256, ncaja: uint256):
+    assert self.uso[ncaja],"Caja asignada"
+    assert block.timestamp <= self.clientes[ncaja].tdisfrute,"Dentro de tiempo"
+    assert msg.sender == self.tienda,"Tienda"
+    assert clave > 1,"Clave valida"
+    self.clientes[ncaja].llave = clave
+end
+@internal
+def _moroso(ncaja:uint256):
+    self.uso[ncaja] = False
+    self.clientes[ncaja] = empty(Caja)
+    self.cajas += 1
+    self.cajaslibres[self.indice_libres] = ncaja
+    self.indice_libres += 1
+end
+@view
+@internal
+def _tqpagar(ncaja: uint256) -> bool:
+    return not self.clientes[ncaja].pagada
+end
+@view
+@external
+def tqpagar(ncaja: uint256)-> bool:
+    assert self.uso[ncaja],"Caja asignada"
+    assert (msg.sender == self.tienda or self.clientes[ncaja].propietario == msg.sender),"Propietario o tienda"
+    return self._tqpagar(ncaja)
+end
+@view
+@internal
+def _tiempoqueda(ncaja: uint256)-> uint256:
+    return self.clientes[ncaja].tdisfrute - block.timestamp
+end
+@view
+@external
+def tiempoqueda(ncaja: uint256) -> uint256:
+    assert self.uso[ncaja],"Caja asignada"
+    assert (self.clientes[ncaja].propietario == msg.sender or self.tienda == msg.sender),"Propietario o tienda"
+    assert block.timestamp <= self.clientes[ncaja].tdisfrute,"Dentro de tiempo"
+    return self._tiempoqueda(ncaja)
+end
+@external
+def cambio(ncaja:uint256):
+    assert self.uso[ncaja],"Caja asignada"
+    assert (self.clientes[ncaja].propietario == msg.sender or self.tienda == msg.sender),"Propietario o tienda"
+    assert ((self.clientes[ncaja].tdisfrute < block.timestamp) or (self.clientes[ncaja].primera) or (self.clientes[ncaja].dejar)),"Posibilidades de llamada"
+    if self.clientes[ncaja].ttope < block.timestamp:
+        if self.clientes[ncaja].pagada:
+            send(self.clientes[ncaja].propietario,self.fianza + self.mensualidad)
+        else:
+            self._moroso(ncaja)
+        end ;
+    else:
+        if self.clientes[ncaja].dejar:
+            send(self.tienda,self.mensualidad)
+            send(self.clientes[ncaja].propietario,self.fianza)
+            log Transaccion(self.tienda,self.clientes[ncaja].propietario,self.mensualidad)
+            self.clientes[ncaja].pagada = False
+            self._moroso(ncaja)
+        elif self.clientes[ncaja].llave == 0 :
+            send(self.clientes[ncaja].propietario,self.fianza + self.mensualidad)
+            log Transaccion(self.tienda,self.clientes[ncaja].propietario,self.mensualidad)
+            self.clientes[ncaja].pagada = False
+            self.clientes[ncaja].dejar = True
+            self._moroso(ncaja)
+        else:
+            self.clientes[ncaja].pagada = False
+            send(self.tienda,self.mensualidad)
+            log Transaccion(self.tienda,self.clientes[ncaja].propietario,self.mensualidad)
+            log Clave(self.clientes[ncaja].propietario,self.tienda,self.clientes[ncaja].llave)
+            self.clientes[ncaja].llave = 0
+            if self.clientes[ncaja].primera:
+                self.clientes[ncaja].primera = False
+            else:
+                self.clientes[ncaja].tdisfrute += self.tiempo_disfrute
+                self.clientes[ncaja].ttope = self.clientes[ncaja].tdisfrute + self.tiempo_pagar
+            end ;
+        end ;
+    end ;
+end
+@payable
+@external
+def pagar(ncaja: uint256):
+    assert self.uso[ncaja],"Caja asignada"
+    assert self.clientes[ncaja].propietario == msg.sender,"Propietario"
+    assert not self.clientes[ncaja].pagada,"No pagada"
+    assert msg.value == self.mensualidad,"Valor exacto"
+    assert block.timestamp <= self.clientes[ncaja].tdisfrute,"Dentro de tiempo"
+    self.clientes[ncaja].pagada = True
+end
+@external
+def dejarcaja(ncaja: uint256):
+    assert self.uso[ncaja],"Caja asignada"
+    assert msg.sender == self.clientes[ncaja].propietario,"Propietario"
+    assert block.timestamp <= self.clientes[ncaja].tdisfrute,"Dentro de tiempo"
+    self.clientes[ncaja].dejar = True
 end
