@@ -13,7 +13,7 @@ def __init__(_beneficiary: address, _auction_start: uint256, _bidding_time: uint
     self.beneficiary = _beneficiary
     self.auctionStart = _auction_start 
     self.auctionEnd = self.auctionStart + _bidding_time
-    assert block.timestamp < self.auctionEnd 
+    assert block.timestamp < self.auctionEnd
 end
 @external
 @payable

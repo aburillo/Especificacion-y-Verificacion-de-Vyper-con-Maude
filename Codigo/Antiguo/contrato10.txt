@@ -120,12 +120,14 @@ def cambio(ncaja:uint256):
             log Transaccion(self.tienda,self.clientes[ncaja].propietario,self.mensualidad)
             self.clientes[ncaja].pagada = False
             self._moroso(ncaja)
+        end
         elif self.clientes[ncaja].llave == 0 :
             send(self.clientes[ncaja].propietario,self.fianza + self.mensualidad)
             log Transaccion(self.tienda,self.clientes[ncaja].propietario,self.mensualidad)
             self.clientes[ncaja].pagada = False
             self.clientes[ncaja].dejar = True
             self._moroso(ncaja)
+        end
         else:
             self.clientes[ncaja].pagada = False
             send(self.tienda,self.mensualidad)
