@@ -161,9 +161,12 @@ var  Ct : Constant .
     if  T1'  := parse (T1) /\
         TL'  := parse (TL) [print "ecuacionEvent:" T1 ] .    
 ***Parsea lista de  declaraciones
+   ceq parse('__[TL]) =  'ListaF[TL']
+    if  isFun(TL) /\
+    TL' := parseL (TL) [print "ecuacionFunciones:" TL ] .
+***Parsea lista de  declaraciones
    ceq parse('__[TL]) =  'ListaD[TL']
-    if  TL'  := parseL (TL) [print "ecuacionDeclaracionesOBody:" TL ] .
-
+    if  TL'  := parseL (TL) [print "ecuacionDeclaracionesOBody:" ] .
 
 ***PARSEA ACCESOS A MEMORIA
 ***Acceso a posición de array
@@ -234,11 +237,11 @@ var  Ct : Constant .
        TL'  := parseL (TL) /\
        TL2'  := parseL (TL2) [print "ecuacionIFELSE sin elseif:" TL ].
 ***elseif
-   ceq parse('elif_:_end[T1,TL]) =  'elseIf[T1', TL']
+   ceq parse('elif_:_end[T1,TL]) =  'Elif[T1', TL']
    if  T1'  := parse (T1) /\
        TL'  := parseL (TL) [print "ecuacionElseif" TL ].
 *** if else con else if
-   ceq parse('if_:_end_else:_end[T1,TL,TL2,TL3]) =  'IfElseIf[T1', TL', TL2' , TL3' ]
+   ceq parse('if_:_end_else:_end[T1,TL,TL2,TL3]) =  'IfElif[T1', TL', TL2' , TL3' ]
    if  T1'  := parse (T1) /\
        TL'  := parseL (TL) /\
        TL2'  := parseL (TL2) /\
@@ -246,12 +249,12 @@ var  Ct : Constant .
 
 ***FUNCIONES!
 ***Parsea parametro simples y arrays
- ceq parse('_:_[T1,T2]) =  '_:_[T1', T2']
+ ceq parse('_:_[T1,T2]) =  'P[T1', T2']
     if  T1'  := parse (T1) /\
         T2'  := parse (T2) [print "ecuacion:" T1' ] .
 
 ***Parsea lista de parametrod
-   ceq parse('_`,_[TL]) =  'Param[TL']
+   ceq parse('_`,_[TL]) =  'LParam[TL']
     if  TL' := parseL (TL) [print "ecuacionParametros" TL ] .
 
 ***PARSEA CABECERASAS DE FUNCIONES
@@ -288,36 +291,36 @@ var  Ct : Constant .
       S == "__default__" [print "ecuacionFuncionesDEFAULT:" S1 ] .
 
 *** Cabecera sin decoradores sin return FUN
-   ceq parse('def_`(_`)[T1,TL]) = 'cab[ T1' , TL']
+   ceq parse('def_`(_`)[T1,TL]) = 'header[ T1' , TL']
   if   T1'  := parse (T1) /\
        TL'  := parse (TL) [print "ecuacionFunciones1:" TL ] .
 
 *** Cabecera con un decorador sin return FUN
-      ceq parse('_def_`(_`)[T1,T2,TL]) = 'cab[T1', T2', TL']
+      ceq parse('_def_`(_`)[T1,T2,TL]) = 'headerD[T1', T2', TL']
   if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
        TL'  := parse (TL) [print "ecuacionFunciones2:" TL ] .
 *** Cabecera con dos decoradores sin return FUN
-      ceq parse('__def_`(_`)[T1,T2,T3,TL]) = 'cab[T1', T2', T3', TL']
+      ceq parse('__def_`(_`)[T1,T2,T3,TL]) = 'headerDD[T1', T2', T3', TL']
   if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
        T3'  := parse (T3) /\
        TL'  := parse (TL) [print "ecuacionFunciones3:" TL ] .
 
 *** Cabecera sin decoradores CON return FUN
-   ceq parse('def_`(_`)->_[T1,TL,T2]) = 'cab[T1' , T2 , TL' ]
+   ceq parse('def_`(_`)->_[T1,TL,T2]) = 'headerR[T1' , T2 , TL' ]
   if  T1'  := parse (T1) /\
        TL'  := parse (TL) /\
        T2'  := parse (T2) [print "ecuacionFunciones4:" TL' ] .
 
 *** Cabecera con un decorador CON return FUN
-      ceq parse('_def_`(_`)->_[T1,T2,TL,T3]) = 'cab[T1', T2', T3' , TL']
+      ceq parse('_def_`(_`)->_[T1,T2,TL,T3]) = 'headerDR[T1', T2', T3' , TL']
   if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
        TL'  := parse (TL) /\
        T3'  := parse (T3) [print "ecuacionFunciones5:" TL' ] .
 *** Cabecera con dos decoradores CON return FUN
-      ceq parse('__def_`(_`)->_[T1,T2,T3,TL,T4]) = 'cab[T1', T2', T3' , T4' ,TL']
+      ceq parse('__def_`(_`)->_[T1,T2,T3,TL,T4]) = 'headerDDR[T1', T2', T3' , T4' ,TL']
   if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
        T3'  := parse (T3) /\
@@ -325,20 +328,20 @@ var  Ct : Constant .
        T4'  := parse (T4) [print "ecuacionFuncionesRetur:" T4 ] .
 
 *** Cabecera sin decoradores CON return tupla FUN
-   ceq parse('def_`(_`)->`(_:_`)[T1,TL,T2,T3]) = 'cab[T1' , T2' , T3' , TL' ]
+   ceq parse('def_`(_`)->`(_:_`)[T1,TL,T2,T3]) = 'headerT[T1' , T2' , T3' , TL' ]
   if  T1'  := parse (T1) /\
        TL'  := parse (TL) /\
        T2'  := parse (T2) /\
        T3'  := parse (T3) [print "ecuacionFunciones7:" TL' ] .
 *** Cabecera con un decorador CON return tupla FUN
-      ceq parse('_def_`(_`)->`(_:_`)[T1,T2,TL,T3,T4]) = 'cab[T1', T2', T3' , T4' ,TL']
+      ceq parse('_def_`(_`)->`(_:_`)[T1,T2,TL,T3,T4]) = 'headerDT[T1', T2', T3' , T4' ,TL']
   if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
        TL'  := parse (TL) /\
        T3'  := parse (T3) /\
        T4'  := parse (T4) [print "ecuacionFunciones8:" TL' ] .
 *** Cabecera con dos decoradores CON return tupla FUN
-      ceq parse('__def_`(_`)->`(_:_`)[T1,T2,T3,TL, T4, T5 ]) = 'cab[T1', T2', T3', T4', T5' , TL']
+      ceq parse('__def_`(_`)->`(_:_`)[T1,T2,T3,TL, T4, T5 ]) = 'headerDDT[T1', T2', T3', T4', T5' , TL']
   if  T1'  := parse (T1) /\
        T2'  := parse (T2) /\
        T3'  := parse (T3) /\
@@ -354,7 +357,7 @@ var  Ct : Constant .
        TL'  := parse (TL) [print "parseaBody:" TL' ] .
    
    ***LLAMADA A UNA FUNCION
-   ceq parse('_`(_`)[T1,TL]) = 'Call[T1',TL']
+   ceq parse('_`(_`)[T1,TL]) = 'CallP[T1',TL']
    if  T1'  := parse (T1) /\
       TL'  := parse (TL) [print "ecuacionCall:" TL' ] .
    
@@ -376,7 +379,7 @@ var  Ct : Constant .
    ceq parse('assert_[TL]) = 'Assert[ TL']
    if  TL'  := parse (TL)  [print "Assert:" TL' ] .
 
-   ceq parse('assert_|_[T1,T2]) = 'Assert[ T1' , T2' ]
+   ceq parse('assert_|_[T1,T2]) = 'AssertS[ T1' , T2' ]
    if  T1'  := parse (T1) /\
        T2'  := parse (T2) [print "AssertString:" T1' ] .
    ***Return
@@ -384,11 +387,11 @@ var  Ct : Constant .
    ceq parse('return_[T1]) = 'Return[ T1']
    if  T1'  := parse (T1)  [print "Return:" T1 ] .
    ***TUPLA
-   ceq parse('return_`,_[T1,T2]) = 'Return[ T1' , T2' ]
+   ceq parse('return_`,_[T1,T2]) = 'ReturnT[ T1' , T2' ]
       if  T1'  := parse (T1) /\
           T2'  := parse (T2) [print "Return2Valores:" T1' ] .
    ***Lista
-   ceq parse('return`[_`][TL]) = 'Return[ TL' ]
+   ceq parse('return`[_`][TL]) = 'ReturnL[ TL' ]
       if  TL'  := parse (TL)  [print "ReturnLista:" TL' ] .
 
 
@@ -418,7 +421,7 @@ var  Ct : Constant .
        T3'  := parse (T3)  [print "ecuacionAsignacionTupla:" T3' ] .
 
 *** Parseando log de un evento
-   ceq parse('log_`(_`)[T1,TL]) = 'logE[T1', 'L[TL']]
+   ceq parse('log_`(_`)[T1,TL]) = 'logE[T1', TL']
     if  T1'  := parse (T1) /\
         TL'  := parse (TL) [print "ecuacionLogEvent:" T1 ] .
 
@@ -532,6 +535,17 @@ eq parseB( (T , TL) ) = parse('token[T]) , parseB (TL) .
  *** comprueba si es un decorador de mutabilidad
  op isNum : Term -> Bool .
  eq isNum(Ct) = (getType(Ct) ==  'Float) or (getType(Ct) ==  'Nat) or (getType(Ct) ==  'Zero) or (getType(Ct) ==  'NzNat) .
+ op isFun : TermList -> Bool .
+ eq isFun(empty) = false .
+ eq isFun((T,TL)) = isFunU(T) [print "ISSSFUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUN" T].
+ op isFunU : Term -> Bool .
+ eq isFunU('_:_end[T,TL]) = true .
+ eq isFunU(T) = false .
+ ***eq isFun((T , TL)) = isDecoradorEI(string(T)) or isDecoradorMUT(string(T)) or (string(T) == "def") [print "daleeeeeeeeeeeeeeeeeeeee" string(T)] .
+---  ceq isFun((T , TL)) = false 
+---    if S := string(T)  [ print "daleeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" S] .
+---       ***S1 :=  substr(S, 0, 3) [ print "daleeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" S1] .
+
 endfm
 
 mod MTP is

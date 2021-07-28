@@ -1,7 +1,7 @@
 
 tienda: public(address)
 @external
-def cambio(ncaja:uint256):
+def cambio():
     assert self.uso[ncaja],"Caja asignada"
         if self.clientes[ncaja].dejar:
             send(self.tienda,self.mensualidad)
@@ -21,7 +21,7 @@ def cambio(ncaja:uint256):
             self.clientes[ncaja].dejar = True
             self._moroso(ncaja)
             end
-                elif self.clientes[ncaja].llave == 0 :
+        elif self.clientes[ncaja].llave == 0 :
             send(self.clientes[ncaja].propietario,self.fianza + self.mensualidad)
             log Transaccion(self.tienda,self.clientes[ncaja].propietario,self.mensualidad)
             self.clientes[ncaja].pagada = False

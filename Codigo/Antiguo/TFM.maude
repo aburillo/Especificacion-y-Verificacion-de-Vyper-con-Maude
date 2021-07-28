@@ -182,7 +182,7 @@ endfm
 fmod MY-PROG is
   	pr STRING .
   	pr FLOAT .
-  	pr QID .
+  	pr QID-LIST .
 	sorts Token Name Value .
 	subsort Qid Float < Value .
 	***subsort Qid < Name < Token . ***falta en float
@@ -244,17 +244,17 @@ fmod MY-PROG is
 	op _and._ : Exp Exp -> Exp [ctor prec 20] .
 	op _or._ : Exp Exp -> Exp [ctor assoc prec 21] .
 	***quizas deberia ser una expression
-	op _(_) : Qid ArgList -> Call [ctor prec 5] . *** prueba
-	op _() : Qid -> Call [ctor prec 5] .
+	op CallP[_,_] : Qid ArgList -> Call [ctor prec 5] . *** prueba
+	op Call[_] : Qid -> Call [ctor prec 5] .
 
 
-	***Lista de expressiones
+	***Lista de expressiones 
 	sort ArgList .
 	subsort Exp < ArgList .
 	op _,_ : ArgList ArgList -> ArgList [ctor assoc prec 60] .
-
+	op LParam : ArgList -> ArgList [ctor] . 
 	***Asignaciones
-	op =[_,_]: Acceso Exp -> asig [ctor] .
+	op =[_,_] : Acceso Exp -> asig [ctor] .
 	op +=[_,_] : Acceso Exp -> asig [ctor] . ***tambien uede ser que en el preparse cambio += o - por otra cosa
 	op -=[_,_] : Acceso Exp -> asig [ctor] .
 	op =St[_,_,_] : Acceso Qid Parametros -> asig [ctor] .
@@ -272,29 +272,29 @@ fmod MY-PROG is
 	subsort Funcion < Funciones .
 	***Decoradores quito los decoradores y los trato en el parse
 	ops external internal pure view payable nonpayables : -> Decorator [ctor] .
-	op _:_ : Qid Exp -> Param [ctor prec 22] .
+	op P[_,_] : Qid Exp -> Param [ctor prec 22] .
 
 	op nonreentrant(_) : Token -> DecoratorNR [ctor] .
 
 	***Parametros de una funcion pueden ser vacios
 	op PaV : -> Parametros [ctor] .
-	op _,_ : Parametros Parametros  -> Parametros  [ctor assoc id: PaV prec 25] . ***prec 25
+	op LParam[_,_] : Parametros Parametros  -> Parametros  [ctor assoc id: PaV prec 25] . ***prec 25 antes era _,_ no se como es
 	*** valores de vuelta
 
 	*** Declaracion de funciones sin return
-	op def _ (_) : Qid Parametros -> Cabecera [ctor prec 90 ] .
-	op _ def _(_) : Decorator Qid Parametros -> Cabecera [ctor prec 90] .
-	op _ _ def _(_) : Decorator Decorator Qid Parametros  -> Cabecera [ctor prec 90] .
+	op header[_,_]: Qid Parametros -> Cabecera [ctor prec 90 ] .
+	op headerD[_,_,_] : Decorator Qid Parametros -> Cabecera [ctor prec 90] .
+	op headerDD[_,_,_,_] : Decorator Decorator Qid Parametros  -> Cabecera [ctor prec 90] .
 
 	*** Declaracion de funciones con return
-	op def _`(_`) -> _ : Qid Parametros Qid -> Cabecera [ctor prec 90] .
-	op _ def _`(_`) -> _ : Decorator Qid Parametros Qid -> Cabecera [ctor prec 90] .
-	op _ _ def _`(_`) -> _ : Decorator Decorator Qid Parametros Qid -> Cabecera [ctor prec 90] .
+	op headerR[_,_,_] : Qid Parametros Qid -> Cabecera [ctor prec 90] .
+	op headerDR[_,_,_,_] : Decorator Qid Parametros Qid -> Cabecera [ctor prec 90] .
+	op headerDDR[_,_,_,_,_] : Decorator Decorator Qid Parametros Qid -> Cabecera [ctor prec 90] .
 
 	*** FUNCION RETORNA TUPLA
-	op def _`(_`)-> (_:_) : Qid Parametros Qid Qid  -> Cabecera [ctor prec 90] .
-	op _ def _`(_`)-> (_:_) : Decorator Qid Parametros Qid Qid -> Cabecera [ctor prec 90] .
-	op _ _ def _`(_`)-> (_:_) : Decorator Decorator Qid Parametros Qid Qid -> Cabecera [ctor prec 90] .
+	op headerT[_,_,_,_] : Qid Parametros Qid Qid  -> Cabecera [ctor prec 90] .
+	op headerDT[_,_,_,_,_] : Decorator Qid Parametros Qid Qid -> Cabecera [ctor prec 90] .
+	op headerDDT[_,_,_,_,_,_] : Decorator Decorator Qid Parametros Qid Qid -> Cabecera [ctor prec 90] .
 
 	*** declaracion de funciones
 	op _:_ end : Cabecera Body -> Funcion [ctor prec 91] . *** ejemplo end
@@ -324,12 +324,12 @@ fmod MY-PROG is
 	***Control flow
 	sort DeclaracionControl .
 	ops break continue pass return : -> DeclaracionControl [ctor] .
-	op raise _ : Qid -> DeclaracionControl [ctor] . ***desencadena una expecion y revierte la llamada
-	op assert _ : Exp -> DeclaracionControl [ctor prec 65] .
-	op assert _|_ : Exp String -> DeclaracionControl [ctor prec 65] . *** si es falso se revierte la transaccion
-	op return _ : Exp -> DeclaracionControl [ctor prec 22 ] .
-	op return _,_ : Exp Exp -> DeclaracionControl [ctor prec 20] . ***se puede devolver una tupla
-	op return [_] : ArgList -> DeclaracionControl [ctor prec 20 ] .
+	op Raise[_] : Qid -> DeclaracionControl [ctor] . ***desencadena una expecion y revierte la llamada
+	op Assert[_] : Exp -> DeclaracionControl [ctor prec 65] .
+	op Assert[_,_] : Exp String -> DeclaracionControl [ctor prec 65] . *** si es falso se revierte la transaccion
+	op Return[_] : Exp -> DeclaracionControl [ctor prec 22 ] .
+	op ReturnT[_,_] : Exp Exp -> DeclaracionControl [ctor prec 20] . ***se puede devolver una tupla
+	op ReturnL[_] : ArgList -> DeclaracionControl [ctor prec 20 ] .
 
 	***igualr una tupla SEGURAMENTE TENGA PROBLEMAS PORQUE NO SERIA UN BUBBLE
 	sort asigTupla .
@@ -337,9 +337,10 @@ fmod MY-PROG is
 	op _ , _  = _ : Qid Qid Call -> asigTupla [ctor] .
 
 	*** registrar eventos
-	op log _`(_`) : Qid ArgList -> RegistrarEventos [ctor] .
+	op logE[_,_] : Qid ArgList -> RegistrarEventos [ctor] .
 	subsort For DeclaracionControl asig asigTupla RegistrarEventos DeclaracionValor ifElse DeclaracionValor Call < Body .
 	op _;_ : Body Body -> Body [ctor assoc prec 105 ] .
+	op Cuerpo : Body Body -> Body [ctor ] .
 
 	***Crea un contrato
 	sort Contrato .

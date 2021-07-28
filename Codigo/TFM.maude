@@ -184,50 +184,59 @@ fmod MY-PROG is
   	pr FLOAT .
   	pr QID-LIST .
 	sorts Token Name Value .
-	subsort Qid Float < Value .
+	subsort Qid Float VarEnt bool tipo < Value .
 	***subsort Qid < Name < Token . ***falta en float
 	sorts Declaracion DeclaracionValor DConstante DcHashMap DcStruct Declaraciones .
 	*** Subsort eventos
 	sorts DeclaracionIndexada DeclaracionEvento RegistrarEventos .
 	subsort Declaracion DConstante DcHashMap DcStruct DeclaracionIndexada DeclaracionEvento  < Declaraciones .
+	sort tipo VarEnt Decorator bool constant controlFlow .
+	ops int128 bool decimal address bytes32 String Bytes struct uint256 HashMap : -> tipo [ctor] .
+	ops block.coinbase   block.difficulty   block.number   block.prevhash   block.timestamp   chain.id msg.gas   msg.sender   msg.value   tx.igin   msg.data : -> VarEnt [ctor] .
+	ops @external @internal @pure @view @payable @nonpayables : -> Decorator  [ctor] .
+	ops True False : -> bool [ctor] .
+	ops  ZERO_ADDRESS EMPTY_BYTES32 MAX_INT128 MIN_INT128 MAX_DECIMAL MIN_DECIMAL MAX_UINT256 : -> constant [ctor] .
+	ops break continue return : -> controlFlow [ctor] .
 	***declaracion valida para x :: int128 y x :: int128 [12]
-    op D[_,_] : Qid Acceso -> Declaracion [ctor prec 22 ] .
-	op Dp[_,_,_] : Qid Acceso Qid -> Declaracion [ctor prec 22 ] . *** ! al ser declaracion se podria meter en los parametros de una fun
+    op D : Qid Acceso -> Declaracion [ctor] .
+	op Dp : Qid tipo String -> Declaracion [ctor ] . *** ! al ser declaracion se podria meter en los parametros de una fun
 
 	***Declarar dando un valor, solo valido dentro de una funcion
-	op Dv[_,_,_] : Qid Qid Exp -> DeclaracionValor [ctor] .
+	op Dv : Qid tipo Exp -> DeclaracionValor [ctor] . *** op Dv : Qid Qid Exp -> DeclaracionValor [ctor] .
 
 	***Declarar un valor constante !quizas hay que cambiar token por acceso
-	op Dc[_,_,_,_] : Qid Qid Value Qid -> DConstante [ctor prec 22 ] . 
+	op Dc : Qid tipo Value String -> DConstante [ctor ] . 
+	***op Dc : Qid Tipo tipo String -> DConstante [ctor ] . 
 
 	*** Declara HashMap x : hasmap [int128 int128] x : hasmap [int128 int128[5]]
-	op Dhm[_,_,_] :  Qid Qid Acceso -> DcHashMap [ctor prec 22  ] . 
-	op DhmP[_,_,_,_] :  Qid Qid Acceso Qid -> DcHashMap [ctor prec 22  ] . 
+	op Dhm :  Qid tipo Acceso -> DcHashMap [ctor ] .
+	op DhmP :  Qid tipo tipo String -> DcHashMap [ctor] . 
+	op DhmP :  Qid tipo Acceso Qid -> DcHashMap [ctor] . 
 	
 	***Declarar Struct
-	op Ds[_,_] : Qid Declaraciones -> DcStruct [ctor prec 22] .
+	op Ds : Qid Declaraciones -> DcStruct [ctor] .
 
 	***declaracion indexada para Eventos
-	op Di[_,_,_] : Qid Qid Qid -> DeclaracionIndexada [ctor prec 22 ]. *** suelen ser las direcciones
+	op Di : Qid tipo String -> DeclaracionIndexada [ctor ]. *** suelen ser las direcciones
 	
 	*** eventos
-	op De[_,_] : Qid Declaraciones -> DeclaracionEvento [ctor prec 22] .
-	op DeC[_,_] : Qid  DeclaracionControl -> DeclaracionEvento [ctor prec 22] . *** solo puede ser pass
+	op De  : Qid Declaraciones -> DeclaracionEvento [ctor] .
+	op DeC : Qid  DeclaracionControl -> DeclaracionEvento [ctor] . *** solo puede ser pass
 	
 	***Lista de declaraciones
-	op dc : -> Declaraciones  [ctor] .
-	op __ : Declaraciones Declaraciones -> Declaraciones  [ctor assoc id: dc prec 25 ] .
-
+	***op dc : -> Declaraciones  [ctor] .
+	op __ : Declaraciones Declaraciones -> Declaraciones  [ctor assoc prec 25 ] .
+	op ListaD : Declaraciones  Declaraciones -> Declaraciones [ctor] .
 	***ACCESOS A MEMORIA
 	sort Acceso .
 	subsort Value < Acceso .
-	op ->[_,_] : Exp Exp -> Acceso [ctor prec 6] . *** op _[_] : Acceso Exp -> Acceso [ctor prec 14] .
-	op .[_,_] :  Exp Exp -> Acceso [ctor prec 7] . *** op _._ :  Acceso Acceso -> Acceso [ctor prec 15] .
+	op -> : Exp Exp -> Acceso [ctor] . *** op _[_] : Acceso Exp -> Acceso [ctor prec 14] .
+	op . :  Exp Exp -> Acceso [ctor] . *** op _._ :  Acceso Acceso -> Acceso [ctor prec 15] .
 
 	***Operaciones
 	sorts Exp Body asig al Call .
-	subsort Acceso Call < Exp .
-	op `(_`) : Exp -> Exp [ctor prec 8] .
+	subsort Acceso Call constant < Exp .
+	op `(`)_. : Exp -> Exp [ctor prec 8] .
 	op -._ : Exp -> Exp [ctor prec 10] .
 	op not._ : Exp -> Exp [ctor prec 10] .
 	op _*._ : Exp Exp -> Exp [ctor comm assoc prec 14] .
@@ -244,20 +253,20 @@ fmod MY-PROG is
 	op _and._ : Exp Exp -> Exp [ctor prec 20] .
 	op _or._ : Exp Exp -> Exp [ctor assoc prec 21] .
 	***quizas deberia ser una expression
-	op CallP[_,_] : Qid ArgList -> Call [ctor prec 5] . *** prueba
-	op Call[_] : Qid -> Call [ctor prec 5] .
+	op CallP : Qid ArgList -> Call [ctor] . *** prueba
+	op Call : Qid -> Call [ctor ] .
 
 
 	***Lista de expressiones 
 	sort ArgList .
 	subsort Exp < ArgList .
 	op _,_ : ArgList ArgList -> ArgList [ctor assoc prec 60] .
-	op LParam : ArgList -> ArgList [ctor] . 
+	op ArgL : ArgList ArgList -> ArgList [ctor] . 
 	***Asignaciones
-	op =[_,_] : Acceso Exp -> asig [ctor] .
-	op +=[_,_] : Acceso Exp -> asig [ctor] . ***tambien uede ser que en el preparse cambio += o - por otra cosa
-	op -=[_,_] : Acceso Exp -> asig [ctor] .
-	op =St[_,_,_] : Acceso Qid Parametros -> asig [ctor] .
+	op = : Acceso Exp -> asig [ctor] .
+	op += : Acceso Exp -> asig [ctor] . ***tambien uede ser que en el preparse cambio += o - por otra cosa
+	op -= : Acceso Exp -> asig [ctor] .
+	op =St : Acceso Qid Parametros -> asig [ctor] .
 
 	***Self seguramente no le de uso
 	sort self .
@@ -267,69 +276,75 @@ fmod MY-PROG is
 	op self._() : Token -> self [ctor] .
 
 	***Funciones
-	sort DecoratorEI DecoratorMut DecoratorNR Parametros Cabecera valorDevuelto Default Init Funcion Funciones Param Decorator .
+	sort  Parametros Cabecera valorDevuelto Default Init Funcion Funciones Param .
 	subsort Param < Parametros .
 	subsort Funcion < Funciones .
 	***Decoradores quito los decoradores y los trato en el parse
-	ops external internal pure view payable nonpayables : -> Decorator [ctor] .
-	op P[_,_] : Qid Exp -> Param [ctor prec 22] .
+	ops external internal pure view payable nonpayables : -> Decorator [ctor] . *** esto no deberia ser asi 
+	op P : Qid Exp -> Param [ctor] .
+	op P : Qid tipo -> Param [ctor] .
 
 	op nonreentrant(_) : Token -> DecoratorNR [ctor] .
 
 	***Parametros de una funcion pueden ser vacios
 	op PaV : -> Parametros [ctor] .
-	op LParam[_,_] : Parametros Parametros  -> Parametros  [ctor assoc id: PaV prec 25] . ***prec 25 antes era _,_ no se como es
+	op _,_ : Parametros Parametros  -> Parametros  [ctor assoc prec 25] . ***prec 25 antes era _,_ no se como es
+	op LParam : Parametros Parametros -> Parametros [ctor] .
 	*** valores de vuelta
+	*** Declaracion cabecera init y default
+	op init : Decorator Parametros -> Cabecera [ctor] .
+	op init : Decorator  Decorator  Parametros -> Cabecera [ctor] .
+	op default : Decorator  Decorator  Parametros -> Cabecera [ctor] . ***quizas no hace falta parametro porque es vacio
 
 	*** Declaracion de funciones sin return
-	op header[_,_]: Qid Parametros -> Cabecera [ctor prec 90 ] .
-	op headerD[_,_,_] : Decorator Qid Parametros -> Cabecera [ctor prec 90] .
-	op headerDD[_,_,_,_] : Decorator Decorator Qid Parametros  -> Cabecera [ctor prec 90] .
+	op header : Qid Parametros -> Cabecera [ctor  ] .
+	op headerD : Decorator Qid Parametros -> Cabecera [ctor] .
+	op headerDD : Decorator Decorator Qid Parametros  -> Cabecera [ctor] .
 
 	*** Declaracion de funciones con return
-	op headerR[_,_,_] : Qid Parametros Qid -> Cabecera [ctor prec 90] .
-	op headerDR[_,_,_,_] : Decorator Qid Parametros Qid -> Cabecera [ctor prec 90] .
-	op headerDDR[_,_,_,_,_] : Decorator Decorator Qid Parametros Qid -> Cabecera [ctor prec 90] .
+	op headerR : Qid tipo Parametros -> Cabecera [ctor] .
+	op headerDR : Decorator Qid tipo Parametros -> Cabecera [ctor ] .
+	op headerDDR : Decorator Decorator Qid tipo Parametros -> Cabecera [ctor] .
 
 	*** FUNCION RETORNA TUPLA
-	op headerT[_,_,_,_] : Qid Parametros Qid Qid  -> Cabecera [ctor prec 90] .
-	op headerDT[_,_,_,_,_] : Decorator Qid Parametros Qid Qid -> Cabecera [ctor prec 90] .
-	op headerDDT[_,_,_,_,_,_] : Decorator Decorator Qid Parametros Qid Qid -> Cabecera [ctor prec 90] .
+	op headerT : Qid Parametros Qid Qid  -> Cabecera [ctor] .
+	op headerDT : Decorator Qid Parametros Qid Qid -> Cabecera [ctor] .
+	op headerDDT : Decorator Decorator Qid Parametros Qid Qid -> Cabecera [ctor] .
 
 	*** declaracion de funciones
-	op _:_ end : Cabecera Body -> Funcion [ctor prec 91] . *** ejemplo end
+	op Fun : Cabecera Body -> Funcion [ctor] . *** ejemplo end
 	op __ : Funciones Funciones -> Funciones [ctor assoc prec 95 ] .
+	op ListaF : Funciones Funciones -> Funciones [ctor] .
 
 	*** FOR
 	sort For .
 	op bv : -> Body [ctor] .
-	op ForR[_,_,_] : Qid ArgList Body -> For [ctor] .
+	op ForR : Qid ArgList Body -> For [ctor] .
 	***op for _ in range(_,_):_ end : Token Exp Exp Body -> For [ctor] .
-	op ForVar[_,_,_] : Qid Qid Body -> For [ctor] .
-	op ForList[_,_,_] : Qid ArgList Body -> For [ctor] .
+	op ForVar : Qid Qid Body -> For [ctor] .
+	op ForList : Qid ArgList Body -> For [ctor] .
 
 	*** IFELSE
 	sort ifElse elseif ListElseif .
 	subsort elseif < ListElseif .
 
-	op Elif[_,_] : Exp Body -> elseif [ctor prec 95] .
+	op Elif : Exp Body -> elseif [ctor ] .
 	op __ : ListElseif ListElseif  -> ListElseif  [ctor assoc prec 99] .
-	op If[_,_] : Exp Body -> ifElse [ctor prec 100 ] .
-	op IfElse [_,_,_] : Exp Body Body -> ifElse [ctor prec 100 ] .
-	op IfElif[_,_,_,_] : Exp Body ListElseif Body -> ifElse [ctor prec 100] .
+	op ListaEIF : ListElseif -> ListElseif [ctor] .
+	op If : Exp Body -> ifElse [ctor] .
+	op IfElse : Exp Body Body -> ifElse [ctor ] .
+	op IfElif : Exp Body ListElseif Body -> ifElse [ctor] .
 	
-	*** if parentesis
-	***op if(_):_ end : Exp Body -> ifElse [ctor] .
 	
 	***Control flow
 	sort DeclaracionControl .
 	ops break continue pass return : -> DeclaracionControl [ctor] .
-	op Raise[_] : Qid -> DeclaracionControl [ctor] . ***desencadena una expecion y revierte la llamada
-	op Assert[_] : Exp -> DeclaracionControl [ctor prec 65] .
-	op Assert[_,_] : Exp String -> DeclaracionControl [ctor prec 65] . *** si es falso se revierte la transaccion
-	op Return[_] : Exp -> DeclaracionControl [ctor prec 22 ] .
-	op ReturnT[_,_] : Exp Exp -> DeclaracionControl [ctor prec 20] . ***se puede devolver una tupla
-	op ReturnL[_] : ArgList -> DeclaracionControl [ctor prec 20 ] .
+	op Raise : Qid -> DeclaracionControl [ctor] . ***desencadena una expecion y revierte la llamada
+	op Assert : Exp -> DeclaracionControl [ctor] .
+	op Assert : Exp String -> DeclaracionControl [ctor] . *** si es falso se revierte la transaccion
+	op Return : Exp -> DeclaracionControl [ctor ] .
+	op ReturnT : Exp Exp -> DeclaracionControl [ctor] . ***se puede devolver una tupla
+	op ReturnL : ArgList -> DeclaracionControl [ctor ] .
 
 	***igualr una tupla SEGURAMENTE TENGA PROBLEMAS PORQUE NO SERIA UN BUBBLE
 	sort asigTupla .
@@ -337,8 +352,8 @@ fmod MY-PROG is
 	op _ , _  = _ : Qid Qid Call -> asigTupla [ctor] .
 
 	*** registrar eventos
-	op logE[_,_] : Qid ArgList -> RegistrarEventos [ctor] .
-	subsort For DeclaracionControl asig asigTupla RegistrarEventos DeclaracionValor ifElse DeclaracionValor Call < Body .
+	op logE : Qid ArgList -> RegistrarEventos [ctor] .
+	subsort For DeclaracionControl asig asigTupla RegistrarEventos DeclaracionValor ifElse DeclaracionValor Call controlFlow < Body .
 	op _;_ : Body Body -> Body [ctor assoc prec 105 ] .
 	op Cuerpo : Body Body -> Body [ctor ] .
 
@@ -346,10 +361,12 @@ fmod MY-PROG is
 	sort Contrato .
 	op errorC : -> Contrato [ctor] .
 	op __ : Declaraciones Funciones -> Contrato [ctor prec 100] .
+	op Contrato : Declaraciones Funciones -> Contrato [ctor] .
 
 
  ***a=[1,2,3]
 endfm
+
 fmod META-SIGN is
  pr META-LEVEL .
 
@@ -506,25 +523,29 @@ fmod TIPOS is
 							   fi .
 
 endfm
---- fmod LISTAS is
---- 	pr TIPOS .
---- 	sort LBool LNat LInt LFloat LAddress .
---- 	subsort BasicB < LBool .
---- 	subsort Nat < LNat .
---- 	subsort Int < LInt .
---- 	subsort Float < LFloat .
---- 	subsort Direccion < LAddress .
---- 	op lbv : -> LBool [ctor] .
---- 	op _,_ : LBool LBool -> LBool [ctor id: lbv ] .
---- 	***op lnv : -> LNat [ctor] .
---- 	***op __ : LNat LNat -> LNat [ctor id: lnv ] .
---- 	op liv : -> LInt [ctor] .
---- 	op _,_ : LInt LInt -> LInt [ctor id: liv ] .
---- 	op lfv : -> LFloat [ctor] .
---- 	op _,_ : LFloat LFloat -> LFloat [ctor id: lfv ] .
---- 	***op lav : -> LAddress [ctor] .
---- 	***op __ : LAddress LAddress -> LAddress [ctor id: lav ] .
---- endfm
+fmod LISTAS is
+	pr TIPOS .
+	var L : LInt .
+	var I V P : Int .
+	sort LBool LNat LInt LFloat Lista .
+	subsort Bool < LBool .
+	subsort Nat < LNat .
+	subsort Int < LInt .
+	subsort Float < LFloat .
+	***subsort LBool LNat LInt LFloat < Lista .
+	op lbv : -> LBool [ctor] .
+	op _,_ : LBool LBool -> LBool [ctor id: lbv assoc] .
+	***op lnv : -> LNat [ctor] .
+	***op __ : LNat LNat -> LNat [ctor id: lnv ] .
+	op liv : -> LInt [ctor] .
+	op _,_ : LInt LInt -> LInt [ctor id: liv ] .
+	op lfv : -> LFloat [ctor] .
+	op _,_ : LFloat LFloat -> LFloat [ctor id: lfv ] .
+	*** cambiar valor de una lista
+	op changeList : LInt Int Nat -> LInt . 
+	eq changeList((I , L) , V , 0) = V , L .
+	eq changeList((I , L) , V , s(P)) = (I , changeList(L , V, P )) .
+endfm
 fmod STRUCT is
 	pr MY-PROG .
 	pr TIPOS .
@@ -596,6 +617,9 @@ fmod MEMORIA is
 	pr STRUCT .
 	pr MAPA .
 	pr CONSTANTES .
+	var M M1 : Memoria .
+	var V : Variable .
+	var Q : Qid .
 	sorts Variable Memoria Visibilidad ConsIndexNorm .
 	subsort Variable ConstanteValor < Memoria .
 	ops public private : -> Visibilidad [ctor] .
@@ -615,6 +639,27 @@ fmod MEMORIA is
 	op __ : Memoria Memoria -> Memoria [ctor assoc comm id: mv] .
 	op inicMemoria : -> Memoria .
 	eq (inicMemoria) = ( [MAXINT128, 100] [MININT128,-100] [MAXDECIMAL, 100.0] [MINDECIMAL, -100.0] [MAXUINT256,100] mv) .
+	***op getQid :  Memoria .
+	op inMemory : Memoria Qid -> Bool .
+	eq inMemory(M [Q,_,_,_,_,_,_] M1 , Q) =  true .
+	eq inMemory(M,V) = false [owise] .
+	op addMemory : Memoria Variable -> Memoria .
+	eq addMemory(M , V) = if inMemory(M,V) *** COMO LE PASO SOLO EL QID Y NO LA VARIABLE ENTERA
+						  then M
+						  else M V 
+						  fi .
+	*** cambiar valor simple
+	op changeMemory : Memoria Qid Value -> Memoria .
+	eq changeMemory(M , Q , V ) = if inMemory(M,Q)
+						  then M [Q,_,v,_,_,_] 
+						  else M *** REALMENTE SI NO ESTA DEBERIA DAR UN ERROR O NO CAMBIAR NADA
+						  fi .
+	*** cammbiar valor de una lista
+	op changeMemory : Memoria Qid Value Nat -> Memoria .
+	eq changeMemory(M , Q , V , N) = if inMemory(M,Q)
+						  then changeList(M,Q,V,N) *** REALMENTE NO LE QUIERO PASAR LA MEMORIA SI SOLO EL LA LISTA Y EL VALOR
+						  else M *** REALMENTE SI NO ESTA DEBERIA DAR UN ERROR O NO CAMBIAR NADA
+						  fi .
 endfm
 fmod MEMORIAFUNCIONES is
 	***pr DeclaracionVariables .
