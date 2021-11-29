@@ -547,7 +547,9 @@ var  Ct : Constant .
         T2'  := parse (T2) .
 
 *** Parseo () 
- ceq parse('`(_`)[T1]) = '`(`)_.[T1']
+---  ceq parse('`(_`)[T1]) = '`(`)_.[T1']
+---    if  T1'  := parse (T1) .
+ ceq parse('`(_`)[T1]) = 'PA_PC[T1']
    if  T1'  := parse (T1) .
 
  eq parse(T) =  T  [owise]  .
@@ -577,13 +579,13 @@ eq parseB( (T , TL) ) = parse('token[T]) , parseB (TL) .
   or (S == "msg.gas") or (S == "msg.sender") or (S == "msg.value") or (S == "tx.origin") or (S == "msg.data") .
  ***comprueba si una palabra es un declaracion de tipo
  op isConstante : String -> Bool .
- eq isConstante(S) = (S == "ZERO_ADDRESS") or (S == "EMPTY_BYTES32") or (S == "MAX_INT128") or (S == "MIN_INT128") or (S == "MAX_DECIMAL") or (S == "MIN_DECIMAL")
-  or (S == "MAX_UINT256")  .
+ eq isConstante(S) = (S == "ZERO-ADDRESS") or (S == "EMPTY-BYTES32") or (S == "MAX-INT128") or (S == "MIN-INT128") or (S == "MAX-DECIMAL") or (S == "MIN-DECIMAL")
+  or (S == "MAX-UINT256")  .
 *** comprueba si es un decorador 
  op isDecorador : String -> Bool .
  eq isDecorador(S) = (S == "@external.@Decorator@") or (S == "@internal.@Decorator@") or (S == "@pure.@Decorator@") or (S == "@view.@Decorator@") or (S == "@payable.@Decorator@") or (S == "@nonpayables.@Decorator@") .
  op isControlFlow : String -> Bool .
- eq isControlFlow(S) = (S == "break.@DeclaracionControl@") or (S == "continue.@DeclaracionControl@") or (S == "return.@DeclaracionControl@") . 
+ eq isControlFlow(S) = (S == "break.@DeclaracionControl@") or (S == "continu.@DeclaracionControl@") or (S == "return.@DeclaracionControl@") . 
 --- *** comprueba si es un decorador externo o interno
 ---  op isDecoradorEI : String -> Bool .
 ---  eq isDecoradorEI(S) = (S == "@external.@Decorator@") or (S == "@internal") .
@@ -751,6 +753,15 @@ crl [parsing] :
     T' := parse(T) /\
     QIL2 := metaPrettyPrint(upModule('MY-PROG, true), T' , none)  [print  QIL " Preparseado \n" QIL1 T "\nParseado: " T' " " Ty "MPP" QIL2 ] .
     ***C := downTerm(T' , errorC) [print  QIL " Preparseado \n" QIL1 T "\nParseado: " T' " " Ty ] .
+--- crl [parsing] :
+---     < example : EXAMPLE | file: FHIn , read: Read, state: parsing, Attrs >
+---     ***closedFile(example, FHIn)
+---  => < example : EXAMPLE | file: noFile , read: "", state: writing , Attrs >
+---       openFile(fileManager, example, "output.txt", "w")
+---  if Read =/= "" /\
+---     QIL := tokenize(Read) /\
+---     QIL1 := preparse(QIL)   [print  QIL " Preparseado \n" QIL1   ] .
+
 
 var RP? : [ResultPair] .
 
@@ -823,73 +834,61 @@ endm
 
 
 
-red preparse(tokenize("@external " +
-"def withdraw(): " +
-"pending_amount: uint256 = self.pendingReturns[msg.sender] ; " +
-"    self.pendingReturns[msg.sender] = 0 ; " +
-"   send(msg.sender, pending_amount)" +
-"  end " )) .
-
-
-red metaParse(GRAMMAR, tokenize(" @external def auctionEnd(PaV) : assert block.timestamp >  revealEnd assert not ended " +
-                                " log AuctionEnded( highestBidder,  highestBid) ended = True send( beneficiary,  highestBid) end "), '@Funcion@) .
-
-red metaParse(GRAMMAR, tokenize(" @internal def placeBid(bidder : address , _value : uint256) -> bool "), anyType) .
-red metaParse(GRAMMAR, tokenize(" assert (msg.value % 2) == 0"), '@DeclaracionControl@) .
-red metaParse(GRAMMAR, tokenize("  assert ( x + 2 ) == 2"), '@DeclaracionControl@) .
-
-red metaParse(GRAMMAR, tokenize("  bidToCheck : Bid = (bids[msg.sender])[i]"), '@Body@) .
-
---- red metaParse(GRAMMAR, preparse(tokenize("@external " +
+--- red preparse(tokenize("@external " +
 --- "def withdraw(): " +
---- "pending_amount: uint256 = self.pendingReturns[msg.sender]  ;" +
---- "    self.pendingReturns[msg.sender] = 0  " +
---- "  end " )), anyType) .
---- red preparse(tokenize( "auctionEnd: public(uint256) ; " +
---- "auctionEnd: public(uint256) ; " +
---- "@external ; " +
---- "def withdraw(): ; " + "@external ; " +
 --- "pending_amount: uint256 = self.pendingReturns[msg.sender] ; " +
 --- "    self.pendingReturns[msg.sender] = 0 ; " +
---- "  end ; " + "@external ; " )) .
+--- "   send(msg.sender, pending_amount)" +
+--- "  end " )) .
 
-red metaParse(GRAMMAR, tokenize(" x = funders[i] .sender "), '@asig@ ) .
-red metaParse(GRAMMAR, tokenize(" send(self.funders[i] . sender, self.funders[i] . value, jesus.paco ) "), '@asig@) .
-***red metaParse(GRAMMAR, tokenize(" elif  x > 2 : refundIndex = nextFunderIndex ; break elif  x > 2 : refundIndex = nextFunderIndex ; break "), '@ListElseif@) .
-red metaParse(GRAMMAR, tokenize(" assert ( msg.value + inicial >= (( balance - inicial - msg.value ) / 2) )"  ), '@DeclaracionControl@ ) .
-red metaParse(GRAMMAR, tokenize(" return voters[addr] . delegate != ZERO_ADDRESS"  ), '@DeclaracionControl@ ) .
-red metaParse(GRAMMAR, tokenize(" winning_proposal = i "  ), '@DeclaracionControl@ ) .
-red metaParse(GRAMMAR, tokenize(" tiempo_contrato += block.timestamp "  ), '@asig@ ) .
---- red metaParse(GRAMMAR, tokenize(" for i in range(ind, ind + 30): " +
----             "refundIndex = nextFunderIndex " + apostadores [ nfi ] = Juego ({apostador : msg.sender , equipo1 : eq1 , equipo2 : eq2 ,apuesta : msg.value})
----         "end" ), '@For@ ) .
-red metaParse(GRAMMAR, tokenize("datos = Datos ({nombre : _nombre, apellidos : _apellidos,direccion : _direccion,telefono : _telefono})"), anyType) .
-red metaParse(GRAMMAR, tokenize("clientes[indice]= Caja({propietario : msg.sender, tdisfrute : block.timestamp + tiempo_disfrute, ttope : block.timestamp + tiempo_disfrute + tiempo_pagar,pagada : True,llave : 1, dejar : False,primera : True})"), '@asig@ ) .
-red preparse(tokenize("def  self.datos = Datos({nombre: _nombre, apellidos: _apellidos,direccion: _direccion,telefono: _telefono})" )) .
-red preparse( tokenize(" winning_proposal<=iASAS " )) .
-red metaParse(GRAMMAR, tokenize(" if x <= y : " +
-            "refundIndex = nextFunderIndex ; " +
-            "return " +
-            "elif x : " +
-            "refundIndex = nextFunderIndex ; " +
-            "return " +
-            "end " +
-            "else: " +
-            "refundIndex = nextFunderIndex ; " +
-            "return " +
-            "end" ), '@ifElse@ ) .
-red metaParse(GRAMMAR, tokenize("elif x : " +
-            "refundIndex = nextFunderIndex ; " +
-            "return " +
-            "end " +
-            "elif x : " +
-            "refundIndex = nextFunderIndex ; " +
-            "return " +
-            "end" ), '@ListElseif@ ) .
-red metaParse(GRAMMAR, tokenize("elif x : " +
-            "refundIndex = nextFunderIndex ; " +
-            "return " +
-            "end "  ), '@elseif@ ) .
+
+--- red metaParse(GRAMMAR, tokenize(" @external def auctionEnd(PaV) : assert block.timestamp >  revealEnd assert not ended " +
+---                                 " log AuctionEnded( highestBidder,  highestBid) ended = True send( beneficiary,  highestBid) end "), '@Funcion@) .
+
+--- red metaParse(GRAMMAR, tokenize(" @internal def placeBid(bidder : address , _value : uint256) -> bool "), anyType) .
+--- red metaParse(GRAMMAR, tokenize(" assert (msg.value % 2) == 0"), '@DeclaracionControl@) .
+--- red metaParse(GRAMMAR, tokenize("  assert ( x + 2 ) == 2"), '@DeclaracionControl@) .
+
+--- red metaParse(GRAMMAR, tokenize("  bidToCheck : Bid = (bids[msg.sender])[i]"), '@Body@) .
+
+--- red metaParse(GRAMMAR, tokenize(" x = funders[i] .sender "), '@asig@ ) .
+--- red metaParse(GRAMMAR, tokenize(" send(self.funders[i] . sender, self.funders[i] . value, jesus.paco ) "), '@asig@) .
+--- ***red metaParse(GRAMMAR, tokenize(" elif  x > 2 : refundIndex = nextFunderIndex ; break elif  x > 2 : refundIndex = nextFunderIndex ; break "), '@ListElseif@) .
+--- red metaParse(GRAMMAR, tokenize(" assert ( msg.value + inicial >= (( balance - inicial - msg.value ) / 2) )"  ), '@DeclaracionControl@ ) .
+--- red metaParse(GRAMMAR, tokenize(" return voters[addr] . delegate != ZERO_ADDRESS"  ), '@DeclaracionControl@ ) .
+--- red metaParse(GRAMMAR, tokenize(" winning_proposal = i "  ), '@DeclaracionControl@ ) .
+--- red metaParse(GRAMMAR, tokenize(" tiempo_contrato += block.timestamp "  ), '@asig@ ) .
+--- --- red metaParse(GRAMMAR, tokenize(" for i in range(ind, ind + 30): " +
+--- ---             "refundIndex = nextFunderIndex " + apostadores [ nfi ] = Juego ({apostador : msg.sender , equipo1 : eq1 , equipo2 : eq2 ,apuesta : msg.value})
+--- ---         "end" ), '@For@ ) .
+--- red metaParse(GRAMMAR, tokenize("datos = Datos ({nombre : _nombre, apellidos : _apellidos,direccion : _direccion,telefono : _telefono})"), anyType) .
+--- red metaParse(GRAMMAR, tokenize("clientes[indice]= Caja({propietario : msg.sender, tdisfrute : block.timestamp + tiempo_disfrute, ttope : block.timestamp + tiempo_disfrute + tiempo_pagar,pagada : True,llave : 1, dejar : False,primera : True})"), '@asig@ ) .
+--- red preparse(tokenize("def  self.datos = Datos({nombre: _nombre, apellidos: _apellidos,direccion: _direccion,telefono: _telefono})" )) .
+--- red preparse( tokenize(" winning_proposal<=iASAS " )) .
+--- red metaParse(GRAMMAR, tokenize(" if x <= y : " +
+---             "refundIndex = nextFunderIndex ; " +
+---             "return " +
+---             "elif x : " +
+---             "refundIndex = nextFunderIndex ; " +
+---             "return " +
+---             "end " +
+---             "else: " +
+---             "refundIndex = nextFunderIndex ; " +
+---             "return " +
+---             "end" ), '@ifElse@ ) .
+--- red metaParse(GRAMMAR, tokenize("elif x : " +
+---             "refundIndex = nextFunderIndex ; " +
+---             "return " +
+---             "end " +
+---             "elif x : " +
+---             "refundIndex = nextFunderIndex ; " +
+---             "return " +
+---             "end" ), '@ListElseif@ ) .
+--- red metaParse(GRAMMAR, tokenize("elif x : " +
+---             "refundIndex = nextFunderIndex ; " +
+---             "return " +
+---             "end "  ), '@elseif@ ) .
+--- red preparse(tokenize("return voters[addr].delegate != ZERO_ADDRESS continue x ")) .
 --- red parse(metaParse(GRAMMAR, tokenize("x = 2 "), '@asig@ )) .
 --- red metaPrettyPrint( upModule('GRAMMAR, false) , metaParse(GRAMMAR, tokenize("x = 2 "), '@asig@ ), none) .
 ---red metaPrettyPrint(upModule('GRAMMAR , false), "x = 2" , none)

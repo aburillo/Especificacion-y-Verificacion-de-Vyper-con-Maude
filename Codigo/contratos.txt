@@ -1,0 +1,547 @@
+---CONTRATO1 . funciona perfect 
+	--- rew initMemory(	Contrato(ListaD(Dp('beneficiary, address, "public"), ListaD(Dp('auctionStart, uint256, "public"),
+    --- ListaD(Dp('auctionEnd, uint256, "public"), ListaD(Dp('highestBidder, address, "public"), ListaD(Dp('highestBid,
+    --- uint256, "public"), ListaD(Dp('ended, bool, "public"), DhmP('pendingReturns, address, uint256, "public"))))))),
+    --- ListaF(Fun(init(@external, LParam(P('_beneficiary, address), LParam(P('_auction_start, uint256), P('_bidding_time,
+    --- uint256)))), Cuerpo(=('beneficiary, '_beneficiary), Cuerpo(=('auctionStart, '_auction_start), Cuerpo(=('auctionEnd,
+    --- '_bidding_time +. 'auctionStart), Assert(block.timestamp <. 'auctionEnd))))), ListaF(Fun(headerDD(@external,
+    --- @payable, 'bid, PaV), Cuerpo(Assert(block.timestamp >=. 'auctionStart), Cuerpo(Assert(block.timestamp <.
+    --- 'auctionEnd), Cuerpo(Assert(msg.value >. 'highestBid), Cuerpo(+=(->('pendingReturns, 'highestBidder), 'highestBid),
+    --- Cuerpo(=('highestBidder, msg.sender), =('highestBid, msg.value))))))), ListaF(Fun(headerD(@external, 'withdraw,
+    --- PaV), Cuerpo(Dv('pending_amount, uint256, ->('pendingReturns, msg.sender)), Cuerpo(=(->('pendingReturns,
+    --- msg.sender), 0.0), CallP('send, ArgL(msg.sender, 'pending_amount))))), Fun(headerD(@external, 'endAuction, PaV),
+    --- Cuerpo(Assert(block.timestamp >=. 'auctionEnd), Cuerpo(Assert(not. 'ended), Cuerpo(=('ended, True), CallP('send,
+    --- ArgL('beneficiary, 'highestBid))))))))))) .
+---CONTRATO2
+	---RECORRE DECLARACIONES CONTRATO2
+		--- rew recorreDeclaraciones(ListaD(Ds('Bid, ListaD(D('blindedBid, bytes32), D('deposit, uint256))), ListaD(Dc(
+		--- 'MAX_BIDS, int128, 1.28e+2, "constant"), ListaD(De('AuctionEnded, ListaD(D('highestBidder, address), D('highestBid,
+		--- uint256))), ListaD(Dp('beneficiary, address, "public"), ListaD(Dp('biddingEnd, uint256, "public"), ListaD(Dp(
+		--- 'revealEnd, uint256, "public"), ListaD(Dp('ended, bool, "public"), ListaD(Dp('highestBid, uint256, "public"),
+		--- ListaD(Dp('highestBidder, address, "public"), ListaD(Dhm('bids, address, ->('Bid, 1.28e+2)), ListaD(Dhm('bidCounts,
+    	--- address, int128), Dhm('pendingReturns, address, uint256))))))))))))) . 
+	---parsea funciones contrato2 falla la funcion gorda investigar porque
+	--- 		rew getFunctions( ListaF(Fun(headerDD(@external, @payable, 'bid, P('_blindedBid, bytes32)),
+	--- 		Cuerpo(Assert(block.timestamp <. 'biddingEnd), Cuerpo(Dv('numBids, int128, ->('bidCounts, msg.sender)), Cuerpo(Assert(
+	--- 		'numBids <. 'MAX_BIDS), Cuerpo(=St(->(->('bids, msg.sender), 'numBids), 'Bid, LParam(P('blindedBid, '_blindedBid), P(
+	--- 		'deposit, msg.value))), +=(->('bidCounts, msg.sender), 1.0)))))), ListaF(Fun(headerR('placeBid, bool, LParam(P('bidder,
+	--- 		address), P('_value, uint256))), Cuerpo(If(PA '_value <=. 'highestBid PC, Return(False)), Cuerpo(If(PA 'highestBidder !=.
+	--- 		ZERO-ADDRESS PC, +=(->('pendingReturns, 'highestBidder), 'highestBid)), Cuerpo(=('highestBid, '_value), Cuerpo(=(
+	--- 		'highestBidder, 'bidder), Return(True)))))), ListaF(Fun(headerD(@external, 'reveal, LParam(P('_numBids, int128), LParam(P(
+	--- 		'_values, ->(uint256, 1.28e+2)), LParam(P('_fakes, ->(bool, 1.28e+2)), P('_secrets, ->(bytes32, 1.28e+2)))))), Cuerpo(Assert(
+	--- 		block.timestamp >. 'biddingEnd), Cuerpo(Assert(block.timestamp <. 'revealEnd), Cuerpo(Assert('_numBids ==. ->('bidCounts,
+	--- 		msg.sender)), Cuerpo(Dv('refund, uint256, 0.0), Cuerpo(ForR('i, 'MAX_BIDS, Cuerpo(If(PA 'i >=. '_numBids PC, break), Cuerpo(
+	--- 		Dv('bidToCheck, 'Bid, ->(->('bids, msg.sender), 'i)), Cuerpo(Dv('value, uint256, ->('_values, 'i)), Cuerpo(Dv('fake, bool,
+	--- 		->('_fakes, 'i)), Cuerpo(Dv('secret, bytes32, ->('_secrets, 'i)), Cuerpo(Dv('blindedBid, bytes32, CallP('keccak256, CallP(
+	--- 		'concat, ArgL(CallP('convert, ArgL('value, bytes32)), CallP('convert, ArgL('fake, bytes32)), 'secret)))), Cuerpo(If(PA
+	--- 		'blindedBid !=. 'bidToCheck.blindedBid PC, Cuerpo(Assert(1.0 ==. 0.0), continu)), Cuerpo(+=('refund, 'bidToCheck.deposit),
+	--- 		Cuerpo(If(PA not. 'fake and. 'bidToCheck.deposit >=. 'value PC, If(PA CallP('placeBid, ArgL(msg.sender, 'value)) PC, -=(
+	--- 		'refund, 'value))), Cuerpo(Dv('zeroBytes32, bytes32, EMPTY-BYTES32), =('bidToCheck.blindedBid, 'zeroBytes32)))))))))))), If(
+	--- 		PA 'refund !=. 0.0 PC, CallP('send, ArgL(msg.sender, 'refund))))))))), ListaF(Fun(headerD(@external, 'withdraw, PaV), Cuerpo(
+	--- 		Dv('pendingAmount, uint256, ->('pendingReturns, msg.sender)), If(PA 'pendingAmount >. 0.0 PC, Cuerpo(=(->('pendingReturns,
+	--- 		msg.sender), 0.0), CallP('send, ArgL(msg.sender, 'pendingAmount)))))), Fun(headerD(@external, 'auctionEnd, PaV), Cuerpo(
+	--- 		Assert(block.timestamp >. 'revealEnd), Cuerpo(Assert(not. 'ended), Cuerpo(logE('AuctionEnded, ArgL('highestBidder,
+	--- 		'highestBid)), Cuerpo(=('ended, True), CallP('send, ArgL('beneficiary, 'highestBid)))))))))))) .
+	--- --- falla por esto Dv('bidToCheck, 'Bid, ->(->('bids, msg.sender), 'i))
+		--- rew Fun(headerD(@external, 'reveal, LParam(P('_numBids, int128), LParam(P(
+		--- '_values, ->(uint256, 1.28e+2)), LParam(P('_fakes, ->(bool, 1.28e+2)), P('_secrets, ->(bytes32, 1.28e+2)))))), Cuerpo(Assert(
+		--- block.timestamp >. 'biddingEnd), Cuerpo(Assert(block.timestamp <. 'revealEnd), Cuerpo(Assert('_numBids ==. ->('bidCounts,
+		--- msg.sender)), Cuerpo(Dv('refund, uint256, 0.0), Cuerpo(ForR('i, 'MAX_BIDS, Cuerpo(If(PA 'i >=. '_numBids PC, break), Cuerpo(
+		--- Dv('bidToCheck, 'Bid, ->(->('bids, msg.sender), 'i)), Cuerpo(Dv('value, uint256, ->('_values, 'i)), Cuerpo(Dv('fake, bool,
+		--- ->('_fakes, 'i)), Cuerpo(Dv('secret, bytes32, ->('_secrets, 'i)), Cuerpo(Dv('blindedBid, bytes32, CallP('keccak256, CallP(
+		--- 'concat, ArgL(CallP('convert, ArgL('value, bytes32)), CallP('convert, ArgL('fake, bytes32)), 'secret)))), Cuerpo(If(PA
+		--- 'blindedBid !=. 'bidToCheck.blindedBid PC, Cuerpo(Assert(1.0 ==. 0.0), continu)), Cuerpo(+=('refund, 'bidToCheck.deposit),
+		--- Cuerpo(If(PA not. 'fake and. 'bidToCheck.deposit >=. 'value PC, If(PA CallP('placeBid, ArgL(msg.sender, 'value)) PC, -=(
+		--- 'refund, 'value))), Cuerpo(Dv('zeroBytes32, bytes32, EMPTY-BYTES32), =('bidToCheck.blindedBid, 'zeroBytes32)))))))))))), If(
+		--- PA 'refund !=. 0.0 PC, CallP('send, ArgL(msg.sender, 'refund))))))))) .
+---CONTRATO3 funciona perfectamente
+		--- 	rew initMemory(Contrato(ListaD(Dp('value, uint256, "public"), ListaD(Dp('seller, address, "public"),
+		--- ListaD(Dp('buyer, address, "public"), ListaD(Dp('unlocked, bool, "public"), Dp('ended, bool,
+		--- "public"))))), ListaF(Fun(init(@external, @payable, PaV), Cuerpo(Assert(PA msg.value %. 2.0 PC ==. 0.0),
+		--- Cuerpo(=('value, msg.value /. 2.0), Cuerpo(=('seller, msg.sender), =('unlocked, True))))), ListaF(Fun(
+		--- headerD(@external, 'abort, PaV), Cuerpo(Assert('unlocked), Cuerpo(Assert(msg.sender ==. 'seller), CallP(
+		--- 'selfdestruct, 'seller)))), ListaF(Fun(headerDD(@external, @payable, 'purchase, PaV), Cuerpo(Assert(
+		--- 'unlocked), Cuerpo(Assert(msg.value ==. PA 'value *. 2.0 PC), Cuerpo(=('buyer, msg.sender), =('unlocked,
+		--- False))))), Fun(headerD(@external, 'received, PaV), Cuerpo(Assert(not. 'unlocked), Cuerpo(Assert(
+		--- msg.sender ==. 'buyer), Cuerpo(Assert(not. 'ended), Cuerpo(=('ended, True), Cuerpo(CallP('send, ArgL(
+		--- 'buyer, 'value)), CallP('selfdestruct, 'seller)))))))))))) .
+---contrato4 FUNCIONA PERFECTAMENTE
+		--- rew initMemory(	Contrato(ListaD(Ds('Funder, ListaD(D('sender, address), D('value, uint256))), ListaD(Dhm(
+		--- 	'funders, int128, 'Funder), ListaD(D('nextFunderIndex, int128), ListaD(D('beneficiary, address), ListaD(
+		--- 	Dp('deadline, uint256, "public"), ListaD(Dp('goal, uint256, "public"), ListaD(D('refundIndex, int128),
+		--- 	Dp('timelimit, uint256, "public")))))))), ListaF(Fun(init(@external, LParam(P('_beneficiary, address),
+		--- 	LParam(P('_goal, uint256), P('_timelimit, uint256)))), Cuerpo(=('beneficiary, '_beneficiary), Cuerpo(=(
+		--- 	'deadline, '_timelimit +. block.timestamp), Cuerpo(=('timelimit, '_timelimit), =('goal, '_goal))))),
+		--- 	ListaF(Fun(headerDD(@external, @payable, 'participate, PaV), Cuerpo(Assert(block.timestamp <. 'deadline,
+		--- 	"deadline not met (yet)"), Cuerpo(Dv('nfi, int128, 'nextFunderIndex), Cuerpo(=St(->('funders, 'nfi),
+		--- 	'Funder, LParam(P('sender, msg.sender), P('value, msg.value))), =('nextFunderIndex, 'nfi +. 1.0))))),
+		--- 	ListaF(Fun(headerD(@external, 'finalize, PaV), Cuerpo(Assert(block.timestamp >=. 'deadline,
+		--- 	"deadline has passed"), Cuerpo(Assert('balance >=. 'goal, "the goal has been reached"), CallP(
+		--- 	'selfdestruct, 'beneficiary)))), Fun(headerD(@external, 'refund, PaV), Cuerpo(Assert(block.timestamp >=.
+		--- 	'deadline and. 'balance <. 'goal), Cuerpo(Dv('ind, int128, 'refundIndex), Cuerpo(ForR('i, ArgL('ind,
+		--- 	'ind +. 3.0e+1), Cuerpo(If('i >=. 'nextFunderIndex, Cuerpo(=('refundIndex, 'nextFunderIndex), return)),
+		--- 	Cuerpo(CallP('send, ArgL(.(->('funders, 'i), 'sender), .(->('funders, 'i), 'value))), =(->('funders,
+		--- 	'i), CallP('empty, 'Funder))))), =('refundIndex, 'ind +. 3.0e+1)))))))))) .
+	---Contrato5
+
+			--- rew recorreDeclaraciones(ListaD(Ds('Voter, ListaD(D('weight, int128), ListaD(D('voted, bool), ListaD(D(
+			--- 'delegate, address), D('vote, int128))))), ListaD(Ds('Proposal, ListaD(D('name, bytes32), D('voteCount,
+			--- int128))), ListaD(DhmP('voters, address, 'Voter, "public"), ListaD(DhmP('proposals, int128, 'Proposal,
+			--- "public"), ListaD(Dp('voterCount, int128, "public"), ListaD(Dp('chairperson, address, "public"), Dp(
+			--- 'int128Proposals, int128, "public")))))))) .
+		---  declaraciones contrato 5 no funcion por el dhmp
+			--- rew newVariable(DhmP('voters, address, 'Voter, "public")) .
+			--- rew getFunctions(ListaF(Fun(headerDDR(@view, @internal, '_delegated, bool, P(
+			--- 'addr, address)), Return(.(->('voters, 'addr), 'delegate) !=. ZERO-ADDRESS)), ListaF(Fun(headerDDR(
+			--- @view, @external, 'delegated, bool, P('addr, address)), Return(CallP('_delegated, 'addr))), ListaF(Fun(
+			--- headerDDR(@view, @internal, '_directlyVoted, bool, P('addr, address)), Return(.(->('voters, 'addr),
+			--- 'voted) and. PA .(->('voters, 'addr), 'delegate) ==. ZERO-ADDRESS PC)), ListaF(Fun(headerDDR(@view,
+			--- @external, 'directlyVoted, bool, P('addr, address)), Return(CallP('_directlyVoted, 'addr))), ListaF(Fun(
+			--- init(@external, P('_proposalNames, ->(bytes32, 2.0))), Cuerpo(=('chairperson, msg.sender), Cuerpo(=(
+			--- 'voterCount, 0.0), ForR('i, 2.0, Cuerpo(=St(->('proposals, 'i), 'Proposal, LParam(P('name, ->(
+			--- '_proposalNames, 'i)), P('voteCount, 0.0))), +=('int128Proposals, 1.0)))))), ListaF(Fun(headerD(
+			--- @external, 'giveRightToVote, P('voter, address)), Cuerpo(Assert(msg.sender ==. 'chairperson), Cuerpo(
+			--- Assert(not. .(->('voters, 'voter), 'voted)), Cuerpo(Assert(.(->('voters, 'voter), 'weight) ==. 0.0),
+			--- Cuerpo(=(.(->('voters, 'voter), 'weight), 1.0), +=('voterCount, 1.0)))))), ListaF(Fun(headerD(@internal,
+			--- '_forwardWeight, P('delegate_with_weight_to_forward, address)), Cuerpo(Assert(CallP('_delegated,
+			--- 'delegate_with_weight_to_forward)), Cuerpo(Assert(.(->('voters, 'delegate_with_weight_to_forward),
+			--- 'weight) >. 0.0), Cuerpo(Dv('target, address, .(->('voters, 'delegate_with_weight_to_forward),
+			--- 'delegate)), Cuerpo(ForR('i, 4.0, IfElse(CallP('_delegated, 'target), Cuerpo(=('target, .(->('voters,
+			--- 'target), 'delegate)), Assert('target !=. 'delegate_with_weight_to_forward)), break)), Cuerpo(Dv(
+			--- 'weight_to_forward, int128, .(->('voters, 'delegate_with_weight_to_forward), 'weight)), Cuerpo(=(.(->(
+			--- 'voters, 'delegate_with_weight_to_forward), 'weight), 0.0), Cuerpo(+=(.(->('voters, 'target), 'weight),
+			--- 'weight_to_forward), If(CallP('_directlyVoted, 'target), Cuerpo(+=(.(->('proposals, .(->('voters,
+			--- 'target), 'vote)), 'voteCount), 'weight_to_forward), =(.(->('voters, 'target), 'weight), 0.0))))))))))),
+			--- ListaF(Fun(headerD(@external, 'forwardWeight, P('delegate_with_weight_to_forward, address)), CallP(
+			--- '_forwardWeight, 'delegate_with_weight_to_forward)), ListaF(Fun(headerD(@external, 'delegate, P('to,
+			--- address)), Cuerpo(Assert(not. .(->('voters, msg.sender), 'voted)), Cuerpo(Assert('to !=. msg.sender),
+			--- Cuerpo(Assert('to !=. ZERO-ADDRESS), Cuerpo(=(.(->('voters, msg.sender), 'voted), True), Cuerpo(=(.(->(
+			--- 'voters, msg.sender), 'delegate), 'to), CallP('_forwardWeight, msg.sender))))))), ListaF(Fun(headerD(
+			--- @external, 'vote, P('proposal, int128)), Cuerpo(Assert(not. .(->('voters, msg.sender), 'voted)), Cuerpo(
+			--- Assert('proposal <. 'int128Proposals), Cuerpo(=(.(->('voters, msg.sender), 'vote), 'proposal), Cuerpo(=(
+			--- .(->('voters, msg.sender), 'voted), True), Cuerpo(+=(.(->('proposals, 'proposal), 'voteCount), .(->(
+			--- 'voters, msg.sender), 'weight)), =(.(->('voters, msg.sender), 'weight), 0.0))))))), ListaF(Fun(
+			--- headerDDR(@view, @internal, '_winningProposal, int128, PaV), Cuerpo(Dv('winning_vote_count, int128,
+			--- 0.0), Cuerpo(Dv('winning_proposal, int128, 0.0), Cuerpo(ForR('i, 2.0, If(.(->('proposals, 'i),
+			--- 'voteCount) >. 'winning_vote_count, Cuerpo(=('winning_vote_count, .(->('proposals, 'i), 'voteCount)), =(
+			--- 'winning_proposal, 'i)))), Return('winning_proposal))))), ListaF(Fun(headerDDR(@view, @external,
+			--- 'winningProposal, int128, PaV), Return(Call('_winningProposal))), Fun(headerDDR(@view, @external,
+			--- 'winnerName, bytes32, PaV), Return(.(->('proposals, Call('_winningProposal)), 'name)))))))))))))))) .
+---CONTRATO6
+	--- rew getFunctions(ListaF(Fun(init(@external, LParam(P('_company,
+    --- address), LParam(P('_total_shares, uint256), P('initial_price, uint256)))), Cuerpo(Assert('_total_shares
+    --- >. 0.0), Cuerpo(Assert('initial_price >. 0.0), Cuerpo(=('company, '_company), Cuerpo(=('totalShares,
+    --- '_total_shares), Cuerpo(=('price, 'initial_price), =(->('holdings, 'company), '_total_shares))))))),
+    --- ListaF(Fun(headerDDR(@view, @internal, '_stockAvailable, uint256, PaV), Return(->('holdings,
+    --- 'company))), ListaF(Fun(headerDDR(@view, @external, 'stockAvailable, uint256, PaV), Return(Call(
+    --- '_stockAvailable))), ListaF(Fun(headerDD(@external, @payable, 'buyStock, PaV), Cuerpo(Dv('buy_order,
+    --- uint256, msg.value /. 'price), Cuerpo(Assert(Call('_stockAvailable) >=. 'buy_order), Cuerpo(-=(->(
+    --- 'holdings, 'company), 'buy_order), Cuerpo(+=(->('holdings, msg.sender), 'buy_order), logE('Buy, ArgL(
+    --- msg.sender, 'buy_order))))))), ListaF(Fun(headerDDR(@view, @internal, '_getHolding, uint256, P(
+    --- '_stockholder, address)), Return(->('holdings, '_stockholder))), ListaF(Fun(headerDDR(@view, @external,
+    --- 'getHolding, uint256, P('_stockholder, address)), Return(CallP('_getHolding, '_stockholder))), ListaF(
+    --- Fun(headerDDR(@view, @external, 'cash, uint256, PaV), Return('balance)), ListaF(Fun(headerD(@external,
+    --- 'sellStock, P('sell_order, uint256)), Cuerpo(Assert('sell_order >. 0.0), Cuerpo(Assert(CallP(
+    --- '_getHolding, msg.sender) >=. 'sell_order), Cuerpo(Assert('balance >=. PA 'price *. 'sell_order PC),
+    --- Cuerpo(-=(->('holdings, msg.sender), 'sell_order), Cuerpo(+=(->('holdings, 'company), 'sell_order),
+    --- Cuerpo(CallP('send, ArgL(msg.sender, 'price *. 'sell_order)), logE('Sell, ArgL(msg.sender,
+    --- 'sell_order))))))))), ListaF(Fun(headerD(@external, 'transferStock, LParam(P('receiver, address), P(
+    --- 'transfer_order, uint256))), Cuerpo(Assert('transfer_order >. 0.0), Cuerpo(Assert(CallP('_getHolding,
+    --- msg.sender) >=. 'transfer_order), Cuerpo(-=(->('holdings, msg.sender), 'transfer_order), Cuerpo(+=(->(
+    --- 'holdings, 'receiver), 'transfer_order), logE('Transfer, ArgL(msg.sender, 'receiver,
+    --- 'transfer_order))))))), ListaF(Fun(headerD(@external, 'payBill, LParam(P('vendor, address), P('amount,
+    --- uint256))), Cuerpo(Assert(msg.sender ==. 'company), Cuerpo(Assert('balance >=. 'amount), Cuerpo(CallP(
+    --- 'send, ArgL('vendor, 'amount)), logE('Pay, ArgL('vendor, 'amount)))))), ListaF(Fun(headerDDR(@view,
+    --- @internal, '_debt, uint256, PaV), Return('price *. PA 'totalShares -. Call('_stockAvailable) PC)),
+    --- ListaF(Fun(headerDDR(@view, @external, 'debt, uint256, PaV), Return(Call('_debt))), Fun(headerDDR(@view,
+    --- @external, 'worth, uint256, PaV), Return('balance -. Call('_debt)))))))))))))))) .
+--- rew Return('price *. PA 'totalShares -. Call('_stockAvailable) PC) .
+	--- rew newFunctionVariable(Fun(headerDDR(@view,
+    --- @internal, '_debt, uint256, PaV), =('totalShares,
+    --- '_total_shares))) .
+---CONTRATO7
+	--- rew recorreDeclaraciones(ListaD(Ds('Juego, ListaD(D('apostador, address), ListaD(D('equipo1, uint256),
+    --- ListaD(D('equipo2, uint256), D('apuesta, uint256))))), ListaD(Dp('casa, address, "public"), ListaD(Dp(
+    --- 'inicial, uint256, "public"), ListaD(Dp('empieza, uint256, "public"), ListaD(Dp('termina, uint256,
+    --- "public"), ListaD(D('pequipo1, uint256), ListaD(D('pequipo2, uint256), ListaD(D('indice, uint256),
+    --- ListaD(Dhm('apostadores, uint256, 'Juego), ListaD(D('sigindice, uint256), ListaD(D('invertido, bool), D(
+    --- 'apuntados, bool))))))))))))) .
+	--- si le quitas la funcion y el assert funciona
+	--- rew getFunctions(ListaF(Fun(init(@payable, @external, LParam(P('tiempo_inicio, uint256), P(
+	---     'duracion, uint256))), Cuerpo(Assert('tiempo_inicio >. 0.0), Cuerpo(Assert('duracion >. 0.0), Cuerpo(=(
+	---     'inicial, msg.value), Cuerpo(=('casa, msg.sender), Cuerpo(=('empieza, 'tiempo_inicio +.
+	---     block.timestamp), =('termina, 'duracion +. 'empieza))))))), ListaF(Fun(headerDD(@external, @payable,
+	---     'apostar, LParam(P('eq1, uint256), P('eq2, uint256))), Cuerpo(Assert(block.timestamp <=. 'empieza,
+	---     "Antes de empezar"), Cuerpo(Assert(msg.sender !=. 'casa, "Jugador"), Cuerpo(Assert(msg.value >. 0.0,
+	---     "Apuesta positiva"), Cuerpo(Dv('nfi, uint256, 'indice), Cuerpo(=St(->('apostadores, 'nfi), 'Juego,
+	---     LParam(P('apostador, msg.sender), LParam(P('equipo1, 'eq1), LParam(P('equipo2, 'eq2), P('apuesta,
+	---     msg.value))))), =('indice, 'nfi +. 1.0))))))), ListaF(Fun(headerDDR(@view, @external, 'necesario,
+	---     uint256, PaV), Cuerpo(Assert(msg.sender ==. 'casa, "Casa"), Cuerpo(Assert(block.timestamp >. 'empieza,
+	---     "Despues de empezar"), Return(PA 'balance -. 'inicial PC /. 2.0)))), ListaF(Fun(headerDD(@payable,
+	---     @external, 'mitad, PaV), Cuerpo(Assert(block.timestamp >. 'empieza, "Despues de empezar"), Cuerpo(
+	---     Assert('casa ==. msg.sender, "Casa"), Cuerpo(Assert('inicial +. msg.value >=. PA PA 'balance -. 'inicial
+	---     -. msg.value PC /. 2.0 PC, "Valor suficiente"), =('invertido, True))))), ListaF(Fun(headerD(@external,
+	---     'ganadores, LParam(P('_eq1, uint256), P('_eq2, uint256))), Cuerpo(Assert(msg.sender ==. 'casa), Cuerpo(
+	---     Assert(block.timestamp >. 'termina), Cuerpo(Assert(not. 'apuntados), Cuerpo(=('apuntados, True), Cuerpo(
+	---     =('pequipo1, '_eq1), =('pequipo2, '_eq2))))))), ListaF(Fun(headerD(@external, 'devolver, PaV), Cuerpo(
+	---     Assert('apuntados, "Apuntados"), Cuerpo(Assert('casa ==. msg.sender, "Casa"), Cuerpo(Assert('invertido,
+	---     "Ha invertido"), Cuerpo(Dv('nive, uint256, 'sigindice), ForR('i, ArgL('nive, 'nive +. 3.0e+1), IfElse('i
+	---     >. 'indice, CallP('selfdestruct, 'casa), If(PA PA .(->('apostadores, 'i), 'equipo1) ==. 'pequipo1 PC
+	---     and. PA .(->('apostadores, 'i), 'equipo2) ==. 'pequipo2 PC PC, Cuerpo(CallP('send, ArgL(.(->(
+	---     'apostadores, 'i), 'apostador), PA .(->('apostadores, 'i), 'apuesta) /. 2.0 PC +. .(->('apostadores,
+	---     'i), 'apuesta))), =('sigindice, 'nive +. 3.0e+1)))))))))), ListaF(Fun(headerD(@external, 'ganadores,
+	---     LParam(P('_eq1, uint256), P('_eq2, uint256))), Cuerpo(Assert(msg.sender ==. 'casa, "Casa"), Cuerpo(
+	---     Assert(block.timestamp >. 'termina, "Despues de terminar"), Cuerpo(Assert(not. 'apuntados,
+	---     "No apuntados"), Cuerpo(=('apuntados, True), Cuerpo(=('pequipo1, '_eq1), =('pequipo2, '_eq2))))))),
+	---     ListaF(Fun(headerDDR(@view, @external, 'terminado, bool, PaV), Return(block.timestamp >. 'termina)),
+	---     ListaF(Fun(headerDDR(@view, @external, 'empezado, bool, PaV), Return(block.timestamp >. 'empieza)),
+	---     ListaF(Fun(headerDDR(@view, @external, 'ganar, uint256, P('apos, 'Juego)), Return('apos.apuesta +. PA
+	---     'apos.apuesta /. 2.0 PC)), Fun(headerDDR(@view, @external, 'ganado, bool, P('apos, 'Juego)), Cuerpo(
+	---     Assert('apuntados), Return(PA 'apos.equipo1 ==. 'pequipo1 PC and. PA 'apos.equipo2 ==. 'pequipo2
+	---     PC)))))))))))))) .
+	--- rew newFunctionVariable(Fun(headerDD(@payable,
+    --- @external, 'mitad, PaV), Cuerpo(Assert(block.timestamp >. 'empieza, "Despues de empezar"), Cuerpo(
+    --- Assert('casa ==. msg.sender, "Casa"), Cuerpo(Assert('inicial +. msg.value >=. PA PA ('balance -. ('inicial
+    --- -. msg.value)) PC /. 2.0 PC, "Valor suficiente"), =('invertido, True)))))) .
+---CONTRATO8
+	--- rew initMemory(Contrato(ListaD(Ds('Datos, ListaD(D('nombre, ->(String, 2.0e+1)), ListaD(D('apellidos, ->(
+    --- String, 4.0e+1)), ListaD(D('direccion, ->(String, 2.0e+1)), D('telefono, ->(String, 9.0)))))), ListaD(Dp(
+    --- 'tiempo_revision, uint256, "public"), ListaD(Dp('protectora, address, "public"), ListaD(Dp('microchip, ->(
+    --- String, 1.5e+1), "public"), ListaD(Dp('veterinario, address, "public"), ListaD(Dp('tasas, uint256, "public"),
+    --- ListaD(Dp('dueno, address, "public"), ListaD(Dp('adoptado, bool, "public"), ListaD(D('tope, uint256), ListaD(
+    --- Dp('datos, 'Datos, "public"), D('vacunado, bool))))))))))), ListaF(Fun(init(@external, LParam(P('_revision,
+    --- uint256), LParam(P('_numerochip, ->(String, 1.5e+1)), LParam(P('_veterinario, address), P('_tasas,
+    --- uint256))))), Cuerpo(=('protectora, msg.sender), Cuerpo(=('tiempo_revision, '_revision), Cuerpo(=('microchip,
+    --- '_numerochip), Cuerpo(=('veterinario, '_veterinario), =('tasas, '_tasas)))))), ListaF(Fun(headerDD(@payable,
+    --- @external, 'adoptar, LParam(P('_direccion, ->(String, 2.0e+1)), LParam(P('_telefono, ->(String, 9.0)), LParam(
+    --- P('_nombre, ->(String, 2.0e+1)), P('_apellidos, ->(String, 4.0e+1)))))), Cuerpo(Assert(not. 'adoptado,
+    --- "No adoptado"), Cuerpo(Assert(msg.value ==. 'tasas, "Tasas exactas"), Cuerpo(=('dueno, msg.sender), Cuerpo(=(
+    --- 'adoptado, True), Cuerpo(=('tope, 'tiempo_revision +. block.timestamp), Cuerpo(=St('datos, 'Datos, LParam(P(
+    --- 'nombre, '_nombre), LParam(P('apellidos, '_apellidos), LParam(P('direccion, '_direccion), P('telefono,
+    --- '_telefono))))), Cuerpo(CallP('send, ArgL('protectora, 'tasas)), =('vacunado, True))))))))), ListaF(Fun(
+    --- headerD(@external, 'vacunar, LParam(P('maltrato, bool), LParam(P('operaciones, bool), P('_chip, ->(String,
+    --- 1.5e+1))))), Cuerpo(Assert('adoptado, "Adoptado"), Cuerpo(Assert(msg.sender ==. 'veterinario, "Veterinario"),
+    --- Cuerpo(Assert(block.timestamp <. 'tope, "Dentro de tiempo"), Cuerpo(Assert('microchip ==. '_chip,
+    --- "Microchip correcto"), Cuerpo(=('vacunado, True), If('maltrato or. 'operaciones, Cuerpo(=('adoptado, False),
+    --- Cuerpo(=('dueno, 'protectora), =('datos, CallP('empty, 'Datos))))))))))), ListaF(Fun(headerD(@external,
+    --- 'revision, LParam(P('apto, bool), P('_chip, ->(String, 1.5e+1)))), Cuerpo(Assert('adoptado, "Adoptado"),
+    --- Cuerpo(Assert(msg.sender ==. 'protectora, "Protectora"), Cuerpo(Assert(block.timestamp >. 'tope,
+    --- "Superior al tope"), Cuerpo(Assert('microchip ==. '_chip, "Microchip correcto"), IfElse('apto or. not.
+    --- 'vacunado, Cuerpo(=('adoptado, False), Cuerpo(=('dueno, 'protectora), =('datos, CallP('empty, 'Datos)))),
+    --- Cuerpo(=('vacunado, False), =('tope, 'tiempo_revision +. block.timestamp)))))))), ListaF(Fun(headerD(
+    --- @external, 'ceder, P('_chip, ->(String, 1.5e+1))), Cuerpo(Assert('adoptado, "Adoptado"), Cuerpo(Assert(
+    --- 'microchip ==. '_chip, "Microchip correcto"), Cuerpo(Assert(msg.sender ==. 'dueno, "Dueno"), Cuerpo(=(
+    --- 'adoptado, False), Cuerpo(=('dueno, 'protectora), =('datos, CallP('empty, 'Datos)))))))), ListaF(Fun(headerD(
+    --- @external, 'dar_baja, P('_chip, ->(String, 1.5e+1))), Cuerpo(Assert(msg.sender ==. 'veterinario,
+    --- "Veterinario"), Cuerpo(Assert('microchip ==. '_chip, "Microchip correcto"), CallP('selfdestruct,
+    --- 'protectora)))), ListaF(Fun(headerD(@external, 'cambio_domicilio, LParam(P('_domicilio, ->(String, 2.0e+1)),
+    --- P('_chip, ->(String, 1.5e+1)))), Cuerpo(Assert('adoptado, "Adoptado"), Cuerpo(Assert(msg.sender ==. 'dueno,
+    --- "Dueno"), Cuerpo(Assert('microchip ==. '_chip, "Microchip correcto"), =('datos.direccion, '_domicilio))))),
+    --- ListaF(Fun(headerD(@external, 'cambio_telefono, LParam(P('_telefono, ->(String, 9.0)), P('_chip, ->(String,
+    --- 1.5e+1)))), Cuerpo(Assert('adoptado, "Adoptado"), Cuerpo(Assert(msg.sender ==. 'dueno, "Dueno"), Cuerpo(
+    --- Assert('microchip ==. '_chip, "Microchip correcto"), =('datos.telefono, '_telefono))))), ListaF(Fun(headerD(
+    --- @external, 'cambio_veterinario, LParam(P('_veterinario, address), P('_chip, ->(String, 1.5e+1)))), Cuerpo(
+    --- Assert(msg.sender ==. 'dueno or. msg.sender ==. 'protectora, "Dueno o protectora"), Cuerpo(Assert('microchip
+    --- ==. '_chip, "Microchip correcto"), =('veterinario, '_veterinario)))), ListaF(Fun(headerDDR(@view, @external,
+    --- 'consultar_datos, 'Datos, PaV), Cuerpo(Assert(msg.sender ==. 'protectora, "Protectora"), Return('datos))),
+    --- Fun(headerDDR(@view, @external, 'consultar_adoptado, bool, PaV), Return('adoptado)))))))))))))) .
+	--- funciona perfectamente
+		--- 	rew recorreDeclaraciones(ListaD(Ds('Datos, ListaD(D('nombre, ->(String, 2.0e+1)), ListaD(D('apellidos, ->(
+		--- String, 4.0e+1)), ListaD(D('direccion, ->(String, 2.0e+1)), D('telefono, ->(String, 9.0)))))), ListaD(Dp(
+		--- 'tiempo_revision, uint256, "public"), ListaD(Dp('protectora, address, "public"), ListaD(Dp('microchip, ->(
+		--- String, 1.5e+1), "public"), ListaD(Dp('veterinario, address, "public"), ListaD(Dp('tasas, uint256, "public"),
+		--- ListaD(Dp('dueno, address, "public"), ListaD(Dp('adoptado, bool, "public"), ListaD(D('tope, uint256), ListaD(
+		--- Dp('datos, 'Datos, "public"), D('vacunado, bool)))))))))))) .
+	--- no funciona por la penultima funcion, al devolver datos, pero se parsea bien sola que esta debajo
+			--- rew getFunctions( ListaF(Fun(init(@external, LParam(P('_revision,
+			--- uint256), LParam(P('_numerochip, ->(String, 1.5e+1)), LParam(P('_veterinario, address), P('_tasas,
+			--- uint256))))), Cuerpo(=('protectora, msg.sender), Cuerpo(=('tiempo_revision, '_revision), Cuerpo(=('microchip,
+			--- '_numerochip), Cuerpo(=('veterinario, '_veterinario), =('tasas, '_tasas)))))), ListaF(Fun(headerDD(@payable,
+			--- @external, 'adoptar, LParam(P('_direccion, ->(String, 2.0e+1)), LParam(P('_telefono, ->(String, 9.0)), LParam(
+			--- P('_nombre, ->(String, 2.0e+1)), P('_apellidos, ->(String, 4.0e+1)))))), Cuerpo(Assert(not. 'adoptado,
+			--- "No adoptado"), Cuerpo(Assert(msg.value ==. 'tasas, "Tasas exactas"), Cuerpo(=('dueno, msg.sender), Cuerpo(=(
+			--- 'adoptado, True), Cuerpo(=('tope, 'tiempo_revision +. block.timestamp), Cuerpo(=St('datos, 'Datos, LParam(P(
+			--- 'nombre, '_nombre), LParam(P('apellidos, '_apellidos), LParam(P('direccion, '_direccion), P('telefono,
+			--- '_telefono))))), Cuerpo(CallP('send, ArgL('protectora, 'tasas)), =('vacunado, True))))))))), ListaF(Fun(
+			--- headerD(@external, 'vacunar, LParam(P('maltrato, bool), LParam(P('operaciones, bool), P('_chip, ->(String,
+			--- 1.5e+1))))), Cuerpo(Assert('adoptado, "Adoptado"), Cuerpo(Assert(msg.sender ==. 'veterinario, "Veterinario"),
+			--- Cuerpo(Assert(block.timestamp <. 'tope, "Dentro de tiempo"), Cuerpo(Assert('microchip ==. '_chip,
+			--- "Microchip correcto"), Cuerpo(=('vacunado, True), If('maltrato or. 'operaciones, Cuerpo(=('adoptado, False),
+			--- Cuerpo(=('dueno, 'protectora), =('datos, CallP('empty, 'Datos))))))))))), ListaF(Fun(headerD(@external,
+			--- 'revision, LParam(P('apto, bool), P('_chip, ->(String, 1.5e+1)))), Cuerpo(Assert('adoptado, "Adoptado"),
+			--- Cuerpo(Assert(msg.sender ==. 'protectora, "Protectora"), Cuerpo(Assert(block.timestamp >. 'tope,
+			--- "Superior al tope"), Cuerpo(Assert('microchip ==. '_chip, "Microchip correcto"), IfElse('apto or. not.
+			--- 'vacunado, Cuerpo(=('adoptado, False), Cuerpo(=('dueno, 'protectora), =('datos, CallP('empty, 'Datos)))),
+			--- Cuerpo(=('vacunado, False), =('tope, 'tiempo_revision +. block.timestamp)))))))), ListaF(Fun(headerD(
+			--- @external, 'ceder, P('_chip, ->(String, 1.5e+1))), Cuerpo(Assert('adoptado, "Adoptado"), Cuerpo(Assert(
+			--- 'microchip ==. '_chip, "Microchip correcto"), Cuerpo(Assert(msg.sender ==. 'dueno, "Dueno"), Cuerpo(=(
+			--- 'adoptado, False), Cuerpo(=('dueno, 'protectora), =('datos, CallP('empty, 'Datos)))))))), ListaF(Fun(headerD(
+			--- @external, 'dar_baja, P('_chip, ->(String, 1.5e+1))), Cuerpo(Assert(msg.sender ==. 'veterinario,
+			--- "Veterinario"), Cuerpo(Assert('microchip ==. '_chip, "Microchip correcto"), CallP('selfdestruct,
+			--- 'protectora)))), ListaF(Fun(headerD(@external, 'cambio_domicilio, LParam(P('_domicilio, ->(String, 2.0e+1)),
+			--- P('_chip, ->(String, 1.5e+1)))), Cuerpo(Assert('adoptado, "Adoptado"), Cuerpo(Assert(msg.sender ==. 'dueno,
+			--- "Dueno"), Cuerpo(Assert('microchip ==. '_chip, "Microchip correcto"), =('datos.direccion, '_domicilio))))),
+			--- ListaF(Fun(headerD(@external, 'cambio_telefono, LParam(P('_telefono, ->(String, 9.0)), P('_chip, ->(String,
+			--- 1.5e+1)))), Cuerpo(Assert('adoptado, "Adoptado"), Cuerpo(Assert(msg.sender ==. 'dueno, "Dueno"), Cuerpo(
+			--- Assert('microchip ==. '_chip, "Microchip correcto"), =('datos.telefono, '_telefono))))), ListaF(Fun(headerD(
+			--- @external, 'cambio_veterinario, LParam(P('_veterinario, address), P('_chip, ->(String, 1.5e+1)))), Cuerpo(
+			--- Assert(msg.sender ==. 'dueno or. msg.sender ==. 'protectora, "Dueno o protectora"), Cuerpo(Assert('microchip
+			--- ==. '_chip, "Microchip correcto"), =('veterinario, '_veterinario)))), ListaF(Fun(headerDDR(@view, @external,
+			--- 'consultar_datos, 'Datos, PaV), Cuerpo(Assert(msg.sender ==. 'protectora, "Protectora"), Return('datos))),
+			--- Fun(headerDDR(@view, @external, 'consultar_adoptado, bool, PaV), Return('adoptado))))))))))))) .
+	--- --- la funcion que arriba falla pero aqui funciona
+			--- rew newFunctionVariable(Fun(headerDDR(@view, @external,
+			--- 'consultar_datos, 'Datos, PaV), Cuerpo(Assert(msg.sender ==. 'protectora, "Protectora"), Return('datos)))) .
+			--- rew Fun(headerDDR(@view, @external,
+			--- 'consultar_datos, 'Datos, PaV), Cuerpo(Assert(msg.sender ==. 'protectora, "Protectora"), Return('datos))) .
+
+---CONTRATO9 
+	--- initmemoria y function iba bien
+	--- rew initMemoryFunctions( Contrato(ListaD(De('Transaccion, ListaD(Di('receptor, address, "indexed"), ListaD(Di('emisor,
+    --- address, "indexed"), D('valor, uint256)))), ListaD(De('Clave, ListaD(Di('receptor, address, "indexed"),
+    --- ListaD(Di('emisor, address, "indexed"), D('clave_, uint256)))), ListaD(Dp('arrendador, address, "public"),
+    --- ListaD(Dp('fianza, uint256, "public"), ListaD(Dp('mensualidad, uint256, "public"), ListaD(Dp('tiempo, uint256,
+    --- "public"), ListaD(Dp('tiempo_contrato, uint256, "public"), ListaD(Dp('tiempo_mensual, uint256, "public"),
+    --- ListaD(Dp('arrendatario, address, "public"), ListaD(Dp('alquilada, bool, "public"), ListaD(D('pagada, bool),
+    --- D('llave, uint256)))))))))))), ListaF(Fun(init(@payable, @external, LParam(P('_mensualidad, uint256), LParam(
+    --- P('_tiempo, uint256), LParam(P('_tiempo_contrato, uint256), P('_llave, uint256))))), Cuerpo(Assert(msg.value
+    --- >. 0.0), Cuerpo(Assert('_mensualidad >. 0.0), Cuerpo(Assert('_tiempo >. 0.0), Cuerpo(Assert('_tiempo_contrato
+    --- >=. '_tiempo), Cuerpo(=('fianza, msg.value), Cuerpo(=('arrendador, msg.sender), Cuerpo(=('mensualidad,
+    --- '_mensualidad), Cuerpo(=('tiempo, '_tiempo), Cuerpo(=('llave, '_llave), =('tiempo_contrato,
+    --- '_tiempo_contrato))))))))))), ListaF(Fun(headerDD(@payable, @external, 'alquilar, PaV), Cuerpo(Assert(not.
+    --- 'alquilada, "No esta alquilada"), Cuerpo(Assert(msg.value ==. 'fianza +. 'mensualidad, "Valor exacto"),
+    --- Cuerpo(=('arrendatario, msg.sender), Cuerpo(=('alquilada, True), Cuerpo(=('tiempo_mensual, 'tiempo +.
+    --- block.timestamp), Cuerpo(+=('tiempo_contrato, block.timestamp), Cuerpo(=('pagada, True), Cuerpo(CallP('send,
+    --- ArgL('arrendador, 'mensualidad)), Cuerpo(logE('Transaccion, ArgL('arrendador, 'arrendatario, 'mensualidad)),
+    --- Cuerpo(logE('Clave, ArgL('arrendatario, 'arrendador, 'llave)), =('llave, 0.0)))))))))))), ListaF(Fun(headerD(
+    --- @external, 'darllave, P('clave, uint256)), Cuerpo(Assert('alquilada, "Alquilada"), Cuerpo(Assert(msg.sender
+    --- ==. 'arrendador, "Arrendador"), Cuerpo(Assert(block.timestamp <. 'tiempo_mensual, "Dentro de plazo"), =(
+    --- 'llave, 'clave))))), ListaF(Fun(headerD(@external, 'cambio, PaV), Cuerpo(Assert('alquilada, "Alquilada"),
+    --- Cuerpo(Assert(block.timestamp >. 'tiempo_mensual, "Plazo cumplido"), Cuerpo(Assert(msg.sender ==. 'arrendador
+    --- or. msg.sender ==. 'arrendatario, "Arrendador o arrendatario"), IfElse(block.timestamp >. 'tiempo_contrato,
+    --- Cuerpo(CallP('send, ArgL('arrendatario, 'fianza)), CallP('selfdestruct, 'arrendador)), IfElse('llave !=. 0.0,
+    --- IfElse('pagada, Cuerpo(logE('Transaccion, ArgL('arrendador, 'arrendatario, 'mensualidad)), Cuerpo(CallP('send,
+    --- ArgL('arrendador, 'mensualidad)), Cuerpo(logE('Clave, ArgL('arrendatario, 'arrendador, 'llave)), Cuerpo(=(
+    --- 'tiempo_mensual, 'tiempo +. block.timestamp), Cuerpo(=('llave, 0.0), =('pagada, False)))))), CallP(
+    --- 'selfdestruct, 'arrendador)), CallP('selfdestruct, 'arrendatario))))))), ListaF(Fun(headerD(@external, 'pagar,
+    --- PaV), Cuerpo(Assert('alquilada, "Alquilada"), Cuerpo(Assert(msg.sender ==. 'arrendatario, "Arrendatario"),
+    --- Cuerpo(Assert(block.timestamp <. 'tiempo_mensual, "Dentro del plazo"), Cuerpo(Assert(msg.value ==.
+    --- 'mensualidad, "Mensualidad"), =('pagada, True)))))), Fun(headerD(@external, 'eliminarcontrato, PaV), Cuerpo(
+    --- Assert(msg.sender ==. 'arrendador, "Arrendador"), Cuerpo(Assert(block.timestamp <. 'tiempo_contrato,
+    --- "Dentro del tiempo del contrato"), IfElse('alquilada, CallP('selfdestruct, 'arrendatario), CallP(
+    --- 'selfdestruct, 'arrendador)))))))))))) .
+---contrato10
+	--- rew initMemory(Contrato(ListaD(De('Transaccion, ListaD(Di('receptor, address, "indexed"), ListaD(Di('emisor, address,
+    --- "indexed"), D('valor, uint256)))), ListaD(De('Clave, ListaD(Di('receptor, address, "indexed"), ListaD(Di('emisor, address,
+    --- "indexed"), D('clave_, uint256)))), ListaD(Ds('Caja, ListaD(D('propietario, address), ListaD(D('tdisfrute, uint256), ListaD(
+    --- D('ttope, uint256), ListaD(D('pagada, bool), ListaD(D('llave, uint256), ListaD(D('dejar, bool), D('primera, bool)))))))),
+    --- ListaD(Dp('tienda, address, "public"), ListaD(Dp('cajas, uint256, "public"), ListaD(Dp('mensualidad, uint256, "public"),
+    --- ListaD(Dp('tiempo_disfrute, uint256, "public"), ListaD(DhmP('clientes, uint256, 'Caja, "public"), ListaD(D('indice, uint256),
+    --- ListaD(Dp('fianza, uint256, "public"), ListaD(Dp('tiempo_pagar, uint256, "public"), ListaD(D('cajas_totales, uint256),
+    --- ListaD(D('indice_libres, uint256), ListaD(Dhm('cajaslibres, uint256, uint256), DhmP('uso, uint256, bool,
+    --- "public"))))))))))))))), ListaF(Fun(init(@external, LParam(P('_cajas, uint256), LParam(P('_mensualidad, uint256), LParam(P(
+    --- '_tiempo_disfrute, uint256), LParam(P('_tiempo_pagar, uint256), P('_fianza, uint256)))))), Cuerpo(Assert('_cajas >. 0.0),
+    --- Cuerpo(Assert('_mensualidad >. 0.0), Cuerpo(Assert('_tiempo_disfrute >. 0.0), Cuerpo(Assert('_tiempo_pagar >. 0.0), Cuerpo(=(
+    --- 'tienda, msg.sender), Cuerpo(=('cajas, '_cajas), Cuerpo(=('cajas_totales, '_cajas), Cuerpo(=('mensualidad, '_mensualidad),
+    --- Cuerpo(=('tiempo_disfrute, '_tiempo_disfrute), Cuerpo(=('tiempo_pagar, '_tiempo_pagar), =('fianza, '_fianza)))))))))))),
+    --- ListaF(Fun(headerDD(@payable, @external, 'alquilar, PaV), Cuerpo(Assert('cajas >. 0.0, "Suficientes cajas"), Cuerpo(Assert(
+    --- msg.value ==. 'fianza +. 'mensualidad, "Valor exacto"), Cuerpo(IfElse('indice <=. 'cajas_totales, Cuerpo(=St(->('clientes,
+    --- 'indice), 'Caja, LParam(P('propietario, msg.sender), LParam(P('tdisfrute, 'tiempo_disfrute +. block.timestamp), LParam(P(
+    --- 'ttope, 'tiempo_disfrute +. 'tiempo_pagar +. block.timestamp), LParam(P('pagada, True), LParam(P('llave, 1.0), LParam(P(
+    --- 'dejar, False), P('primera, True)))))))), Cuerpo(=(->('uso, 'indice), True), +=('indice, 1.0))), Cuerpo(Dv('index, uint256,
+    --- ->('cajaslibres, 'indice_libres -. 1.0)), Cuerpo(=St(->('clientes, 'index), 'Caja, LParam(P('propietario, msg.sender),
+    --- LParam(P('tdisfrute, 'tiempo_disfrute +. block.timestamp), LParam(P('ttope, 'tiempo_disfrute +. 'tiempo_pagar +.
+    --- block.timestamp), LParam(P('pagada, True), LParam(P('llave, 1.0), LParam(P('dejar, False), P('primera, True)))))))), Cuerpo(
+    --- =(->('uso, 'index), True), -=('indice_libres, 1.0))))), -=('cajas, 1.0))))), ListaF(Fun(headerD(@external, 'asignarllave,
+    --- LParam(P('clave, uint256), P('ncaja, uint256))), Cuerpo(Assert(->('uso, 'ncaja), "Caja asignada"), Cuerpo(Assert(
+    --- block.timestamp <=. .(->('clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"), Cuerpo(Assert(msg.sender ==. 'tienda,
+    --- "Tienda"), Cuerpo(Assert('clave >. 1.0, "Clave valida"), =(.(->('clientes, 'ncaja), 'llave), 'clave)))))), ListaF(Fun(
+    --- headerD(@internal, '_moroso, P('ncaja, uint256)), Cuerpo(=(->('uso, 'ncaja), False), Cuerpo(=(->('clientes, 'ncaja), CallP(
+    --- 'empty, 'Caja)), Cuerpo(+=('cajas, 1.0), Cuerpo(=(->('cajaslibres, 'indice_libres), 'ncaja), +=('indice_libres, 1.0)))))),
+    --- ListaF(Fun(headerDDR(@view, @internal, '_tqpagar, bool, P('ncaja, uint256)), Return(not. .(->('clientes, 'ncaja), 'pagada))),
+    --- ListaF(Fun(headerDDR(@view, @external, 'tqpagar, bool, P('ncaja, uint256)), Cuerpo(Assert(->('uso, 'ncaja), "Caja asignada"),
+    --- Cuerpo(Assert(PA msg.sender ==. 'tienda or. .(->('clientes, 'ncaja), 'propietario) ==. msg.sender PC,
+    --- "Propietario o tienda"), Return(CallP('_tqpagar, 'ncaja))))), ListaF(Fun(headerDDR(@view, @internal, '_tiempoqueda, uint256,
+    --- P('ncaja, uint256)), Return(.(->('clientes, 'ncaja), 'tdisfrute) -. block.timestamp)), ListaF(Fun(headerDDR(@view, @external,
+    --- 'tiempoqueda, uint256, P('ncaja, uint256)), Cuerpo(Assert(->('uso, 'ncaja), "Caja asignada"), Cuerpo(Assert(PA .(->(
+    --- 'clientes, 'ncaja), 'propietario) ==. msg.sender or. 'tienda ==. msg.sender PC, "Propietario o tienda"), Cuerpo(Assert(
+    --- block.timestamp <=. .(->('clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"), Return(CallP('_tiempoqueda, 'ncaja)))))),
+    --- ListaF(Fun(headerD(@external, 'cambio, P('ncaja, uint256)), Cuerpo(Assert(->('uso, 'ncaja), "Caja asignada"), Cuerpo(Assert(
+    --- PA .(->('clientes, 'ncaja), 'propietario) ==. msg.sender or. 'tienda ==. msg.sender PC, "Propietario o tienda"), Cuerpo(
+    --- Assert(PA PA .(->('clientes, 'ncaja), 'tdisfrute) <. block.timestamp PC or. PA .(->('clientes, 'ncaja), 'primera) PC or. PA
+    --- .(->('clientes, 'ncaja), 'dejar) PC PC, "Posibilidades de llamada"), IfElse(.(->('clientes, 'ncaja), 'ttope) <.
+    --- block.timestamp, IfElse(.(->('clientes, 'ncaja), 'pagada), CallP('send, ArgL(.(->('clientes, 'ncaja), 'propietario), 'fianza
+    --- +. 'mensualidad)), CallP('_moroso, 'ncaja)), IfElif(.(->('clientes, 'ncaja), 'dejar), Cuerpo(CallP('send, ArgL('tienda,
+    --- 'mensualidad)), Cuerpo(CallP('send, ArgL(.(->('clientes, 'ncaja), 'propietario), 'fianza)), Cuerpo(logE('Transaccion, ArgL(
+    --- 'tienda, .(->('clientes, 'ncaja), 'propietario), 'mensualidad)), Cuerpo(=(.(->('clientes, 'ncaja), 'pagada), False), CallP(
+    --- '_moroso, 'ncaja))))), Elif(.(->('clientes, 'ncaja), 'llave) ==. 0.0, Cuerpo(CallP('send, ArgL(.(->('clientes, 'ncaja),
+    --- 'propietario), 'fianza +. 'mensualidad)), Cuerpo(logE('Transaccion, ArgL('tienda, .(->('clientes, 'ncaja), 'propietario),
+    --- 'mensualidad)), Cuerpo(=(.(->('clientes, 'ncaja), 'pagada), False), Cuerpo(=(.(->('clientes, 'ncaja), 'dejar), True), CallP(
+    --- '_moroso, 'ncaja)))))), Cuerpo(=(.(->('clientes, 'ncaja), 'pagada), False), Cuerpo(CallP('send, ArgL('tienda, 'mensualidad)),
+    --- Cuerpo(logE('Transaccion, ArgL('tienda, .(->('clientes, 'ncaja), 'propietario), 'mensualidad)), Cuerpo(logE('Clave, ArgL(.(
+    --- ->('clientes, 'ncaja), 'propietario), 'tienda, .(->('clientes, 'ncaja), 'llave))), Cuerpo(=(.(->('clientes, 'ncaja), 'llave),
+    --- 0.0), IfElse(.(->('clientes, 'ncaja), 'primera), =(.(->('clientes, 'ncaja), 'primera), False), Cuerpo(+=(.(->('clientes,
+    --- 'ncaja), 'tdisfrute), 'tiempo_disfrute), =(.(->('clientes, 'ncaja), 'ttope), 'tiempo_pagar +. .(->('clientes, 'ncaja),
+    --- 'tdisfrute))))))))))))))), ListaF(Fun(headerDD(@payable, @external, 'pagar, P('ncaja, uint256)), Cuerpo(Assert(->('uso,
+    --- 'ncaja), "Caja asignada"), Cuerpo(Assert(.(->('clientes, 'ncaja), 'propietario) ==. msg.sender, "Propietario"), Cuerpo(
+    --- Assert(not. .(->('clientes, 'ncaja), 'pagada), "No pagada"), Cuerpo(Assert(msg.value ==. 'mensualidad, "Valor exacto"),
+    --- Cuerpo(Assert(block.timestamp <=. .(->('clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"), =(.(->('clientes, 'ncaja),
+    --- 'pagada), True))))))), Fun(headerD(@external, 'dejarcaja, P('ncaja, uint256)), Cuerpo(Assert(->('uso, 'ncaja),
+    --- "Caja asignada"), Cuerpo(Assert(msg.sender ==. .(->('clientes, 'ncaja), 'propietario), "Propietario"), Cuerpo(Assert(
+    --- block.timestamp <=. .(->('clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"), =(.(->('clientes, 'ncaja), 'dejar),
+    --- True))))))))))))))))) .
+---CONTRATO10
+			--- 	rew initMemory(Contrato(ListaD(De('Transaccion, ListaD(Di('receptor, address, "indexed"), ListaD(Di('emisor,
+			--- address, "indexed"), D('valor, uint256)))), ListaD(De('Clave, ListaD(Di('receptor, address, "indexed"),
+			--- ListaD(Di('emisor, address, "indexed"), D('clave_, uint256)))), ListaD(Ds('Caja, ListaD(D('propietario,
+			--- address), ListaD(D('tdisfrute, uint256), ListaD(D('ttope, uint256), ListaD(D('pagada, bool), ListaD(D('llave,
+			--- uint256), ListaD(D('dejar, bool), D('primera, bool)))))))), ListaD(Dp('tienda, address, "public"), ListaD(Dp(
+			--- 'cajas, uint256, "public"), ListaD(Dp('mensualidad, uint256, "public"), ListaD(Dp('tiempo_disfrute, uint256,
+			--- "public"), ListaD(DhmP('clientes, uint256, 'Caja, "public"), ListaD(D('indice, uint256), ListaD(Dp('fianza,
+			--- uint256, "public"), ListaD(Dp('tiempo_pagar, uint256, "public"), ListaD(D('cajas_totales, uint256), ListaD(D(
+			--- 'indice_libres, uint256), ListaD(Dhm('cajaslibres, uint256, uint256), DhmP('uso, uint256, bool,
+			--- "public"))))))))))))))), ListaF(Fun(init(@external, LParam(P('_cajas, uint256), LParam(P('_mensualidad,
+			--- uint256), LParam(P('_tiempo_disfrute, uint256), LParam(P('_tiempo_pagar, uint256), P('_fianza, uint256)))))),
+			--- Cuerpo(Assert('_cajas >. 0.0), Cuerpo(Assert('_mensualidad >. 0.0), Cuerpo(Assert('_tiempo_disfrute >. 0.0),
+			--- Cuerpo(Assert('_tiempo_pagar >. 0.0), Cuerpo(=('tienda, msg.sender), Cuerpo(=('cajas, '_cajas), Cuerpo(=(
+			--- 'cajas_totales, '_cajas), Cuerpo(=('mensualidad, '_mensualidad), Cuerpo(=('tiempo_disfrute,
+			--- '_tiempo_disfrute), Cuerpo(=('tiempo_pagar, '_tiempo_pagar), =('fianza, '_fianza)))))))))))), ListaF(Fun(
+			--- headerDD(@payable, @external, 'alquilar, PaV), Cuerpo(Assert('cajas >. 0.0, "Suficientes cajas"), Cuerpo(
+			--- Assert(msg.value ==. 'fianza +. 'mensualidad, "Valor exacto"), Cuerpo(IfElse('indice <=. 'cajas_totales,
+			--- Cuerpo(=St(->('clientes, 'indice), 'Caja, LParam(P('propietario, msg.sender), LParam(P('tdisfrute,
+			--- 'tiempo_disfrute +. block.timestamp), LParam(P('ttope, 'tiempo_disfrute +. 'tiempo_pagar +. block.timestamp),
+			--- LParam(P('pagada, True), LParam(P('llave, 1.0), LParam(P('dejar, False), P('primera, True)))))))), Cuerpo(=(
+			--- ->('uso, 'indice), True), +=('indice, 1.0))), Cuerpo(Dv('index, uint256, ->('cajaslibres, 'indice_libres -.
+			--- 1.0)), Cuerpo(=St(->('clientes, 'index), 'Caja, LParam(P('propietario, msg.sender), LParam(P('tdisfrute,
+			--- 'tiempo_disfrute +. block.timestamp), LParam(P('ttope, 'tiempo_disfrute +. 'tiempo_pagar +. block.timestamp),
+			--- LParam(P('pagada, True), LParam(P('llave, 1.0), LParam(P('dejar, False), P('primera, True)))))))), Cuerpo(=(
+			--- ->('uso, 'index), True), -=('indice_libres, 1.0))))), -=('cajas, 1.0))))), ListaF(Fun(headerD(@external,
+			--- 'asignarllave, LParam(P('clave, uint256), P('ncaja, uint256))), Cuerpo(Assert(->('uso, 'ncaja),
+			--- "Caja asignada"), Cuerpo(Assert(block.timestamp <=. .(->('clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"),
+			--- Cuerpo(Assert(msg.sender ==. 'tienda, "Tienda"), Cuerpo(Assert('clave >. 1.0, "Clave valida"), =(.(->(
+			--- 'clientes, 'ncaja), 'llave), 'clave)))))), ListaF(Fun(headerD(@internal, '_moroso, P('ncaja, uint256)),
+			--- Cuerpo(=(->('uso, 'ncaja), False), Cuerpo(=(->('clientes, 'ncaja), CallP('empty, 'Caja)), Cuerpo(+=('cajas,
+			--- 1.0), Cuerpo(=(->('cajaslibres, 'indice_libres), 'ncaja), +=('indice_libres, 1.0)))))), ListaF(Fun(headerDDR(
+			--- @view, @internal, '_tqpagar, bool, P('ncaja, uint256)), Return(not. .(->('clientes, 'ncaja), 'pagada))),
+			--- ListaF(Fun(headerDDR(@view, @external, 'tqpagar, bool, P('ncaja, uint256)), Cuerpo(Assert(->('uso, 'ncaja),
+			--- "Caja asignada"), Cuerpo(Assert(PA msg.sender ==. 'tienda or. .(->('clientes, 'ncaja), 'propietario) ==.
+			--- msg.sender PC, "Propietario o tienda"), Return(CallP('_tqpagar, 'ncaja))))), ListaF(Fun(headerDDR(@view,
+			--- @internal, '_tiempoqueda, uint256, P('ncaja, uint256)), Return(.(->('clientes, 'ncaja), 'tdisfrute) -.
+			--- block.timestamp)), ListaF(Fun(headerDDR(@view, @external, 'tiempoqueda, uint256, P('ncaja, uint256)), Cuerpo(
+			--- Assert(->('uso, 'ncaja), "Caja asignada"), Cuerpo(Assert(PA .(->('clientes, 'ncaja), 'propietario) ==.
+			--- msg.sender or. 'tienda ==. msg.sender PC, "Propietario o tienda"), Cuerpo(Assert(block.timestamp <=. .(->(
+			--- 'clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"), Return(CallP('_tiempoqueda, 'ncaja)))))), ListaF(Fun(
+			--- headerD(@external, 'cambio, P('ncaja, uint256)), Cuerpo(Assert(->('uso, 'ncaja), "Caja asignada"), Cuerpo(
+			--- Assert(PA .(->('clientes, 'ncaja), 'propietario) ==. msg.sender or. 'tienda ==. msg.sender PC,
+			--- "Propietario o tienda"), Cuerpo(Assert(PA PA .(->('clientes, 'ncaja), 'tdisfrute) <. block.timestamp PC or. PA
+			--- .(->('clientes, 'ncaja), 'primera) PC or. PA .(->('clientes, 'ncaja), 'dejar) PC PC,
+			--- "Posibilidades de llamada"), IfElse(.(->('clientes, 'ncaja), 'ttope) <. block.timestamp, IfElse(.(->(
+			--- 'clientes, 'ncaja), 'pagada), CallP('send, ArgL(.(->('clientes, 'ncaja), 'propietario), 'fianza +.
+			--- 'mensualidad)), CallP('_moroso, 'ncaja)), IfElif(.(->('clientes, 'ncaja), 'dejar), Cuerpo(CallP('send, ArgL(
+			--- 'tienda, 'mensualidad)), Cuerpo(CallP('send, ArgL(.(->('clientes, 'ncaja), 'propietario), 'fianza)), Cuerpo(
+			--- logE('Transaccion, ArgL('tienda, .(->('clientes, 'ncaja), 'propietario), 'mensualidad)), Cuerpo(=(.(->(
+			--- 'clientes, 'ncaja), 'pagada), False), CallP('_moroso, 'ncaja))))), Elif(.(->('clientes, 'ncaja), 'llave) ==.
+			--- 0.0, Cuerpo(CallP('send, ArgL(.(->('clientes, 'ncaja), 'propietario), 'fianza +. 'mensualidad)), Cuerpo(logE(
+			--- 'Transaccion, ArgL('tienda, .(->('clientes, 'ncaja), 'propietario), 'mensualidad)), Cuerpo(=(.(->('clientes,
+			--- 'ncaja), 'pagada), False), Cuerpo(=(.(->('clientes, 'ncaja), 'dejar), True), CallP('_moroso, 'ncaja)))))),
+			--- Cuerpo(=(.(->('clientes, 'ncaja), 'pagada), False), Cuerpo(CallP('send, ArgL('tienda, 'mensualidad)), Cuerpo(
+			--- logE('Transaccion, ArgL('tienda, .(->('clientes, 'ncaja), 'propietario), 'mensualidad)), Cuerpo(logE('Clave,
+			--- ArgL(.(->('clientes, 'ncaja), 'propietario), 'tienda, .(->('clientes, 'ncaja), 'llave))), Cuerpo(=(.(->(
+			--- 'clientes, 'ncaja), 'llave), 0.0), IfElse(.(->('clientes, 'ncaja), 'primera), =(.(->('clientes, 'ncaja),
+			--- 'primera), False), Cuerpo(+=(.(->('clientes, 'ncaja), 'tdisfrute), 'tiempo_disfrute), =(.(->('clientes,
+			--- 'ncaja), 'ttope), 'tiempo_pagar +. .(->('clientes, 'ncaja), 'tdisfrute))))))))))))))), ListaF(Fun(headerDD(
+			--- @payable, @external, 'pagar, P('ncaja, uint256)), Cuerpo(Assert(->('uso, 'ncaja), "Caja asignada"), Cuerpo(
+			--- Assert(.(->('clientes, 'ncaja), 'propietario) ==. msg.sender, "Propietario"), Cuerpo(Assert(not. .(->(
+			--- 'clientes, 'ncaja), 'pagada), "No pagada"), Cuerpo(Assert(msg.value ==. 'mensualidad, "Valor exacto"), Cuerpo(
+			--- Assert(block.timestamp <=. .(->('clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"), =(.(->('clientes,
+			--- 'ncaja), 'pagada), True))))))), Fun(headerD(@external, 'dejarcaja, P('ncaja, uint256)), Cuerpo(Assert(->('uso,
+			--- 'ncaja), "Caja asignada"), Cuerpo(Assert(msg.sender ==. .(->('clientes, 'ncaja), 'propietario),
+			--- "Propietario"), Cuerpo(Assert(block.timestamp <=. .(->('clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"),
+			--- =(.(->('clientes, 'ncaja), 'dejar), True))))))))))))))))) .
+	--- no funciona por DhmP('clientes, uint256, 'Caja, "public") si lo quitas si
+		--- rew recorreDeclaraciones(ListaD(De('Transaccion, ListaD(Di('receptor, address, "indexed"), ListaD(Di('emisor,
+		--- 	address, "indexed"), D('valor, uint256)))), ListaD(De('Clave, ListaD(Di('receptor, address, "indexed"),
+		--- 	ListaD(Di('emisor, address, "indexed"), D('clave_, uint256)))), ListaD(Ds('Caja, ListaD(D('propietario,
+		--- 	address), ListaD(D('tdisfrute, uint256), ListaD(D('ttope, uint256), ListaD(D('pagada, bool), ListaD(D('llave,
+		--- 	uint256), ListaD(D('dejar, bool), D('primera, bool)))))))), ListaD(Dp('tienda, address, "public"), ListaD(Dp(
+		--- 	'cajas, uint256, "public"), ListaD(Dp('mensualidad, uint256, "public"), ListaD(Dp('tiempo_disfrute, uint256,
+		--- 	"public"), ListaD(DhmP('clientes, uint256, 'Caja, "public"), ListaD(D('indice, uint256), ListaD(Dp('fianza,
+		--- 	uint256, "public"), ListaD(Dp('tiempo_pagar, uint256, "public"), ListaD(D('cajas_totales, uint256), ListaD(D(
+		--- 	'indice_libres, uint256), ListaD(Dhm('cajaslibres, uint256, uint256), DhmP('uso, uint256, bool,
+		--- 	"public")))))))))))))))) .
+	--- rew newVariable(DhmP('clientes, uint256, 'Caja, "public")) .
+	--- ambigua por_tiempoqueda y por 'alquilar
+		--- rew getFunctions(ListaF(Fun(init(@external, LParam(P('_cajas, uint256), LParam(P('_mensualidad,
+		--- 	uint256), LParam(P('_tiempo_disfrute, uint256), LParam(P('_tiempo_pagar, uint256), P('_fianza, uint256)))))),
+		--- 	Cuerpo(Assert('_cajas >. 0.0), Cuerpo(Assert('_mensualidad >. 0.0), Cuerpo(Assert('_tiempo_disfrute >. 0.0),
+		--- 	Cuerpo(Assert('_tiempo_pagar >. 0.0), Cuerpo(=('tienda, msg.sender), Cuerpo(=('cajas, '_cajas), Cuerpo(=(
+		--- 	'cajas_totales, '_cajas), Cuerpo(=('mensualidad, '_mensualidad), Cuerpo(=('tiempo_disfrute,
+		--- 	'_tiempo_disfrute), Cuerpo(=('tiempo_pagar, '_tiempo_pagar), =('fianza, '_fianza)))))))))))), ListaF(Fun(
+		--- 	headerDD(@payable, @external, 'alquilar, PaV), Cuerpo(Assert('cajas >. 0.0, "Suficientes cajas"), Cuerpo(
+		--- 	Assert(msg.value ==. 'fianza +. 'mensualidad, "Valor exacto"), Cuerpo(IfElse('indice <=. 'cajas_totales,
+		--- 	Cuerpo(=St(->('clientes, 'indice), 'Caja, LParam(P('propietario, msg.sender), LParam(P('tdisfrute,
+		--- 	'tiempo_disfrute +. block.timestamp), LParam(P('ttope, 'tiempo_disfrute +. 'tiempo_pagar +. block.timestamp),
+		--- 	LParam(P('pagada, True), LParam(P('llave, 1.0), LParam(P('dejar, False), P('primera, True)))))))), Cuerpo(=(
+		--- 	->('uso, 'indice), True), +=('indice, 1.0))), Cuerpo(Dv('index, uint256, ->('cajaslibres, 'indice_libres -.
+		--- 	1.0)), Cuerpo(=St(->('clientes, 'index), 'Caja, LParam(P('propietario, msg.sender), LParam(P('tdisfrute,
+		--- 	'tiempo_disfrute +. block.timestamp), LParam(P('ttope, 'tiempo_disfrute +. 'tiempo_pagar +. block.timestamp),
+		--- 	LParam(P('pagada, True), LParam(P('llave, 1.0), LParam(P('dejar, False), P('primera, True)))))))), Cuerpo(=(
+		--- 	->('uso, 'index), True), -=('indice_libres, 1.0))))), -=('cajas, 1.0))))), ListaF(Fun(headerD(@external,
+		--- 	'asignarllave, LParam(P('clave, uint256), P('ncaja, uint256))), Cuerpo(Assert(->('uso, 'ncaja),
+		--- 	"Caja asignada"), Cuerpo(Assert(block.timestamp <=. .(->('clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"),
+		--- 	Cuerpo(Assert(msg.sender ==. 'tienda, "Tienda"), Cuerpo(Assert('clave >. 1.0, "Clave valida"), =(.(->(
+		--- 	'clientes, 'ncaja), 'llave), 'clave)))))), ListaF(Fun(headerD(@internal, '_moroso, P('ncaja, uint256)),
+		--- 	Cuerpo(=(->('uso, 'ncaja), False), Cuerpo(=(->('clientes, 'ncaja), CallP('empty, 'Caja)), Cuerpo(+=('cajas,
+		--- 	1.0), Cuerpo(=(->('cajaslibres, 'indice_libres), 'ncaja), +=('indice_libres, 1.0)))))), ListaF(Fun(headerDDR(
+		--- 	@view, @internal, '_tqpagar, bool, P('ncaja, uint256)), Return(not. .(->('clientes, 'ncaja), 'pagada))),
+		--- 	ListaF(Fun(headerDDR(@view, @external, 'tqpagar, bool, P('ncaja, uint256)), Cuerpo(Assert(->('uso, 'ncaja),
+		--- 	"Caja asignada"), Cuerpo(Assert(PA msg.sender ==. 'tienda or. .(->('clientes, 'ncaja), 'propietario) ==.
+		--- 	msg.sender PC, "Propietario o tienda"), Return(CallP('_tqpagar, 'ncaja))))), ListaF(Fun(headerDDR(@view,
+		--- 	@internal, '_tiempoqueda, uint256, P('ncaja, uint256)), Return(.(->('clientes, 'ncaja), 'tdisfrute) -.
+		--- 	block.timestamp)), ListaF(Fun(headerDDR(@view, @external, 'tiempoqueda, uint256, P('ncaja, uint256)), Cuerpo(
+		--- 	Assert(->('uso, 'ncaja), "Caja asignada"), Cuerpo(Assert(PA .(->('clientes, 'ncaja), 'propietario) ==.
+		--- 	msg.sender or. 'tienda ==. msg.sender PC, "Propietario o tienda"), Cuerpo(Assert(block.timestamp <=. .(->(
+		--- 	'clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"), Return(CallP('_tiempoqueda, 'ncaja)))))), ListaF(Fun(
+		--- 	headerD(@external, 'cambio, P('ncaja, uint256)), Cuerpo(Assert(->('uso, 'ncaja), "Caja asignada"), Cuerpo(
+		--- 	Assert(PA .(->('clientes, 'ncaja), 'propietario) ==. msg.sender or. 'tienda ==. msg.sender PC,
+		--- 	"Propietario o tienda"), Cuerpo(Assert(PA PA .(->('clientes, 'ncaja), 'tdisfrute) <. block.timestamp PC or. PA
+		--- 	.(->('clientes, 'ncaja), 'primera) PC or. PA .(->('clientes, 'ncaja), 'dejar) PC PC,
+		--- 	"Posibilidades de llamada"), IfElse(.(->('clientes, 'ncaja), 'ttope) <. block.timestamp, IfElse(.(->(
+		--- 	'clientes, 'ncaja), 'pagada), CallP('send, ArgL(.(->('clientes, 'ncaja), 'propietario), 'fianza +.
+		--- 	'mensualidad)), CallP('_moroso, 'ncaja)), IfElif(.(->('clientes, 'ncaja), 'dejar), Cuerpo(CallP('send, ArgL(
+		--- 	'tienda, 'mensualidad)), Cuerpo(CallP('send, ArgL(.(->('clientes, 'ncaja), 'propietario), 'fianza)), Cuerpo(
+		--- 	logE('Transaccion, ArgL('tienda, .(->('clientes, 'ncaja), 'propietario), 'mensualidad)), Cuerpo(=(.(->(
+		--- 	'clientes, 'ncaja), 'pagada), False), CallP('_moroso, 'ncaja))))), Elif(.(->('clientes, 'ncaja), 'llave) ==.
+		--- 	0.0, Cuerpo(CallP('send, ArgL(.(->('clientes, 'ncaja), 'propietario), 'fianza +. 'mensualidad)), Cuerpo(logE(
+		--- 	'Transaccion, ArgL('tienda, .(->('clientes, 'ncaja), 'propietario), 'mensualidad)), Cuerpo(=(.(->('clientes,
+		--- 	'ncaja), 'pagada), False), Cuerpo(=(.(->('clientes, 'ncaja), 'dejar), True), CallP('_moroso, 'ncaja)))))),
+		--- 	Cuerpo(=(.(->('clientes, 'ncaja), 'pagada), False), Cuerpo(CallP('send, ArgL('tienda, 'mensualidad)), Cuerpo(
+		--- 	logE('Transaccion, ArgL('tienda, .(->('clientes, 'ncaja), 'propietario), 'mensualidad)), Cuerpo(logE('Clave,
+		--- 	ArgL(.(->('clientes, 'ncaja), 'propietario), 'tienda, .(->('clientes, 'ncaja), 'llave))), Cuerpo(=(.(->(
+		--- 	'clientes, 'ncaja), 'llave), 0.0), IfElse(.(->('clientes, 'ncaja), 'primera), =(.(->('clientes, 'ncaja),
+		--- 	'primera), False), Cuerpo(+=(.(->('clientes, 'ncaja), 'tdisfrute), 'tiempo_disfrute), =(.(->('clientes,
+		--- 	'ncaja), 'ttope), 'tiempo_pagar +. .(->('clientes, 'ncaja), 'tdisfrute))))))))))))))), ListaF(Fun(headerDD(
+		--- 	@payable, @external, 'pagar, P('ncaja, uint256)), Cuerpo(Assert(->('uso, 'ncaja), "Caja asignada"), Cuerpo(
+		--- 	Assert(.(->('clientes, 'ncaja), 'propietario) ==. msg.sender, "Propietario"), Cuerpo(Assert(not. .(->(
+		--- 	'clientes, 'ncaja), 'pagada), "No pagada"), Cuerpo(Assert(msg.value ==. 'mensualidad, "Valor exacto"), Cuerpo(
+		--- 	Assert(block.timestamp <=. .(->('clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"), =(.(->('clientes,
+		--- 	'ncaja), 'pagada), True))))))), Fun(headerD(@external, 'dejarcaja, P('ncaja, uint256)), Cuerpo(Assert(->('uso,
+		--- 	'ncaja), "Caja asignada"), Cuerpo(Assert(msg.sender ==. .(->('clientes, 'ncaja), 'propietario),
+		--- 	"Propietario"), Cuerpo(Assert(block.timestamp <=. .(->('clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"),
+		--- 	=(.(->('clientes, 'ncaja), 'dejar), True)))))))))))))))) .
+		--- el menos hace que sea ambigua 
+				--- rew newFunctionVariable(Fun(headerDDR(@view,
+				--- @internal, '_tiempoqueda, uint256, P('ncaja, uint256)), Return(.(->('clientes, 'ncaja), 'tdisfrute) -.
+				--- block.timestamp)))
+		---ambigua por los st y por Cuerpo(Dv('index, uint256, ->('cajaslibres, 'indice_libres -.1.0)),
+				--- rew newFunctionVariable(Fun(
+				--- headerDD(@payable, @external, 'alquilar, PaV), Cuerpo(Assert('cajas >. 0.0, "Suficientes cajas"), Cuerpo(
+				--- Assert(msg.value ==. 'fianza +. 'mensualidad, "Valor exacto"), Cuerpo(IfElse('indice <=. 'cajas_totales,
+				--- Cuerpo(=St(->('clientes, 'indice), 'Caja, LParam(P('propietario, msg.sender), LParam(P('tdisfrute,
+				--- 'tiempo_disfrute +. block.timestamp), LParam(P('ttope, 'tiempo_disfrute +. 'tiempo_pagar +. block.timestamp),
+				--- LParam(P('pagada, True), LParam(P('llave, 1.0), LParam(P('dejar, False), P('primera, True)))))))), Cuerpo(=(
+				--- ->('uso, 'indice), True), +=('indice, 1.0))), Cuerpo(Dv('index, uint256, ->('cajaslibres, 'indice_libres -.
+				--- 1.0)), Cuerpo(=St(->('clientes, 'index), 'Caja, LParam(P('propietario, msg.sender), LParam(P('tdisfrute,
+				--- 'tiempo_disfrute +. block.timestamp), LParam(P('ttope, 'tiempo_disfrute +. 'tiempo_pagar +. block.timestamp),
+				--- LParam(P('pagada, True), LParam(P('llave, 1.0), LParam(P('dejar, False), P('primera, True)))))))), Cuerpo(=(
+				--- ->('uso, 'index), True), -=('indice_libres, 1.0))))), -=('cajas, 1.0)))))) .
