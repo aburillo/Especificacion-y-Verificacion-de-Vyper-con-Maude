@@ -63,7 +63,10 @@ def reveal(_numBids: int128, _values: uint256[2], _fakes: bool[2], _secrets: byt
         value: uint256 = _values[i]
         fake: bool = _fakes[i]
         secret: bytes32 = _secrets[i]
-        blindedBid: bytes32 = keccak256(concat(convert(value, bytes32), convert(fake, bytes32), secret))
+        conver1: bytes32 = convert(value, bytes32)
+        conver2: bytes32 = convert(fake, bytes32)
+        concat1: int128 = concat(conver1, conver2, secret)
+        blindedBid: bytes32 = keccak256(concat1)
         if (blindedBid != bidToCheck.blindedBid):
             assert 1 == 0
             continue

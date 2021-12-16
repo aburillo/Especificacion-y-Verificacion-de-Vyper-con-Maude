@@ -60,7 +60,7 @@ def retirar_del_mercado(descripcion:String[150]):
             send(self.registro[i].cliente,self.registro[i].cantidad * self.precio)
         end ;
     end ;
-    self.sigindice = nive +20
+    self.sigindice = nive + 20
 end 
 @external
 def aviso_a_clientes(descripcion:String[150]):
