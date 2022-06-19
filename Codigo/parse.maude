@@ -1,321 +1,311 @@
 load preparse.maude
 load file.maude
-load TFM.maude
+load vyper.maude
 fmod PARSING is
  pr META-LEVEL .
  pr CONVERSION .
  pr META-SIGN .
  pr PREPARSE .
- ***pr MY-PROG .
  sort ParsingRes .
 
 subsort Term < ParsingRes  .
 
 vars T T1 T1' T2 T2' T3 T3' T4 T4' T5 T5' T6 T6' : Term .
-var TL TL' TL2 TL2' TL3 TL3' : TermList .
- vars M M1 M2 M3 : Module .
-var  Ct : Constant .
- var  S S1 S2 S4 S3 : String .
- var  F : Float .
- var  Q Q1 : Qid .
- var B B1 : Bool .
- var N : Nat .
+vars TL TL' TL2 TL2' TL3 TL3' : TermList .
+vars M M1 M2 M3 : Module .
+vars  Ct : Constant .
+vars  S S1 S2 S4 S3 : String .
+vars  F : Float .
+vars  Q Q1 : Qid .
+vars B B1 : Bool .
+vars N : Nat .
 
- op parse : Term -> ParsingRes .
-*** PARSEA COMAS DE LOS BUBBLE
- ceq parse('token[T]) = Q1 
-  if Q := downQid(T) /\
-     S := string(Q) /\
-     S == "`," /\
-     S1 := "," + ".eliminar" /\
-     Q1 := qid(S1) [print "ecuacionComa" Q1 ] .
+op parse : Term -> ParsingRes .
+
+*** parse the comma of the bubbles
+ceq parse('token[T]) = Q1 
+if Q := downQid(T) /\
+   S := string(Q) /\
+   S == "`," /\
+   S1 := "," + ".eliminar" /\
+   Q1 := qid(S1) [print "eq comma: " Q1 ] .
  
- *** PARSEA BOOLEANOS
- ceq parse('token[T]) =  Q1
-  if Q := downQid(T) /\
-     S := string(Q) /\
-     isBool(S) /\
-     S1 := S + ".bool" /\
-     Q1 := qid(S1) [print "ecuacionBool" S ] .
- *** parsea control flow
-  ceq parse(T) =  Q1
-  if S := string(T) /\
-     isControlFlow(S) /\
+*** parse boolean
+ceq parse('token[T]) =  Q1
+if Q := downQid(T) /\
+   S := string(Q) /\
+   isBool(S) /\
+   S1 := S + ".bool" /\
+   Q1 := qid(S1) [print "eq bool: " S ] .
+
+*** parse control flow
+ceq parse(T) =  Q1
+if S := string(T) /\
+   isControlFlow(S) /\
+   N := find(S, ".", 0) /\ 
+   S1 := substr(S, 0, N) /\
+   S2 := S1 + ".controlFlow" /\
+   Q1 := qid(S2) [print "eq control flow: " S ] .
+
+***parse internal external decorator
+ceq parse(T) =  Q
+if  S := string(T) /\ 
+      isDecorador(S) /\ 
       N := find(S, ".", 0) /\ 
       S1 := substr(S, 0, N) /\
-      S2 := S1 + ".controlFlow" /\
-      Q1 := qid(S2) [print "ecuacion declaracion control" S ] .
- *** estas dos no funcionan
- ***PARSEA DECORADOR EXTERNO INTERNO
- ceq parse(T) =  Q
-   if  S := string(T) /\ 
-       isDecorador(S) /\ 
-       N := find(S, ".", 0) /\ 
-       S1 := substr(S, 0, N) /\
-       S2 := S1 + ".Decorator" /\
-       Q := qid(S2) [print "ecuacionDecoradorEI" Q ] .
+      S2 := S1 + ".Decorator" /\
+      Q := qid(S2) [print "eq IE decorator: " Q ] .
 
----  ***PARSEA DECORADOR DE MUTABILIDAD
----  ceq parse('token[T]) =  Q1
----   if Q := downQid(T) /\
----      S := string(Q) /\
----      isDecoradorMUT(S) /\
----      S1 := S + ".decoradorMUT" /\
----      Q1 := qid(S1) [print "ecuacionDecoradorMUT" Q1 ] .
+*** parse type
+ceq parse('token[T]) =  Q1
+if Q := downQid(T) /\
+   S := string(Q) /\
+   isType(S) /\
+   S1 := S + ".type" /\
+   Q1 := qid(S1) [print "eq type: " Q1 ] .
 
-*** PARSEA TIPOS DE DATOS
-  ceq parse('token[T]) =  Q1
-  if Q := downQid(T) /\
-     S := string(Q) /\
-     isTipo(S) /\
-     S1 := S + ".tipo" /\
-     Q1 := qid(S1) [print "ecuacionTipos" Q1 ] .
+*** parse environment variable
+ceq parse('token[T]) =  Q1
+if Q := downQid(T) /\
+   S := string(Q) /\
+   isEnVar(S) /\
+   S1 := S + ".VarEnt" /\
+   Q1 := qid(S1) [print "eq environment variable: " Q1 ] .
 
-*** PARSEA VARIABLES DE ENTORNO
-  ceq parse('token[T]) =  Q1
-  if Q := downQid(T) /\
-     S := string(Q) /\
-     isVariableEntorno(S) /\
-     S1 := S + ".VarEnt" /\
-     Q1 := qid(S1) [print "ecuacionVaraibleEntorno" Q1 ] .
+*** parse constant
+ceq parse('token[T]) =  Q1
+if Q := downQid(T) /\
+   S := string(Q) /\
+   isConstant(S) /\
+   S1 := S + ".constant" /\
+   Q1 := qid(S1) [print "eq constant: " Q1 ] .
 
-*** PARSEA CONSTANTES
-  ceq parse('token[T]) =  Q1
-  if Q := downQid(T) /\
-     S := string(Q) /\
-     isConstante(S) /\
-     S1 := S + ".constant" /\
-     Q1 := qid(S1) [print "ecuacionconstante" Q1 ] .
-
-*** PARSEA PARAMETRO
- ceq parse(T) =  Q
-  if   S := string (T) /\
-       S == "PaV.@Parametros@" /\
-       S1 := substr(S, 0, 4) /\
-       S2 := S1 + "Parametros" /\
-       Q := qid(S2) [print "PAV" Q].
+*** parse empty parameters
+ceq parse(T) = Q
+if   S := string (T) /\
+      S == "PaV.@Parameters@" /\
+      S1 := substr(S, 0, 4) /\
+      S2 := S1 + "Parameters" /\
+      Q := qid(S2) [print "eq empty parameters(PAV): " Q] .
      
-*** PARSEA CONSTANTES
- ceq parse('token[T]) =  upTerm(F)
-  if Q := downQid(T) /\
-     S := string(Q) /\
-     F := float(S) .
+*** parse float
+ceq parse('token[T]) =  upTerm(F)
+if Q := downQid(T) /\
+   S := string(Q) /\
+   F := float(S) .
 
-*** PARSEA INT
- ceq parse('token[T]) =  upTerm(F)
-  if Q := downQid(T) /\
-     S := string(Q) /\
-     rat(S, 10) :: Nat /\
-     F := float(S + ".0") .
+*** parse int to float
+ceq parse('token[T]) =  upTerm(F)
+if Q := downQid(T) /\
+   S := string(Q) /\
+   rat(S, 10) :: Nat /\
+   F := float(S + ".0") .
 
-*** PARSEA QID
- ceq parse('token[T]) =  T
-  if Q := downQid(T) /\
-     S := string(Q) /\
-     not (float(S) :: Float) /\
-     not (rat(S, 10) :: Nat) /\
-     not isBool(S) /\
-     not isTipo(S)  /\
-     not isVariableEntorno(S) [print "ecuacionQid" S ] .
+*** parse qid
+ceq parse('token[T]) =  T
+if Q := downQid(T) /\
+   S := string(Q) /\
+   not (float(S) :: Float) /\
+   not (rat(S, 10) :: Nat) /\
+   not isBool(S) /\
+   not isType(S)  /\
+   not isEnVar(S) [print "eq qid: " S ] .
 
-*** PARSEA LOGNAME
- ceq parse('logName[T]) =  T1
-  if T1 := parse('token[T])  [print "ECUACION LOGNAME" T].
+*** parse logname
+ceq parse('logName[T]) =  T1
+if T1 := parse('token[T])  [print "eq logname: " T].
 
-*** PARSEA BUBBLE!
-***['__[''2.Qid,''`,.Qid,''x.Qid]]
-*** parsea lista de bubble
- ceq parse('bubble['__[TL]]) =  TL'
-  if TL' := parseB(TL) [print "ecuacionBubble" TL ] .
- *** parsea bubble individual
- ceq parse('bubble[TL]) =  TL'
-  if TL' := parseB(TL) [print "ecuacionBubbleiNDIVIDUAL" TL ] .
+*** parsea bubble
+ceq parse('bubble['__[TL]]) =  TL'
+if TL' := parseB(TL) [print "eq bubble" TL ] .
 
- *** PARSEA DECLARACIONES
----   ceq parse('_::_[T1,T2]) =  '_::_[T1', T2']
----     if  T1'  := parse (T1) /\
----         not isNum(T1') /\
----         T2'  := parse (T2) /\ 
----         not isNum(T2') [print "ecuacion:" T1' ] .
- ***Declaracion variable y array
- ceq parse('_::_[T1,T2]) =  'D[T1', T2']
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) [print "ecuacion:" T1' ] .
-*** Declaracion varibale y array publico
- ceq parse('_::`public`(_`)[T1,T2]) =  'Dp[T1', T2', upTerm("public") ]
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) [print "ecuacion:" T1' ] .
-***Declaracion dando un valor inicial, dentro de funciones
- ceq parse('_:_=_[T1,T2,T3]) =  'Dv[T1', T2', T3']
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) /\
-        T3'  := parse (T3) [print "ecuacion valor inicial:" T1 ] .
-*** Declaracion costante sin listas
- ceq parse('_::`constant`(_`)=_[T1,T2,T3]) =  'Dc[T1', T2', T3' , upTerm("constant") ]
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) /\
-        T3'  := parse (T3) [print "ecuacion:" T1 ] .
-***Declaracion hashmap 
- ceq parse('_::`HashMap`[_`,_`] [T1,T2,T3]) =  'Dhm[T1', T2', T3']
-    if  T1' := parse (T1) /\
-        T2' := parse (T2) /\
-        T3' := parse (T3) [print "ecuacion:" T1 ] .
-***Declaracion nhashmap publico
-  ceq parse('_::`public`(HashMap`[_`,_`]`)[T1,T2,T3]) =  'DhmP[T1', T2', T3', upTerm("public")]
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) /\
-        T3'  := parse (T3)  [print "ecuacion:" T1 ] .
- *** Declaracion de struct
-   ceq parse('struct_::_end[T1,TL]) =  'Ds[T1', TL']
-    if  T1'  := parse (T1) /\
-        TL'  := parse (TL) [print "ecuacionStruct:" T1 ] .
-***Parte de eventos
-*** Parsea declaracion indexada
-  ceq parse('_::`indexed`(_`)[T1,T2]) =  'Di[T1', T2', upTerm("indexed")]
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) [print "ecuacioniNDEXADA:" T1 ] .
-***Parsea evento
-  ceq parse('event_::_end[T1,TL]) =  'De[T1', TL']
-    if  T1'  := parse (T1) /\
-        TL'  := parse (TL) [print "ecuacionEvent:" T1 ] .    
-*** parsea contrato
-   --- ceq parse('__[TL,TL1]) =  'Contrato[TL',TL1']
-   --- if  TL'  := parseL (TL) /\
-   ---    TL2'  := parseL (TL2) [print "listadddddddddddddddddddddddddddddddddddddddddd:" ] .
-   ceq parse('__[TL]) =  'Contrato[TL']
-    if  isContract(TL) /\
-    TL'  := parseL (TL) [print "Contratooooo" TL ] .
-***Parsea lista de  declaraciones
-   ceq parse('__[TL]) =  'ListaF[TL']
-    if  isFun(TL) /\
-    TL' := parseL (TL) [print "ecuacionFuncionesssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss:" TL ] .
-***Parsea lista de  elif
-   ceq parse('__[TL]) =  'ListaEIF[TL']
-       if  isElif(TL) /\
-       TL' := parseL (TL) [print "ecuacionELIF :"  ] .
-   --- ceq parse('__[TL]) =  'Contrato[TL']
-   ---  if  TL'  := parseL (TL) /\ 
-   ---  hayDecl(TL) /\
-   ---  hayFun(TL) [print "Contratooooo" TL ] .
-***Parsea lista de  declaraciones
-   ceq parse('__[TL]) =  'ListaD[TL']
-    if  
-   ---  not isFun(TL) /\
-   ---  not isElif(TL) /\ 
-    TL'  := parseL (TL) [print "listadddddddddddddddddddddddddddddddddddddddddd:" TL ] .
+*** parse individual bubble
+ceq parse('bubble[TL]) =  TL'
+if TL' := parseB(TL) [print "eq individual bubble: " TL ] .
 
-***PARSEA ACCESOS A MEMORIA
-***Acceso a posición de array
- ceq parse('_`[_`][T1,T2]) = '->[T1' , T2']
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) [print "Acceso:" T1' ] .
-***Acceso a struct
- ceq parse('_._[T1,T2]) = '.[T1' , T2']
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) [print "Acceso:" T1' ] .
+***parse statement
+ceq parse('_::_[T1,T2]) =  'D[T1', T2']
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) [print "eq statement: " T1' ] .
 
+*** parse public statement
+ceq parse('_::`public`(_`)[T1,T2]) =  'Dp[T1', T2', upTerm("public") ]
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) [print "eq public statement:" T1' ] .
 
-*** PARSEA ASIGNACIONES
-*** =
-   ceq parse('_=_[T1,T2]) = '=[T1', T2']
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) [print "asignacion=:" T1' ] .
-*** parsea +=
-   ceq parse('_+=_[T1,T2]) = '+=[T1', T2']
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) [print "asignacion+=:" T1' ] .
-*** parsea -=
-   ceq parse('_-=_[T1,T2]) = '-=[T1', T2']
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) [print "asignacion-=:" T1' ] .
-
-   ceq parse('_=_`(`{_`}`)[T1,T2,TL]) = '=St[T1', T2', TL']
-    if  T1'  := parse (T1) /\
+***parse statement initial value
+ceq parse('_:_=_[T1,T2,T3]) =  'Dv[T1', T2', T3']
+   if  T1'  := parse (T1) /\
       T2'  := parse (T2) /\
-      TL'  := parse (TL) [print "asignacion{}:" TL' ] .
+      T3'  := parse (T3) [print "eq initial value:" T1 ] .
 
-*** PARSEA FOR
-*** Parseando un for_in_
-   ceq parse('for_in_:_end[T1,T2,TL]) =  'ForVar[T1', T2', TL']
+*** parse constant statement
+ceq parse('_::`constant`(_`)=_[T1,T2,T3]) =  'Dc[T1', T2', T3' , upTerm("constant") ]
    if  T1'  := parse (T1) /\
-       T2'  := parse (T2) /\
-       TL'  := parse (TL) .
-***Parseando range
-   ceq parse('for_in`range`(_`):_end[T1,T2,TL]) =  'ForR[T1', TL2', TL']
-   if  T1'  := parse (T1) /\
-       TL2'  := parse (T2) /\
-       TL'  := parse(TL) .
-***Parseando un for_in range(_,_) creo que no hace falta
-   --- ceq parse('for_in`range`(_`,_`);_end[T1,T2,T3,TL]) =  'forR2[T1', T2', T3, TL']
-   --- if  T1'  := parse (T1) /\
-   ---     T2'  := parse (T2) /\
-   ---     T3'  := parse (T3) /\
-   ---     TL'  := parseL (TL) .
-***Parseando un for_in list(_,_) quizas esta es igual que la primera de for
-   ceq parse('for_in`[_`];_end[T1,T2,TL]) =  'ForList[T1', TL2', TL']
-  if  T1'  := parse (T1) /\
-       TL2'  := parse (T2) /\
-       TL'  := parseL (TL) [print "ecuacionForListas:" TL ] .
+      T2'  := parse (T2) /\
+      T3'  := parse (T3) [print "eq constant statement: " T1 ] .
 
-
-***PARSEA IF-ELSE
-*** if sencillo
-   ceq parse('if_:_end[T1,TL]) =  'If[T1', TL']
-   if  T1'  := parse (T1) /\
-       TL'  := parseL (TL)  [print "ecuacionIFELSE sin else:" TL  ] .
-*** if sencillo parentesis
-   --- ceq parse('if`(_`):_end[T1,TL]) =  'If_Else[T1', TL']
-   --- if  T1'  := parse (T1) /\
-   ---     TL'  := parseL (TL)  [print "ecuacionIFELSE sin else:" TL ] .
-*** if else sin elseif
-   ceq parse('if_:_else:_end[T1,TL,TL2]) =  'IfElse[T1', TL', TL2']
-   if  T1'  := parse (T1) /\
-       TL'  := parseL (TL) /\
-       TL2'  := parseL (TL2) [print "ecuacionIFELSE sin elseif:" TL ].
-***elseif
-   ceq parse('elif_:_end[T1,TL]) =  'Elif[T1', TL']
-   if  T1'  := parse (T1) /\
-       TL'  := parseL (TL) [print "ecuacionElseif" TL ].
-*** if else con else if
-   ceq parse('if_:_end_else:_end[T1,TL,TL2,TL3]) =  'IfElif[T1', TL', TL2' , TL3' ]
-   if  T1'  := parse (T1) /\
-       TL'  := parseL (TL) /\
-       TL2'  := parseL (TL2) /\
-       TL3'  := parseL (TL3) [print "ecuacionIFELSE Ccon elseif:" TL ].
-
-***FUNCIONES!
-***Parsea parametro simples y arrays
- ceq parse('_:_[T1,T2]) =  'P[T1', T2']
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) [print "ecuacion:" T1' ] .
-
-***Parsea lista de parametrod
-   --- ceq parse('_`,_[TL]) =  'LParam[TL']
-   ---  if  TL' := parseL (TL) [print "ecuacionParametros" TL ] .
-***Parsea lista de parametrod
-   ceq parse('_`,_[TL,TL2]) = 'LParam[TL',TL2']
-    if isParam(TL) /\ 
-      TL' := parse (TL) /\ 
-      TL2' := parse (TL2) [print "ecuacionParametros" TL] .
-
-   ***Parsea lista de parametrod
-   ceq parse('_`,_[TL,TL2]) = 'ArgL[TL',TL2']
-    if  TL' := parse (TL) /\ 
-      TL2' := parse (TL2) [print "ecuacionArglist" TL TL2 ] .
-
-***PARSEA CABECERASAS DE FUNCIONES
-*** Cabecera init
-   ceq parse('_def_`(_`)[T1,T2,TL]) = 'init[ T1' , TL']
-   if T1' := parse (T1) /\
-      S1 := string(T1') /\
-      S1 == "@external.Decorator" /\ 
+***parse hashmap statement
+ceq parse('_::`HashMap`[_`,_`] [T1,T2,T3]) =  'Dhm[T1', T2', T3']
+   if  T1' := parse (T1) /\
       T2' := parse (T2) /\
-      S := string(T2') /\
-      S2 := substr(S,0,9) /\
-      S2 == "'__init__" /\
-      TL' := parse(TL) [print "ecuacionFuncionesInit:" S ] .
-   *** Cabecera init
-   ceq parse('__def_`(_`)[T1,T2,T3,TL]) = 'init[T1' , T2' , TL']
+      T3' := parse (T3) [print "eq hashmap statement:" T1 ] .
+
+***parse public hashmap statement
+ceq parse('_::`public`(HashMap`[_`,_`]`)[T1,T2,T3]) =  'DhmP[T1', T2', T3', upTerm("public")]
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) /\
+      T3'  := parse (T3)  [print "eq public hashmap statement: " T1 ] .
+      
+*** parse struct statement
+ceq parse('struct_::_end[T1,TL]) =  'Ds[T1', TL']
+   if  T1'  := parse (T1) /\
+      TL'  := parse (TL) [print "eq struct statement :" T1 ] .
+
+***Events
+*** parse indexed statement
+ceq parse('_::`indexed`(_`)[T1,T2]) =  'Di[T1', T2', upTerm("indexed")]
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) [print "eq indexed statement:" T1 ] .
+
+***parse event
+ceq parse('event_::_end[T1,TL]) =  'De[T1', TL']
+   if  T1'  := parse (T1) /\
+      TL'  := parse (TL) [print "eq event:" T1 ] .    
+
+*** parse contract
+ceq parse('__[TL]) =  'Contract[TL']
+   if  isContract(TL) /\
+   TL'  := parseL (TL) [print "eq Contract" TL ] .
+
+*** parse functions list
+ceq parse('__[TL]) =  'ListF[TL']
+   if  isFun(TL) /\
+   TL' := parseL (TL) [print "eq functions:" TL ] .
+
+*** parse elif list
+ceq parse('__[TL]) =  'ListaEIF[TL']
+      if  isElif(TL) /\
+      TL' := parseL (TL) [print "eq elif list:"  ] .
+
+***parse statements list
+ceq parse('__[TL]) =  'ListS[TL']
+   if  TL'  := parseL (TL) [print "eq list statements:" TL ] .
+
+***Memory access
+
+***parse access to array
+ceq parse('_`[_`][T1,T2]) = '->[T1' , T2']
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) [print "access array:" T1' ] .
+
+***parse access to struct
+ceq parse('_._[T1,T2]) = '.[T1' , T2']
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) [print "access struct:" T1' ] .
+
+
+*** parse assignments
+
+*** parse assignments equal
+ceq parse('_=_[T1,T2]) = '=[T1', T2']
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) [print "assignment = :" T1' ] .
+
+*** parse assignment plus equal
+ceq parse('_+=_[T1,T2]) = '+=[T1', T2']
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) [print "assignment +=:" T1' ] .
+
+*** parse assignment minus equal
+ceq parse('_-=_[T1,T2]) = '-=[T1', T2']
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) [print "assignment -=:" T1' ] .
+
+*** parse struct assignment
+ceq parse('_=_`(`{_`}`)[T1,T2,TL]) = '=St[T1', T2', TL']
+   if  T1'  := parse (T1) /\
+   T2'  := parse (T2) /\
+   TL'  := parse (TL) [print "assignment {}:" TL' ] .
+
+*** parse FOR
+
+*** parse for in
+ceq parse('for_in_:_end[T1,T2,TL]) =  'ForVar[T1', T2', TL']
+if  T1'  := parse (T1) /\
+      T2'  := parse (T2) /\
+      TL'  := parse (TL) .
+
+***parse for range
+ceq parse('for_in`range`(_`):_end[T1,T2,TL]) =  'ForR[T1', TL2', TL']
+if  T1'  := parse (T1) /\
+      TL2'  := parse (T2) /\
+      TL'  := parse(TL) .
+
+*** parse for in list
+ceq parse('for_in`[_`];_end[T1,T2,TL]) =  'ForList[T1', TL2', TL']
+if  T1'  := parse (T1) /\
+      TL2'  := parse (T2) /\
+      TL'  := parseL (TL) [print "eq for list:" TL ] .
+
+***parse if else
+
+*** parse simple if
+ceq parse('if_:_end[T1,TL]) =  'If[T1', TL']
+if  T1'  := parse (T1) /\
+      TL'  := parseL (TL)  [print "eq simple if: " TL ] .
+
+*** parse if-else
+ceq parse('if_:_else:_end[T1,TL,TL2]) =  'IfElse[T1', TL', TL2']
+if  T1'  := parse (T1) /\
+      TL'  := parseL (TL) /\
+      TL2'  := parseL (TL2) [print "eq if-else: " TL ] .
+
+*** parse elif
+ceq parse('elif_:_end[T1,TL]) =  'Elif[T1', TL']
+if  T1'  := parse (T1) /\
+      TL'  := parseL (TL) [print "eq elsif: " TL ] .
+
+*** parse if-else-elif
+ceq parse('if_:_end_else:_end[T1,TL,TL2,TL3]) =  'IfElif[T1', TL', TL2' , TL3' ]
+if  T1'  := parse (T1) /\
+      TL'  := parseL (TL) /\
+      TL2'  := parseL (TL2) /\
+      TL3'  := parseL (TL3) [print "eq if-else-elif: " TL ] .
+
+*** parse functions
+
+*** parse simple parameters
+ceq parse('_:_[T1,T2]) =  'P[T1', T2']
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) [print "eq parameters: " T1' ] .
+
+*** parse list parameters
+ceq parse('_`,_[TL,TL2]) = 'LParam[TL',TL2']
+   if isParam(TL) /\ 
+   TL' := parse (TL) /\ 
+   TL2' := parse (TL2) [print "eq parameters list: " TL] .
+
+***parse argl
+ceq parse('_`,_[TL,TL2]) = 'ArgL[TL',TL2']
+   if  TL' := parse (TL) /\ 
+   TL2' := parse (TL2) [print "eq argl: " TL TL2 ] .
+
+***parse functions headers
+
+*** parse header init 
+ceq parse('_def_`(_`)[T1,T2,TL]) = 'init[ T1' , TL']
+if T1' := parse (T1) /\
+   S1 := string(T1') /\
+   S1 == "@external.Decorator" /\ 
+   T2' := parse (T2) /\
+   S := string(T2') /\
+   S2 := substr(S,0,9) /\
+   S2 == "'__init__" /\
+   TL' := parse(TL) [print "eq header init: " S ] .
+
+*** parse header init + decorator
+ceq parse('__def_`(_`)[T1,T2,T3,TL]) = 'init[T1' , T2' , TL']
    if T1' := parse (T1) /\
       S1 := string(T1') /\
       T2' := parse (T2) /\
@@ -325,321 +315,319 @@ var  Ct : Constant .
       S := string(T3') /\
       S4 := substr(S,0,9) /\
       S4 == "'__init__" /\
-      TL'  := parse (TL) [print "ecuacionFuncionesInit:" S ] .
-*** Cabecera  default quizas prodria ser llos decoradores al reves
-    ceq parse('__def_`(_`)[T1,T2,T3,T4]) = 'default[T1', T2']
-   if T1'  := parse (T1) /\
-      S1 := string(T1') /\
-      S1 == "@external.Decorator" /\
-      T2' := parse (T2) /\
-      S2 := string(T2') /\
-      S2 == "@payable.Decorator" /\
-      T3' := parse(T3) /\
-      S := string(T3') /\
-      S3 := substr(S,0,12) /\
-      S3 == "'__default__" /\
-      T4' := parse(T4) /\ 
-      S4 := string(T4') /\ 
-      S4 == "PaV.Parametros" [print "ecuacionFuncionesDEFAULT:" S1 T4' ] .
+      TL'  := parse (TL) [print "eq header init + decorator: " S ] .
 
-*** Cabecera sin decoradores sin return FUN
-   ceq parse('def_`(_`)[T1,TL]) = 'header[ T1' , TL']
-  if   T1'  := parse (T1) /\
-       TL'  := parse (TL) [print "ecuacionFunciones1:" TL ] .
+*** parse header default
+ceq parse('__def_`(_`)[T1,T2,T3,T4]) = 'default[T1', T2']
+if T1'  := parse (T1) /\
+   S1 := string(T1') /\
+   S1 == "@external.Decorator" /\
+   T2' := parse (T2) /\
+   S2 := string(T2') /\
+   S2 == "@payable.Decorator" /\
+   T3' := parse(T3) /\
+   S := string(T3') /\
+   S3 := substr(S,0,12) /\
+   S3 == "'__default__" /\
+   T4' := parse(T4) /\ 
+   S4 := string(T4') /\ 
+   S4 == "PaV.Parameters" [print "eq header default: " S1 T4' ] .
 
-*** Cabecera con un decorador sin return FUN
-      ceq parse('_def_`(_`)[T1,T2,TL]) = 'headerD[T1', T2', TL']
-  if  T1'  := parse (T1) /\
-       T2'  := parse (T2) /\
-       TL'  := parse (TL)  [print "ecuacionFunciones2:" T1' ] .
-*** Cabecera con dos decoradores sin return FUN
-      ceq parse('__def_`(_`)[T1,T2,T3,TL]) = 'headerDD[T1', T2', T3', TL']
-  if  T1'  := parse (T1) /\
-       T2'  := parse (T2) /\
-       T3'  := parse (T3) /\
-       TL'  := parse (TL)  [print "ecuacionFunciones3:"  TL] .
+*** parse header
+ceq parse('def_`(_`)[T1,TL]) = 'header[ T1' , TL']
+if   T1'  := parse (T1) /\
+      TL'  := parse (TL) [print "eq header : " TL ] .
 
-*** Cabecera sin decoradores CON return FUN
-   ceq parse('def_`(_`)->_[T1,TL,T2]) = 'headerR[T1' , T2' , TL' ]
-  if  T1'  := parse (T1) /\
-       TL'  := parse (TL) /\
-       T2'  := parse (T2) [print "ecuacionFunciones4:" TL' ] .
+*** parse header + decorator
+ceq parse('_def_`(_`)[T1,T2,TL]) = 'headerD[T1', T2', TL']
+if  T1'  := parse (T1) /\
+      T2'  := parse (T2) /\
+      TL'  := parse (TL)  [print "eq header + decorator: " T1' ] .
 
-*** Cabecera con un decorador CON return FUN
-      ceq parse('_def_`(_`)->_[T1,T2,TL,T3]) = 'headerDR[T1', T2', T3' , TL']
-  if  T1'  := parse (T1) /\
-       T2'  := parse (T2) /\
-       TL'  := parse (TL) /\
-       T3'  := parse (T3) [print "ecuacionFunciones5:" TL' ] .
-*** Cabecera con dos decoradores CON return FUN
-      ceq parse('__def_`(_`)->_[T1,T2,T3,TL,T4]) = 'headerDDR[T1', T2', T3' , T4' ,TL']
-  if  T1'  := parse (T1) /\
-       T2'  := parse (T2) /\
-       T3'  := parse (T3) /\
-       TL'  := parse (TL) /\
-       T4'  := parse (T4) [print "ecuacionFuncionesRetur:" T4 ] .
+*** parse header + 2 decorator
+ceq parse('__def_`(_`)[T1,T2,T3,TL]) = 'headerDD[T1', T2', T3', TL']
+if  T1'  := parse (T1) /\
+   T2'  := parse (T2) /\
+   T3'  := parse (T3) /\
+   TL'  := parse (TL)  [print "eq header + 2 decorator: "  TL] .
 
-*** Cabecera sin decoradores CON return tupla FUN
-   ceq parse('def_`(_`)->`(_:_`)[T1,TL,T2,T3]) = 'headerT[T1' , T2' , T3' , TL' ]
-  if  T1'  := parse (T1) /\
-       TL'  := parse (TL) /\
-       T2'  := parse (T2) /\
-       T3'  := parse (T3) [print "ecuacionFunciones7:" TL' ] .
-*** Cabecera con un decorador CON return tupla FUN
-      ceq parse('_def_`(_`)->`(_:_`)[T1,T2,TL,T3,T4]) = 'headerDT[T1', T2', T3' , T4' ,TL']
-  if  T1'  := parse (T1) /\
-       T2'  := parse (T2) /\
-       TL'  := parse (TL) /\
-       T3'  := parse (T3) /\
-       T4'  := parse (T4) [print "ecuacionFunciones8:" TL' ] .
-*** Cabecera con dos decoradores CON return tupla FUN
-      ceq parse('__def_`(_`)->`(_:_`)[T1,T2,T3,TL, T4, T5 ]) = 'headerDDT[T1', T2', T3', T4', T5' , TL']
-  if  T1'  := parse (T1) /\
-       T2'  := parse (T2) /\
-       T3'  := parse (T3) /\
-       TL'  := parse (TL)  /\
-       T4'  := parse (T4)  /\
-       T5'  := parse (T5) [print "ecuacionFunciones9:" TL' ] .
-*** FUNCION
-   ceq parse('_:_end[T1,TL]) = 'Fun[T1' , TL']
-   if  T1'  := parse (T1) /\
-         TL'  := parse (TL) [print "ecuacionParseaFuncion:" TL' ] .
+*** parse header + return
+ceq parse('def_`(_`)->_[T1,TL,T2]) = 'headerR[T1' , T2' , TL' ]
+if  T1'  := parse (T1) /\
+   TL'  := parse (TL) /\
+   T2'  := parse (T2) [print "eq header return: " TL' ] .
 
-   ceq parse('_;_[T1,TL]) = 'Cuerpo[T1' , TL']
-   if  T1'  := parse (T1) /\
-       TL'  := parse (TL) [print "parseaBody:" ] .
+*** parse header + decorator + return
+ceq parse('_def_`(_`)->_[T1,T2,TL,T3]) = 'headerDR[T1', T2', T3' , TL']
+if  T1'  := parse (T1) /\
+   T2'  := parse (T2) /\
+   TL'  := parse (TL) /\
+   T3'  := parse (T3) [print "eq parse header + decorator + return: " TL' ] .
+
+*** parse header + 2 decorator + return
+ceq parse('__def_`(_`)->_[T1,T2,T3,TL,T4]) = 'headerDDR[T1', T2', T3' , T4' ,TL']
+if  T1'  := parse (T1) /\
+   T2'  := parse (T2) /\
+   T3'  := parse (T3) /\
+   TL'  := parse (TL) /\
+   T4'  := parse (T4) [print "eq header + 2 decorator + return: " T4 ] .
+
+*** header tuple
+ceq parse('def_`(_`)->`(_:_`)[T1,TL,T2,T3]) = 'headerT[T1' , T2' , T3' , TL' ]
+if  T1'  := parse (T1) /\
+      TL'  := parse (TL) /\
+      T2'  := parse (T2) /\
+      T3'  := parse (T3) [print "eq header tuple:" TL' ] .
+      
+*** parse header decorator + tuple
+ceq parse('_def_`(_`)->`(_:_`)[T1,T2,TL,T3,T4]) = 'headerDT[T1', T2', T3' , T4' ,TL']
+if  T1'  := parse (T1) /\
+   T2'  := parse (T2) /\
+   TL'  := parse (TL) /\
+   T3'  := parse (T3) /\
+   T4'  := parse (T4) [print "eq decorator + tuple: " TL' ] .
+
+*** parse header 2 decorator + tuple
+ceq parse('__def_`(_`)->`(_:_`)[T1,T2,T3,TL, T4, T5 ]) = 'headerDDT[T1', T2', T3', T4', T5' , TL']
+if  T1'  := parse (T1) /\
+   T2'  := parse (T2) /\
+   T3'  := parse (T3) /\
+   TL'  := parse (TL)  /\
+   T4'  := parse (T4)  /\
+   T5'  := parse (T5) [print "eq header 2decorator + tuple :" TL' ] .
+
+*** parse function
+ceq parse('_:_end[T1,TL]) = 'Fun[T1' , TL']
+if  T1'  := parse (T1) /\
+      TL'  := parse (TL) [print "eq parse function: " TL' ] .
+
+***parse body
+ceq parse('_;_[T1,TL]) = 'BodyF[T1' , TL']
+if  T1'  := parse (T1) /\
+      TL'  := parse (TL) [print "eq parse body :" ] .
    
-   ***LLAMADA A UNA FUNCION
-   ceq parse('_`(_`)[T1,TL]) = 'CallP[T1',TL']
+***parse call parametizer
+ceq parse('_`(_`)[T1,TL]) = 'CallP[T1',TL']
+if  T1'  := parse (T1) /\
+   TL'  := parse (TL) [print "eq parse call param function: " TL' ] .
+
+***parse call parametizer  
+ceq parse('_`(`)[T1]) = 'Call[T1']
+if  T1'  := parse (T1)  [print "eq parse call function: " ] .
+
+*** parse control statements
+***parse raise
+ceq parse('raise_[T1]) = 'Raise[ T1']
+if  T1'  := parse (T1)  [print "eq raise:" T1 ] .
+
+***parse assert
+ceq parse('assert_[TL]) = 'Assert[ TL']
+if  TL'  := parse (TL)  [print "eq assert: " TL' ] .
+
+***parse assert string
+ceq parse('assert_|_[T1,T2]) = 'Assert[ T1' , T2' ]
+if  T1'  := parse (T1) /\
+      T2'  := parse (T2) [print "eq assert string: " T1' ] .
+
+***parse return
+ceq parse('return_[T1]) = 'Return[ T1']
+if  T1'  := parse (T1)  [print "eq return:" T1 ] .
+
+***parse return tuple
+ceq parse('return_`,_[T1,T2]) = 'ReturnT[ T1' , T2' ]
    if  T1'  := parse (T1) /\
-      TL'  := parse (TL) [print "ecuacionCall:" TL' ] .
-   
-   ceq parse('_`(`)[T1]) = 'Call[T1']
-   if  T1'  := parse (T1)  .
-   --- ***Parametros de la llamada
-   --- ceq parse('`(_`)[TL]) = 'parametros[TL']
-   --- if  TL'  := parse (TL) [print "ecuacionCall:" TL' ] .
-   --- ***llamada
-   --- ceq parse('__[T1,T2]) = 'call[T1' , T2']
-   --- if  T1'  := parse (T1) /\
-   ---     T2'  := parse (T2) [print "ecuacionParseaLLamada:" T1' ] .
+         T2'  := parse (T2) [print "eq return tuple:" T1' ] .
 
-*** PARSEANDO DECLARACION DE CONTROL
-   ***RAISE
-   ceq parse('raise_[T1]) = 'Raise[ T1']
-   if  T1'  := parse (T1)  [print "Raise:" T1 ] .
-   ***Assert
-   ceq parse('assert_[TL]) = 'Assert[ TL']
-   if  TL'  := parse (TL)  [print "Assert:" TL' ] .
+***parse return list
+ceq parse('return`[_`][TL]) = 'ReturnL[ TL' ]
+   if  TL'  := parse (TL)  [print "eq return list:" TL' ] .
 
-   ceq parse('assert_|_[T1,T2]) = 'Assert[ T1' , T2' ]
+*** tuples
+*** parse tuple 
+ceq parse('`(_`,_`)=_`(_`)[T1,T2,T3,TL]) = 'tup[T1', T2', T3', TL']
+if  T1'  := parse (T1) /\
+      T2'  := parse (T2) /\
+      T3'  := parse (T3) /\
+      TL'  := parse (TL) [print "eq tuple:" TL ] .
+
+*** parse tuple without ()
+ceq parse('_`,_=_`(_`)[T1,T2,T3,TL]) = 'tup[T1', T2', T3', TL']
+if  T1'  := parse (T1) /\
+      T2'  := parse (T2) /\
+      T3'  := parse (T3) /\
+      TL'  := parse (TL) [print "eq tuple without (): " TL ] .
+
+*** parse tuple without () and parameters
+ceq parse('`(_`,_`)=_`(`)[T1,T2,T3]) = 'tup[T1', T2', T3']
+if  T1'  := parse (T1) /\
+      T2'  := parse (T2) /\
+      T3'  := parse (T3) [print "eq without () and parameters: " T3' ] .
+
+*** parse tuple with parameters without ()
+ceq parse('_`,_=_`(`)[T1,T2,T3]) = 'tup[T1', T2', T3']
+if  T1'  := parse (T1) /\
+      T2'  := parse (T2) /\
+      T3'  := parse (T3)  [print "eq tuple parameters without (): " T3' ] .
+
+*** parse log event
+ceq parse('log_`(_`)[T1,TL]) = 'logE[T1', TL']
    if  T1'  := parse (T1) /\
-       T2'  := parse (T2) [print "AssertString:" T1' ] .
-   ***Return
-   ***Valor unico
-   ceq parse('return_[T1]) = 'Return[ T1']
-   if  T1'  := parse (T1)  [print "Return:" T1 ] .
-   ***TUPLA
-   ceq parse('return_`,_[T1,T2]) = 'ReturnT[ T1' , T2' ]
-      if  T1'  := parse (T1) /\
-          T2'  := parse (T2) [print "Return2Valores:" T1' ] .
-   ***Lista
-   ceq parse('return`[_`][TL]) = 'ReturnL[ TL' ]
-      if  TL'  := parse (TL)  [print "ReturnLista:" TL' ] .
+      TL'  := parse (TL) [print "eq log event: " T1 ] .
 
+*** parse operator
+*** parse + .
+ceq parse('_+_[T1,T2]) = '_+._[T1', T2']
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) .
 
+*** parse - .
+ceq parse('_-_[T1,T2]) = '_-._[T1', T2']
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) .
 
-*** TUPLA !MODIFICAR
-*** parseando una asignacion de tupla con paratensis
-   ceq parse('`(_`,_`)=_`(_`)[T1,T2,T3,TL]) = 'tup[T1', T2', T3', TL']
-  if  T1'  := parse (T1) /\
-       T2'  := parse (T2) /\
-       T3'  := parse (T3) /\
-       TL'  := parse (TL) [print "ecuacionAsignacionTupla:" TL ] .
-*** parseando una asignacion de tupla SIN paratensis
-   ceq parse('_`,_=_`(_`)[T1,T2,T3,TL]) = 'tup[T1', T2', T3', TL']
-  if  T1'  := parse (T1) /\
-       T2'  := parse (T2) /\
-       T3'  := parse (T3) /\
-       TL'  := parse (TL) [print "ecuacionAsignacionTupla:" TL ] .
-*** parseando una asignacion de tupla con paratensis SIN Parametros
-   ceq parse('`(_`,_`)=_`(`)[T1,T2,T3]) = 'tup[T1', T2', T3']
-  if  T1'  := parse (T1) /\
-       T2'  := parse (T2) /\
-       T3'  := parse (T3) [print "ecuacionAsignacionTupla:" T3' ] .
-*** parseando una asignacion de tupla SIN paratensis SIN Parametros
-   ceq parse('_`,_=_`(`)[T1,T2,T3]) = 'tup[T1', T2', T3']
-  if  T1'  := parse (T1) /\
-       T2'  := parse (T2) /\
-       T3'  := parse (T3)  [print "ecuacionAsignacionTupla:" T3' ] .
+*** parse *  .
+ceq parse('_*_[T1,T2]) = '_*._[T1', T2']
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) .
 
-*** Parseando log de un evento
-   ceq parse('log_`(_`)[T1,TL]) = 'logE[T1', TL']
-    if  T1'  := parse (T1) /\
-        TL'  := parse (TL) [print "ecuacionLogEvent:" T1 ] .
+*** parse <
+ceq parse('_<_[T1,T2]) =  '_<._[T1', T2']
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) .
 
-*** PARSEO EXPRESIONES Y OPERACIONES
- *** Parseando una suma .
- ceq parse('_+_[T1,T2]) = '_+._[T1', T2']
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) .
+*** parse >
+ceq parse('_>_[T1,T2]) =  '_>._[T1', T2']
+   if  T1'  := parse (T1) /\
+      T2' := parse (T2) .
 
- *** Parseando un - .
- ceq parse('_-_[T1,T2]) = '_-._[T1', T2']
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) .
+*** parse <=
+ceq parse('_<=_[T1,T2]) =  '_<=._[T1', T2']
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) .
 
- *** Parseando una suma .
- ceq parse('_*_[T1,T2]) = '_*._[T1', T2']
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) .
+***parse  >=
+ceq parse('_>=_[T1,T2]) = '_>=._[T1', T2']
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) .
 
-***PARSEO UN <
- ceq parse('_<_[T1,T2]) =  '_<._[T1', T2']
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) .
-***PARSEO UN <
- ceq parse('_>_[T1,T2]) =  '_>._[T1', T2']
-    if  T1'  := parse (T1) /\
-        T2' := parse (T2) .
-***PARSEO UN <
- ceq parse('_<=_[T1,T2]) =  '_<=._[T1', T2']
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) .
-***PARSEO UN <
- ceq parse('_>=_[T1,T2]) = '_>=._[T1', T2']
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) .
+***parse !=
+ceq parse('_!=_[T1,T2]) = '_!=._[T1', T2']
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) .
 
-***PARSEO UN !=
- ceq parse('_!=_[T1,T2]) = '_!=._[T1', T2']
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) .
+***parse ==
+ceq parse('_==_[T1,T2]) = '_==._[T1', T2']
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) .
 
-***PARSEO UN ==
- ceq parse('_==_[T1,T2]) = '_==._[T1', T2']
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) .
+***parse %
+ceq parse('_%_[T1,T2]) = '_%._[T1', T2']
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) .
 
-***PARSEO UN %
- ceq parse('_%_[T1,T2]) = '_%._[T1', T2']
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) .
+***parse /
+ceq parse('_/_[T1,T2]) = '_/._[T1', T2']
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) .
 
-***PARSEO UN /
- ceq parse('_/_[T1,T2]) = '_/._[T1', T2']
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) .
+*** parse not
+ceq parse('not_[T1]) = 'not._[T1']
+   if  T1'  := parse (T1) .
 
-*** Parseo not
- ceq parse('not_[T1]) = 'not._[T1']
-    if  T1'  := parse (T1) .
-
-***PARSEO and
- ceq parse('_and_[T1,T2]) = '_and._[T1', T2']
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) .
+***parse and
+ceq parse('_and_[T1,T2]) = '_and._[T1', T2']
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) .
 
 *** paseo or
+ceq parse('_or_[T1,T2]) = '_or._[T1', T2']
+   if  T1'  := parse (T1) /\
+      T2'  := parse (T2) .
 
- ceq parse('_or_[T1,T2]) = '_or._[T1', T2']
-    if  T1'  := parse (T1) /\
-        T2'  := parse (T2) .
-
-*** Parseo () 
----  ceq parse('`(_`)[T1]) = '`(`)_.[T1']
----    if  T1'  := parse (T1) .
+*** parse () 
  ceq parse('`(_`)[T1]) = 'PA_PC[T1']
    if  T1'  := parse (T1) .
 
- eq parse(T) =  T  [owise]  .
-*** Parsea una lista
+***parse owise
+eq parse(T) =  T  [owise]  .
+
+*** parse termlist
 op parseL : TermList -> TermList .
 eq parseL(empty) = empty .
 eq parseL( (T , TL) ) = parse(T) , parseL (TL) .
-***PARsea interior de un bubble
+
+***parse bubble
 op parseB : TermList -> TermList .
 eq parseB(empty) = empty .
 eq parseB( (T , TL) ) = parse('token[T]) , parseB (TL) .
 
- op downQid : Term -> [Qid] [memo] .
- eq downQid(Ct)
-    = qid(substr(string(getName(Ct)), 1, length(string(getName(Ct))))) .
+*** term to qid list
+op downQid : Term -> [Qid] [memo] .
+eq downQid(Ct)
+   = qid(substr(string(getName(Ct)), 1, length(string(getName(Ct))))) .
 
-*** comprueba si una palabra es true o false
- op isBool : String -> Bool .
- eq isBool(S) = (S == "True") or (S == "False") .
- ***comprueba si una palabra es un declaracion de tipo
- op isTipo : String -> Bool .
- eq isTipo(S) = (S == "int128") or (S == "bool") or (S == "decimal") or (S == "address") or (S == "bytes32") or (S == "String")
-  or (S == "Bytes") or (S == "struct") or (S == "uint256") or (S == "HashMap") .
- ***comprueba si una palabra es un declaracion de tipo
- op isVariableEntorno : String -> Bool .
- eq isVariableEntorno(S) = (S == "block.coinbase") or (S == "block.difficulty") or (S == "block.number") or (S == "block.prevhash") or (S == "block.timestamp") or (S == "chain.id")
-  or (S == "msg.gas") or (S == "msg.sender") or (S == "msg.value") or (S == "tx.origin") or (S == "msg.data") .
- ***comprueba si una palabra es un declaracion de tipo
- op isConstante : String -> Bool .
- eq isConstante(S) = (S == "ZERO-ADDRESS") or (S == "EMPTY-BYTES32") or (S == "MAX-INT128") or (S == "MIN-INT128") or (S == "MAX-DECIMAL") or (S == "MIN-DECIMAL")
-  or (S == "MAX-UINT256")  .
-*** comprueba si es un decorador 
- op isDecorador : String -> Bool .
- eq isDecorador(S) = (S == "@external.@Decorator@") or (S == "@internal.@Decorator@") or (S == "@pure.@Decorator@") or (S == "@view.@Decorator@") or (S == "@payable.@Decorator@") or (S == "@nonpayables.@Decorator@") .
- op isControlFlow : String -> Bool .
- eq isControlFlow(S) = (S == "break.@DeclaracionControl@") or (S == "continu.@DeclaracionControl@") or (S == "return.@DeclaracionControl@") . 
---- *** comprueba si es un decorador externo o interno
----  op isDecoradorEI : String -> Bool .
----  eq isDecoradorEI(S) = (S == "@external.@Decorator@") or (S == "@internal") .
----  *** comprueba si es un decorador de mutabilidad
----  op isDecoradorMUT : String -> Bool .
----  eq isDecoradorMUT(S) = (S == "@pure") or (S == "@view") or (S == "@payable") or (S == "@nonpayables") .
- *** comprueba si es un decorador de mutabilidad
- op isNum : Term -> Bool .
- eq isNum(Ct) = (getType(Ct) ==  'Float) or (getType(Ct) ==  'Nat) or (getType(Ct) ==  'Zero) or (getType(Ct) ==  'NzNat) .
- op isFun : TermList -> Bool .
- eq isFun(empty) = false .
- eq isFun((T,TL)) = isFunU(T) .
- op isFunU : Term -> Bool .
- eq isFunU('_:_end[T,TL]) = true .
- eq isFunU(T) = false .
- op isElif : TermList -> Bool .
- eq isElif(empty) = false .
- eq isElif((T,TL)) = isElifU(T) .
- op isElifU : Term -> Bool .
- eq isElifU('elif_:_end[T,TL]) = true .
- eq isElifU(T) = false .
+*** string is bool
+op isBool : String -> Bool .
+eq isBool(S) = (S == "True") or (S == "False") .
+
+ ***string is type
+op isType : String -> Bool .
+eq isType(S) = (S == "int128") or (S == "bool") or (S == "decimal") or (S == "address") or (S == "bytes32") or (S == "String")
+or (S == "Bytes") or (S == "struct") or (S == "uint256") or (S == "HashMap") .
+
+***string is Envar
+op isEnVar : String -> Bool .
+eq isEnVar(S) = (S == "block.coinbase") or (S == "block.difficulty") or (S == "block.number") or (S == "block.prevhash") or (S == "block.timestamp") or (S == "chain.id")
+or (S == "msg.gas") or (S == "msg.sender") or (S == "msg.value") or (S == "tx.origin") or (S == "msg.data") .
+
+***string is constant
+op isConstant : String -> Bool .
+eq isConstant(S) = (S == "ZERO-ADDRESS") or (S == "EMPTY-BYTES32") or (S == "MAX-INT128") or (S == "MIN-INT128") or (S == "MAX-DECIMAL") or (S == "MIN-DECIMAL")
+or (S == "MAX-UINT256")  .
+
+*** string is Decorator
+op isDecorador : String -> Bool .
+eq isDecorador(S) = (S == "@external.@Decorator@") or (S == "@internal.@Decorator@") or (S == "@pure.@Decorator@") or (S == "@view.@Decorator@") or (S == "@payable.@Decorator@") or (S == "@nonpayables.@Decorator@") .
+
+*** string is control flow
+op isControlFlow : String -> Bool .
+eq isControlFlow(S) = (S == "break.@StatementControl@") or (S == "continu.@StatementControl@") or (S == "return.@StatementControl@") . 
+
+*** term is num
+op isNum : Term -> Bool .
+eq isNum(Ct) = (getType(Ct) ==  'Float) or (getType(Ct) ==  'Nat) or (getType(Ct) ==  'Zero) or (getType(Ct) ==  'NzNat) .
+
+***termlist is fun
+op isFun : TermList -> Bool .
+eq isFun(empty) = false .
+eq isFun((T,TL)) = isFunU(T) .
+op isFunU : Term -> Bool .
+eq isFunU('_:_end[T,TL]) = true .
+eq isFunU(T) = false .
+
+*** termlist is elif
+op isElif : TermList -> Bool .
+eq isElif(empty) = false .
+eq isElif((T,TL)) = isElifU(T) .
+op isElifU : Term -> Bool .
+eq isElifU('elif_:_end[T,TL]) = true .
+eq isElifU(T) = false .
+
+*** termlist is param
  op isParam : TermList -> Bool .
  eq isParam(empty) = false .
  eq isParam((T,TL)) = isParamU(T) .
  op isParamU : Term -> Bool .
  eq isParamU('_:_[T,T1]) = true .
  eq isParamU(T) = false .
- *** esto era para ver si habia declaraciones y funciones una vez parseado, tarda mucho en computar
----  op hayDecl : TermList -> Bool .
----  eq hayDecl((T,TL)) = isDecla(T) or hayDecl(TL) .
----  eq hayDecl(empty) = false .
----  op isDecla : Term -> Bool .
----  eq isDecla('ListaD[TL]) = true .
----  eq isDecla(T) = false .
----  op hayFun : TermList -> Bool .
----  eq hayFun((T,TL)) = isFunParsed(T) or hayFun(TL) .
----  eq hayFun(empty) = false .
----  op isFunParsed : Term -> Bool .
----  eq isFunParsed('ListaF[TL]) = true  .
----  eq isFunParsed(T) = false .
-----------------
+
+***termlist is contract
  op isContract : TermList -> Bool .
- eq isContract((T,TL)) = isContractU(T) [print "esCONTRATTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTO" T] .
+ eq isContract((T,TL)) = isContractU(T) [print "is CONTRACT" T] .
  eq isContract(empty) = false .
  op isContractU : Term -> Bool .
  eq isContractU('__[TL]) = true .
  eq isContractU(T) = false .
----  op isFunParsed : Term -> Bool .
----  eq isFunParsed('ListaF[TL]) = true  .
----  eq isFunParsed(T) = false .
- ***eq isFun((T , TL)) = isDecoradorEI(string(T)) or isDecoradorMUT(string(T)) or (string(T) == "def") [print "daleeeeeeeeeeeeeeeeeeeee" string(T)] .
----  ceq isFun((T , TL)) = false 
----    if S := string(T)  [ print "daleeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" S] .
----       ***S1 :=  substr(S, 0, 3) [ print "daleeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" S1] .
 
 endfm
 
@@ -649,20 +637,22 @@ mod MTP is
  pr META-SIGN .
  pr  LEXICAL .
  pr PARSING .
- ***pr MY-PROG .
  inc FILE .
  
 
- vars Text Original Read Source S : String .
+ vars Text Original Read Source S St St1 St2 : String .
  var  Attrs : AttributeSet .
  vars FHIn FHOut : Oid .
- var  QIL QIL1 QIL2 : QidList .
- vars T T' : Term .
+ var  QIL QIL1 QIL2 QIL3 : QidList .
+ vars T T' T2 T3 T4 T5 : Term .
  var  M : Module .
  vars N N' : Nat .
  var  Ty : Type .
  var  Q : Qid .
- var C : Contrato .
+ var TL : TermList .
+ var B B1 MF MF1 S1 S2 V V1 M1 M2 : Term .
+ var st : State .
+ var C errorC : Contract .
 
  *** Object and class definition
  op EXAMPLE : -> Cid [ctor] .
@@ -675,9 +665,12 @@ mod MTP is
  op read:_ : String -> Attribute [ctor] .
  op state:_ : State -> Attribute [ctor] .
  op terms:_ : TermList -> Attribute [ctor gather (&)] .
+ op functionName:_ : Qid -> Attribute [ctor] .
+ op parameters:_ : Term -> Attribute [ctor] .
+ op context:_ : TermList -> Attribute [ctor] .
 
  sort State .
- ops idle reading parsing writing closing : -> State [ctor] .
+ ops idle reading parsing writing closing asking askingParameters readingAsking : -> State [ctor] .
 
  *** Run command
  op run : -> Configuration [ctor] .
@@ -688,16 +681,16 @@ mod MTP is
 
  crl [loadComm] :
     gotLine(example, stdin, Text)
-    < example : EXAMPLE | Attrs >
- => < example : EXAMPLE | Attrs >
+    < example : EXAMPLE | state: idle, Attrs >
+ => < example : EXAMPLE | state: idle, Attrs >
     openFile(fileManager, example, Source, "r")
   if Q := tokenize(Text) /\
      Source := printTokens(Q) [print "regla1"] .
 
  crl [loadCommERROR] :
     gotLine(example, stdin, Text)
-    < example : EXAMPLE | Attrs >
- => < example : EXAMPLE | Attrs >
+    < example : EXAMPLE | state: idle, Attrs >
+ => < example : EXAMPLE | state: idle, Attrs >
     write(stdout, example, "File name incorrect.\n")
   if Q QIL := tokenize(Text) /\
      QIL =/= nil [print "regla2"] .
@@ -724,44 +717,99 @@ rl [newLine] :
    < example : EXAMPLE | file: FHIn, read: Read, state: reading, Attrs >
 => if Text == ""
    then < example : EXAMPLE | file: FHIn, read: Read, state: parsing , Attrs >
-        ***closeFile(FHIn, example)
    else < example : EXAMPLE | file: FHIn, read: (Read + Text + " ; "), state: reading, Attrs >
         getLine(FHIn, example)
    fi [print "regla5" ] .
 
---- crl [parsing] :
----     < example : EXAMPLE | file: FHIn , read: Read, state: parsing, Attrs >
----     ***closedFile(example, FHIn)
----  => < example : EXAMPLE | file: noFile , read: "", state: writing , terms: T' , Attrs >
----       openFile(fileManager, example, "output.txt", "w")
----  if Read =/= "" /\
----     QIL := tokenize(Read) /\
----     QIL1 := preparse(QIL)  /\
----     {T, Ty} := metaParse(GRAMMAR, QIL1, '@Contrato@) /\
----     T' := parse(T)  [print  QIL " Preparseado \n" QIL1 T "\nParseado: " T' " " Ty "MPP" ] .
-    ***C := downTerm(T' , errorC) [print  QIL " Preparseado \n" QIL1 T "\nParseado: " T' " " Ty ] .
+ ***                           ***
+ ***          Parsing          ***
+ ***                           ***
 
 crl [parsing] :
     < example : EXAMPLE | file: FHIn , read: Read, state: parsing, Attrs >
-    ***closedFile(example, FHIn)
- => < example : EXAMPLE | file: noFile , read: "", state: writing , terms: T' , Attrs >
-      openFile(fileManager, example, "output.txt", "w")
+ => < example : EXAMPLE | file: noFile , read: "", state: asking , terms: T' ,context: empty, Attrs >
+    getLine(stdin, example, "Introduce function name> ")
  if Read =/= "" /\
     QIL := tokenize(Read) /\
     QIL1 := preparse(QIL)  /\
-    {T, Ty} := metaParse(GRAMMAR, QIL1, '@Contrato@) /\
-    T' := parse(T) /\
-    QIL2 := metaPrettyPrint(upModule('MY-PROG, true), T' , none)  [print  QIL " Preparseado \n" QIL1 T "\nParseado: " T' " " Ty "MPP" QIL2 ] .
-    ***C := downTerm(T' , errorC) [print  QIL " Preparseado \n" QIL1 T "\nParseado: " T' " " Ty ] .
---- crl [parsing] :
----     < example : EXAMPLE | file: FHIn , read: Read, state: parsing, Attrs >
----     ***closedFile(example, FHIn)
----  => < example : EXAMPLE | file: noFile , read: "", state: writing , Attrs >
----       openFile(fileManager, example, "output.txt", "w")
----  if Read =/= "" /\
----     QIL := tokenize(Read) /\
----     QIL1 := preparse(QIL)   [print  QIL " Preparseado \n" QIL1   ] .
+    {T, Ty} := metaParse(GRAMMAR, QIL1, '@Contract@) /\
+    T' := parse(T) [print "PREPARSE " QIL1  "\n" "METAPARSE " T "\n" "PARSE " T'] .
 
+ ***                           ***
+ ***          IO               ***
+ ***                           ***
+
+crl [asking] :
+    gotLine(example, stdin, Text)
+    < example : EXAMPLE | state: asking, Attrs >
+ => < example : EXAMPLE | state: askingParameters, functionName: Q, parameters: 'argV.ArgList, Attrs >
+    getLine(stdin, example, "Introduce arguments> ")
+  if Text =/= " \n" /\
+  Q := tokenize(Text) [print "rule asking parameters"] .
+
+crl [askingParameters] :
+    gotLine(example, stdin, Text)
+    < example : EXAMPLE | state: askingParameters, parameters: TL, Attrs >
+ => < example : EXAMPLE | state: askingParameters, parameters: ('ArgL[TL , T]) , Attrs >
+    getLine(stdin, example, "Introduce parameters> ")
+  if Text =/=  " \n" /\
+   QIL := tokenize(Text) /\
+   {T, Ty} := metaParse(upModule('MY-PROG,true), QIL, anyType) [print "rule asking parameters T " T " TY " Ty] .
+
+crl [askingParametersEmptyFT] :
+    gotLine(example, stdin, Text)
+    < example : EXAMPLE | state: askingParameters, functionName: Q, parameters: T, terms: T3, context: empty, Attrs >
+ => < example : EXAMPLE | state: readingAsking, context: T2, Attrs >
+   write(stdout, example, St2 + "\n")
+  if Text == " \n" /\ 
+   T' := if T == 'argV.ArgList then 'Call[qid("'" + string(Q) + ".Qid")] else 'CallP[qid("'" + string(Q) + ".Qid") , T]  fi /\ 
+   T4 := 'exec[T3, T'] /\
+   {T2, Ty} := metaRewrite(upModule('SEMANTICS, true), T4, unbounded) /\ 
+   '<_`,_`,_`,_`,_>[B, MF, S1, V, M1] := T2  /\ 
+   QIL1 := metaPrettyPrint(upModule('SEMANTICS, true), S1 , mixfix number rat) /\
+   S := printTokens(QIL1) /\
+   QIL2 := metaPrettyPrint(upModule('SEMANTICS, true), V , mixfix number rat) /\
+   St := printTokens(QIL2) /\
+   QIL3 := metaPrettyPrint(upModule('SEMANTICS, true), M1 , mixfix number rat) /\
+   St1 := printTokens(QIL3) /\
+   St2 := "La pila despues de aplicar los cambios: " + S + "\n" + "Valor devuelto por la función(noneV si no hay) "  + St + "\n"
+   + "Struct devuelto por la funcion(mv si no hay): " +  St1 [print " qil " T2 " S1 " S1 " V " V  "MV" M1 "t'" T' "QIL" QIL1 " S " S " St " St] . ***[print "rule asking parameters T " T " TY " Ty " t2 " T2 ] .
+
+crl [askingParametersEmptyOT] :
+    gotLine(example, stdin, Text)
+    < example : EXAMPLE | state: askingParameters, functionName: Q, parameters: T, context: T5, Attrs >
+ => < example : EXAMPLE | state: readingAsking, context: T2, Attrs >
+  write(stdout, example, St2 + "\n")
+  if Text == " \n" /\ 
+   T' := if T == 'argV.ArgList then 'Call[qid("'" + string(Q) + ".Qid")] else 'CallP[qid("'" + string(Q) + ".Qid") , T]  fi /\ 
+   '<_`,_`,_`,_`,_>[B, MF, S1, V, M1] := T5 /\
+   T4 := '<_`,_`,_`,_`,_>[T', MF, S1, 'noneV.NoneValue, 'mv.Memory] /\
+   {T2, Ty} := metaRewrite(upModule('SEMANTICS, true), T4, unbounded) /\
+   '<_`,_`,_`,_`,_>[B1, MF1, S2, V1, M2] := T2 /\
+   QIL1 := metaPrettyPrint(upModule('SEMANTICS, true), S2 , mixfix number rat) /\
+   S := printTokens(QIL1) /\
+   QIL2 := metaPrettyPrint(upModule('SEMANTICS, true), V1 , mixfix number rat) /\
+   St := printTokens(QIL2) /\
+   QIL3 := metaPrettyPrint(upModule('SEMANTICS, true), M2 , mixfix number rat) /\
+   St1 := printTokens(QIL3) /\
+   St2 := "La pila despues de aplicar los cambios: " + S + "\n" + "Valor devuelto por la función(noneV si no hay) "  + St + "\n"
+   + "Struct devuelto por la funcion(mv si no hay): " +  St1 [print " qil " S2 " " V] .
+
+rl [readingAsking] :
+< example : EXAMPLE | state: readingAsking, Attrs >
+wrote(example, stdout) =>
+< example : EXAMPLE | state: asking, Attrs >
+getLine(stdin, example, "Introduce function name> ") .
+
+ ***                           ***
+ ***          END              ***
+ ***                           ***
+
+crl [END] :
+    gotLine(example, stdin, Text)
+    < example : EXAMPLE | state: asking, Attrs >
+ => write(stdout, example, "chao.\n")
+  if Text == " \n"  [print "rule end"] .
 
 var RP? : [ResultPair] .
 
@@ -772,39 +820,6 @@ crl [parsingError] :
     QIL := tokenize(Read) /\
     QIL1 := preparse(QIL) /\
     RP? := metaParse(GRAMMAR, QIL1, anyType) [print "regla 6" QIL1 "\nNo parseado: " RP?] .
---- crl [parsing] :
----     < example : EXAMPLE | read: Read, state: parsing, Attrs >
----  => < example : EXAMPLE | read: "", Attrs >
----     write(stdout, example, "Parsed.\n")
----  if Read =/= "" /\
----     QIL := tokenize(Read) /\
----     QIL1 := preparse(QIL) /\
----     {T, Ty} := metaParse(GRAMMAR, QIL1, anyType) /\
----     T' := parse(T) [print QIL1 T "\nParseado: " T' " " Ty] .
-
- ***                              ***
- ***          closedFile          ***
- ***                              ***
-rl [openFileW] :
-   < example : EXAMPLE | file: noFile , state: writing , terms: T , Attrs >
-      openedFile(example, fileManager, FHOut)
- => < example : EXAMPLE | file: FHOut , state: writing , terms: T , read: "dale" , Attrs >
-      write(FHOut , example, "DALE")  .
-   ---  if S := string(T) [print "regla 7" S ] .
-
---- crl [openFileW] :
----    < example : EXAMPLE | file: noFile , state: writing , terms: T , Attrs >
----       openedFile(example, fileManager, FHOut)
----  => < example : EXAMPLE | file: FHOut , state: writing , terms: T , read: S , Attrs >
----       write(FHOut , example, S)  
----     if QIL1 := metaPrettyPrint(GRAMMAR, T , none) /\
----       S := printTokens(QIL1) [print "regla 7" S ] .
-
-rl [writeFile] :
-   < example : EXAMPLE | file: FHOut , state: writing , terms: T , read: S , Attrs >
-    wrote(example, FHOut)
- => < example : EXAMPLE | file: FHOut , state: closing , terms: T , read: S , Attrs > 
-   closeFile(FHOut, example) [print "regla8"]  .
 
  rl [closedFile] :
     closedFile(example, FHOut)
@@ -815,83 +830,20 @@ rl [writeFile] :
  ***          WROTE           ***
  ***                          ***
 
- rl [wrote] :
+ crl [wrote] :
     wrote(example, stdout)
-    < example : EXAMPLE | file: noFile, Attrs >
- => < example : EXAMPLE | file: noFile, Attrs > .
+    < example : EXAMPLE | file: noFile, state: st, Attrs >
+ => < example : EXAMPLE | file: noFile, state: st, Attrs > 
+   if st =/= readingAsking .
 
  ***                        ***
  ***          RUN           ***
  ***                        ***
 
  eq run =
-    <> < example : EXAMPLE | file: noFile, read: "", state: idle, terms: empty >
+    <> < example : EXAMPLE | file: noFile, read: "", state: idle >
     getLine(stdin, example, "Introduce file name> ") .
 endm
 
-
-
-
-
-
---- red preparse(tokenize("@external " +
---- "def withdraw(): " +
---- "pending_amount: uint256 = self.pendingReturns[msg.sender] ; " +
---- "    self.pendingReturns[msg.sender] = 0 ; " +
---- "   send(msg.sender, pending_amount)" +
---- "  end " )) .
-
-
---- red metaParse(GRAMMAR, tokenize(" @external def auctionEnd(PaV) : assert block.timestamp >  revealEnd assert not ended " +
----                                 " log AuctionEnded( highestBidder,  highestBid) ended = True send( beneficiary,  highestBid) end "), '@Funcion@) .
-
---- red metaParse(GRAMMAR, tokenize(" @internal def placeBid(bidder : address , _value : uint256) -> bool "), anyType) .
---- red metaParse(GRAMMAR, tokenize(" assert (msg.value % 2) == 0"), '@DeclaracionControl@) .
---- red metaParse(GRAMMAR, tokenize("  assert ( x + 2 ) == 2"), '@DeclaracionControl@) .
-
---- red metaParse(GRAMMAR, tokenize("  bidToCheck : Bid = (bids[msg.sender])[i]"), '@Body@) .
-
---- red metaParse(GRAMMAR, tokenize(" x = funders[i] .sender "), '@asig@ ) .
---- red metaParse(GRAMMAR, tokenize(" send(self.funders[i] . sender, self.funders[i] . value, jesus.paco ) "), '@asig@) .
---- ***red metaParse(GRAMMAR, tokenize(" elif  x > 2 : refundIndex = nextFunderIndex ; break elif  x > 2 : refundIndex = nextFunderIndex ; break "), '@ListElseif@) .
---- red metaParse(GRAMMAR, tokenize(" assert ( msg.value + inicial >= (( balance - inicial - msg.value ) / 2) )"  ), '@DeclaracionControl@ ) .
---- red metaParse(GRAMMAR, tokenize(" return voters[addr] . delegate != ZERO_ADDRESS"  ), '@DeclaracionControl@ ) .
---- red metaParse(GRAMMAR, tokenize(" winning_proposal = i "  ), '@DeclaracionControl@ ) .
---- red metaParse(GRAMMAR, tokenize(" tiempo_contrato += block.timestamp "  ), '@asig@ ) .
---- --- red metaParse(GRAMMAR, tokenize(" for i in range(ind, ind + 30): " +
---- ---             "refundIndex = nextFunderIndex " + apostadores [ nfi ] = Juego ({apostador : msg.sender , equipo1 : eq1 , equipo2 : eq2 ,apuesta : msg.value})
---- ---         "end" ), '@For@ ) .
---- red metaParse(GRAMMAR, tokenize("datos = Datos ({nombre : _nombre, apellidos : _apellidos,direccion : _direccion,telefono : _telefono})"), anyType) .
---- red metaParse(GRAMMAR, tokenize("clientes[indice]= Caja({propietario : msg.sender, tdisfrute : block.timestamp + tiempo_disfrute, ttope : block.timestamp + tiempo_disfrute + tiempo_pagar,pagada : True,llave : 1, dejar : False,primera : True})"), '@asig@ ) .
---- red preparse(tokenize("def  self.datos = Datos({nombre: _nombre, apellidos: _apellidos,direccion: _direccion,telefono: _telefono})" )) .
---- red preparse( tokenize(" winning_proposal<=iASAS " )) .
---- red metaParse(GRAMMAR, tokenize(" if x <= y : " +
----             "refundIndex = nextFunderIndex ; " +
----             "return " +
----             "elif x : " +
----             "refundIndex = nextFunderIndex ; " +
----             "return " +
----             "end " +
----             "else: " +
----             "refundIndex = nextFunderIndex ; " +
----             "return " +
----             "end" ), '@ifElse@ ) .
---- red metaParse(GRAMMAR, tokenize("elif x : " +
----             "refundIndex = nextFunderIndex ; " +
----             "return " +
----             "end " +
----             "elif x : " +
----             "refundIndex = nextFunderIndex ; " +
----             "return " +
----             "end" ), '@ListElseif@ ) .
---- red metaParse(GRAMMAR, tokenize("elif x : " +
----             "refundIndex = nextFunderIndex ; " +
----             "return " +
----             "end "  ), '@elseif@ ) .
---- red preparse(tokenize("return voters[addr].delegate != ZERO_ADDRESS continue x ")) .
---- red parse(metaParse(GRAMMAR, tokenize("x = 2 "), '@asig@ )) .
---- red metaPrettyPrint( upModule('GRAMMAR, false) , metaParse(GRAMMAR, tokenize("x = 2 "), '@asig@ ), none) .
----red metaPrettyPrint(upModule('GRAMMAR , false), "x = 2" , none)
---- red in MY-PROG :  Dp('beneficiary , address , "public" ) .
 set print attribute on .
 erew run .

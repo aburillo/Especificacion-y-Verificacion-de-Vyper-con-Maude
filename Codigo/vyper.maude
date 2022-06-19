@@ -1,0 +1,2807 @@
+fmod VYPER-GRAMMAR is
+  pr STRING .
+ sorts @Token@ @Bubble@ @NeTokenList@ @Name@ @LToken@ .
+
+	sorts @statement@ @statementValue@ @statementConstant@ @statementHashMap@ @statementStruct@ @statements@  .
+	*** Subsort eventos
+	sort @StatementIndexed@ @StatementEvent@ @RegisterEvent@ .
+	subsort @statement@ @statementConstant@ @statementHashMap@ @statementStruct@ @StatementIndexed@ @StatementEvent@  < @statements@ .
+	***statement valida para x :: int128 y x :: int128 [12]
+	op _::_ : @Token@ @Access@ -> @statement@ [ctor prec 22 ] .
+	op _:: public( _ ) : @Token@ @Access@ -> @statement@ [ctor prec 22 ] . 
+
+	***Declarar dando un valor, solo valido dentro de una Function
+	op _:_ = _ : @Token@ @Name@ @Exp@ -> @statementValue@ [ctor] .
+
+	***Declarar un valor constante !quizas hay que cambiar token por Access
+	op _:: constant( _ ) = _ : @Token@ @Token@ @Token@ -> @statementConstant@ [ctor prec 22 ] . 
+
+	*** Declara HashMap x : hasmap [int128 int128] x : hasmap [int128 int128[5]]
+	op _:: HashMap[_,_] :  @Token@ @Token@ @Access@ -> @statementHashMap@ [ctor prec 22  ] . 
+	op _:: public(HashMap[_,_]) :  @Token@ @Token@ @Access@ -> @statementHashMap@ [ctor prec 22  ] . 
+	
+	***Declarar Struct
+	op struct_::_end : @Token@ @statements@ -> @statementStruct@ [ctor prec 22] .
+
+	***statement indexada para Eventos
+	op _:: indexed(_) : @Token@ @Token@ -> @StatementIndexed@ [ctor prec 22 ]. *** suelen ser las direcciones
+	
+	*** eventos
+	op event _::_end : @Token@ @statements@ -> @StatementEvent@ [ctor prec 22] .
+	op event _::_end : @Token@  @StatementControl@ -> @StatementEvent@ [ctor prec 22] . *** solo puede ser pass
+	
+	***Lista de statements
+	op dc : -> @statements@  [ctor] .
+	op __ : @statements@ @statements@ -> @statements@  [ctor assoc id: dc prec 25 ] .
+
+	***ACCESOS A MEMORY
+	sort @Access@ .
+	subsort @Token@ < @Access@ .
+	op _[_] : @Exp@ @Exp@ -> @Access@ [ctor prec 6] .
+	op _._ :  @Exp@ @Exp@ -> @Access@ [ctor prec 7] .
+
+	***Operaciones
+	sorts @Exp@ @Body@ @assig@ @Call@ .
+	subsort @Access@ @Call@ < @Exp@ .
+	op `(_`) : @Exp@ -> @Exp@ [ctor prec 8] .
+	op -_ : @Exp@ -> @Exp@ [ctor prec 10] .
+	op not_ : @Exp@ -> @Exp@ [ctor prec 10] .
+	op _*_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc prec 14] .
+	op _/_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 14] .
+	op _%_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 14] .
+	op _+_ : @Exp@ @Exp@ -> @Exp@ [ctor comm assoc prec 16] .
+	op _-_ : @Exp@ @Exp@ -> @Exp@ [ctor assoc prec 16] .
+	op _>_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 18] .
+	op _>=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 18] .
+	op _<_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 18] .
+	op _<=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 18] .
+	op _==_ : @Exp@ @Exp@ -> @Exp@ [ctor assoc prec 19] .
+	op _!=_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 19] .
+	op _and_ : @Exp@ @Exp@ -> @Exp@ [ctor prec 20] .
+	op _or_ : @Exp@ @Exp@ -> @Exp@ [ctor assoc prec 21] .
+	***quizas deberia ser una expression
+	op _(_) : @Name@ @ArgList@ -> @Call@ [ctor prec 5] . *** prueba
+	op _() : @Name@ -> @Call@ [ctor prec 5] .
+
+
+	***Lista de expressiones
+	sort @ArgList@ .
+	subsort @Exp@ < @ArgList@ .
+	op _,_ : @ArgList@ @ArgList@ -> @ArgList@ [ctor assoc prec 60] .
+
+	***Asignaciones
+	op _=_ : @Access@ @Exp@ -> @assig@ [ctor] .
+	op _+=_ : @Access@ @Exp@ -> @assig@ [ctor] . ***tambien uede ser que en el preparse cambio += o - por otra cosa
+	op _-=_ : @Access@ @Exp@ -> @assig@ [ctor] .
+	op _=_`({_}`) : @Access@ @Name@ @Parameters@ -> @assig@ [ctor] .
+
+	***Functions
+	sort @DecoratorNR@ @Parameters@ @header@ @Default@ @Init@ @Function@ @Functions@ @Param@ @Decorator@ .
+	subsort @Param@ < @Parameters@ .
+	subsort @Function@ < @Functions@ .
+	***Decoradores quito los decoradores y los trato en el parse
+	ops @external @internal @pure @view @payable @nonpayables : -> @Decorator@ [ctor] .
+	op _:_ : @Token@ @Exp@ -> @Param@ [ctor prec 22] .
+
+	op @nonreentrant(_) : @Token@ -> @DecoratorNR@ [ctor] .
+
+	***Parameters de una Function pueden ser vacios
+	op PaV : -> @Parameters@ [ctor] .
+	op _,_ : @Parameters@ @Parameters@  -> @Parameters@  [ctor assoc id: PaV prec 25] . ***prec 25
+	*** valores de vuelta
+
+	*** statement de Functions sin return
+	op def _ (_) : @Token@ @Parameters@ -> @header@ [ctor prec 90 ] .
+	op _ def _(_) : @Decorator@ @Token@ @Parameters@ -> @header@ [ctor prec 90] .
+	op _ _ def _(_) : @Decorator@ @Decorator@ @Token@ @Parameters@  -> @header@ [ctor prec 90] .
+
+	*** statement de Functions con return
+	op def _`(_`) -> _ : @Token@ @Parameters@ @Name@ -> @header@ [ctor prec 90] .
+	op _ def _`(_`) -> _ : @Decorator@ @Token@ @Parameters@ @Name@ -> @header@ [ctor prec 90] .
+	op _ _ def _`(_`) -> _ : @Decorator@ @Decorator@ @Token@ @Parameters@ @Name@ -> @header@ [ctor prec 90] .
+
+	*** Function RETORNA TUPLA
+	op def _`(_`)-> (_:_) : @Token@ @Parameters@ @Token@ @Token@  -> @header@ [ctor prec 90] .
+	op _ def _`(_`)-> (_:_) : @Decorator@ @Token@ @Parameters@ @Token@ @Token@ -> @header@ [ctor prec 90] .
+	op _ _ def _`(_`)-> (_:_) : @Decorator@ @Decorator@ @Token@ @Parameters@ @Token@ @Token@ -> @header@ [ctor prec 90] .
+
+	*** statement de Functions
+	op _:_ end : @header@ @Body@ -> @Function@ [ctor prec 91] . *** ejemplo end
+	op __ : @Functions@ @Functions@ -> @Functions@ [ctor assoc prec 95 ] .
+
+	*** FOR
+	sort @For@ .
+	op bv : -> @Body@ [ctor] .
+	op for _ in range(_):_ end : @Token@ @ArgList@ @Body@ -> @For@ [ctor] .
+	***op for _ in range(_,_):_ end : @Token@ @Exp@ @Exp@ @Body@ -> @For@ [ctor] .
+	op for _ in _:_ end : @Token@ @Name@ @Body@ -> @For@ [ctor] .
+	op for _ in [_]:_ end : @Token@ @ArgList@ @Body@ -> @For@ [ctor] .
+
+	*** IFELSE
+	sort @ifElse@ @elseif@ @ListElseif@ .
+	subsort @elseif@ < @ListElseif@ .
+
+	op elif_:_end : @Exp@ @Body@ -> @elseif@ [ctor prec 95] .
+	op __ : @ListElseif@ @ListElseif@  -> @ListElseif@  [ctor assoc prec 97] .
+	op if_:_ end : @Exp@ @Body@ -> @ifElse@ [ctor prec 100 ] .
+	op if_:_ else:_ end : @Exp@ @Body@ @Body@ -> @ifElse@ [ctor prec 100 ] .
+	op if_:_end_else:_ end : @Exp@ @Body@ @ListElseif@ @Body@ -> @ifElse@ [ctor prec 100] .
+	
+	*** if parentesis
+	***op if(_):_ end : @Exp@ @Body@ -> @ifElse@ [ctor] .
+	
+	***Control flow
+	sort @StatementControl@ .
+	ops break continu pass return : -> @StatementControl@ [ctor] .
+	op raise _ : @Token@ -> @StatementControl@ [ctor] .
+	op assert _ : @Exp@ -> @StatementControl@ [ctor prec 65] .
+	op assert _|_ : @Exp@ String -> @StatementControl@ [ctor prec 65] .
+	op return _ : @Exp@ -> @StatementControl@ [ctor prec 22 ] .
+	op return _,_ : @Exp@ @Exp@ -> @StatementControl@ [ctor prec 20] .
+	op return [_] : @ArgList@ -> @StatementControl@ [ctor prec 20 ] .
+
+	sort @assigTuple@ .
+	op (_ , _ ) = _ : @Token@ @Token@ @Call@ -> @assigTuple@ [ctor] .
+	op _ , _  = _ : @Token@ @Token@ @Call@ -> @assigTuple@ [ctor] .
+
+	*** registrar eventos
+	op log _`(_`) : @Name@ @ArgList@ -> @RegisterEvent@ [ctor] .
+	subsort @For@ @StatementControl@ @assig@ @assigTuple@ @RegisterEvent@ @statementValue@ @ifElse@ @statementValue@ @Call@ < @Body@ .
+	op _;_ : @Body@ @Body@ -> @Body@ [ctor assoc prec 105 ] .
+
+	***Crea un Contract
+	sort @Contract@ .
+	op __ : @statements@ @Functions@ -> @Contract@ [ctor prec 100] .
+
+endfm
+fmod MY-PROG is
+  	pr STRING .
+  	pr FLOAT .
+	pr BOOL .
+  	pr QID-LIST .
+	sorts Token Name Value .
+	sort stringVar NoneValue .
+	subsort Qid Float VarEnt bool type Bool constant stringVar NoneValue < Value . ***revisar contante y bool
+
+	sorts statement statementValue statementConstant statementHashMap statementStruct statements .
+	*** Subsort eventos
+	sorts StatementIndexed StatementEvent RegisterEvent StatementControl .
+	subsort statement statementConstant statementHashMap statementStruct StatementIndexed StatementEvent  < statements .
+	sort type VarEnt Decorator bool constant controlFlow .
+	ops int128 bool decimal address bytes32 String Bytes struct uint256 HashMap event : -> type [ctor] .
+
+	ops block.coinbase   block.difficulty   block.number   block.prevhash   block.timestamp   chain.id msg.gas   msg.sender   msg.value   tx.igin   msg.data : -> VarEnt [ctor] .
+	
+	ops @external @internal @pure @view @payable @nonpayables : -> Decorator  [ctor] .
+	
+	ops True False : -> bool [ctor] .
+	
+	ops  ZERO-ADDRESS EMPTY-BYTES32 MAX-INT128 MIN-INT128 MAX-DECIMAL MIN-DECIMAL MAX-UINT256 : -> constant [ctor] .
+	
+	ops break continu return : -> controlFlow [ctor] .
+	
+	op  [_] : String -> stringVar [ctor] .
+	
+	op noneV : -> NoneValue [ctor] .
+
+    op D : Qid Access -> statement [ctor] .
+	
+	op Dp : Qid Access String -> statement [ctor ] .
+
+	op Dv : Qid Value Exp -> statementValue [ctor] .
+
+	op Dc : Qid type Value String -> statementConstant [ctor ] . 
+
+	op Dhm :  Qid type Access -> statementHashMap [ctor ] .
+	 
+	op DhmP :  Qid type Access String -> statementHashMap [ctor] . 
+	
+	op Ds : Qid statements -> statementStruct [ctor] .
+
+	op Di : Qid type String -> StatementIndexed [ctor ].
+	
+	op De  : Qid statements -> StatementEvent [ctor] .
+
+	op DeC : Qid  StatementControl -> StatementEvent [ctor] .
+	
+	op ListS : statements  statements -> statements [ctor] .
+
+	sort Access .
+	subsort Value < Access .
+
+	op -> : Exp Exp -> Access [ctor] . 
+	op . :  Exp Exp -> Access [ctor] . 
+
+	***Operaciones
+	sorts Exp Body assig Call .
+	subsort Access Call constant < Exp .
+
+	op PA_PC : Exp -> Exp [ctor prec 8] .
+	op -.._ : Exp -> Exp [ctor prec 10] .
+	op not._ : Exp -> Exp [ctor prec 10] .
+	op _*._ : Exp Exp -> Exp [ctor comm assoc prec 14] .
+	op _/._ : Exp Exp -> Exp [ctor prec 14] .
+	op _%._ : Exp Exp -> Exp [ctor prec 14] .
+	op _+._ : Exp Exp -> Exp [ctor comm assoc prec 16] .
+	op _-._ : Exp Exp -> Exp [ctor assoc prec 16] .
+	op _>._ : Exp Exp -> Exp [ctor prec 18] .
+	op _>=._ : Exp Exp -> Exp [ctor prec 18] .
+	op _<._ : Exp Exp -> Exp [ctor prec 18] .
+	op _<=._ : Exp Exp -> Exp [ctor prec 18] .
+	op _==._ : Exp Exp -> Exp [ctor assoc prec 19] .
+	op _!=._ : Exp Exp -> Exp [ctor prec 19] .
+	op _and._ : Exp Exp -> Exp [ctor prec 20] .
+	op _or._ : Exp Exp -> Exp [ctor assoc prec 21] .
+	
+
+	op CallP : Qid ArgList -> Call [ctor] .
+	op Call : Qid -> Call [ctor ] .
+
+	sort ArgList .
+	subsort Exp < ArgList .
+
+	op argV : -> ArgList [ctor] .
+	op ArgL : ArgList ArgList -> ArgList [ctor assoc id: argV ] . 
+
+	op = : Access Exp -> assig [ctor] .
+	op += : Access Exp -> assig [ctor] .
+	op -= : Access Exp -> assig [ctor] .
+	op =St : Access Qid Parameters -> assig [ctor] .
+
+	sort self .
+	op self : -> self [ctor] .
+	op self.balance : -> self [ctor] .
+	op self._ : Token -> self [ctor] .
+	op self._() : Token -> self [ctor] .
+
+	***Functions
+	sort  Parameters header Default Init Function Functions Param .
+	subsort Param < Parameters .
+	subsort Function < Functions .
+
+	op P : Qid Exp -> Param [ctor] .
+	op P : Qid type -> Param [ctor] .
+
+	***Parameters emptys
+	op PaV : -> Parameters [ctor] .
+
+	op LParam : Parameters Parameters -> Parameters [ctor] .
+
+	*** statement header init y default
+	op init : Decorator Parameters -> header [ctor] .
+	op init : Decorator  Decorator  Parameters -> header [ctor] .
+	op default : Decorator  Decorator  Parameters -> header [ctor] .
+
+	*** statement de Functions without return
+	op header : Qid Parameters -> header [ctor] .
+	op headerD : Decorator Qid Parameters -> header [ctor] .
+	op headerDD : Decorator Decorator Qid Parameters  -> header [ctor] .
+
+	*** statement de Functions with return
+	op headerR : Qid type Parameters -> header [ctor] .
+	op headerDR : Decorator Qid type Parameters -> header [ctor ] .
+	op headerDDR : Decorator Decorator Qid Value Parameters -> header [ctor] .
+
+	*** Function 
+	op headerT : Qid Parameters Qid Qid  -> header [ctor] .
+	op headerDT : Decorator Qid Parameters Qid Qid -> header [ctor] .
+	op headerDDT : Decorator Decorator Qid Parameters Qid Qid -> header [ctor] .
+
+	*** statement of Functions
+	op Fun : header Body -> Function [ctor] .
+
+	op ListF : Functions Functions -> Functions [ctor] .
+
+	*** FOR
+	sort For .
+	op bv : -> Body [ctor] .
+	op ForR : Qid ArgList Body -> For [ctor] .
+	op ForVar : Qid Qid Body -> For [ctor] .
+	op ForList : Qid ArgList Body -> For [ctor] .
+
+	*** IFELSE
+	sort ifElse elseif ListElseif .
+	subsort elseif < ListElseif .
+
+	op Elif : Exp Body -> elseif [ctor ] .
+	op ListaEIF : ListElseif -> ListElseif [ctor] .
+	op If : Exp Body -> ifElse [ctor] .
+	op IfElse : Exp Body Body -> ifElse [ctor ] .
+	op IfElif : Exp Body ListElseif Body -> ifElse [ctor] .
+	
+	
+	***Control flow 
+	op Raise : Qid -> controlFlow [ctor] . ***desencadena una expecion y revierte la llamada
+	op Assert : Exp -> controlFlow [ctor] .
+	op Assert : Exp String -> controlFlow [ctor] . *** si es falso se revierte la transaccion
+	op Return : Exp -> controlFlow [ctor ] .
+	op ReturnT : Exp Exp -> controlFlow [ctor] . ***se puede devolver una tupla
+	op ReturnL : ArgList -> controlFlow [ctor ] .
+
+	***tuple
+	sort assigTuple .
+	op (_ , _ ) = _ : Qid Qid Call -> assigTuple [ctor] .
+	op _ , _  = _ : Qid Qid Call -> assigTuple [ctor] .
+
+	*** registrar eventos
+	sort printP .
+	op logE : Qid ArgList -> RegisterEvent [ctor] .
+	subsort For StatementControl assig assigTuple RegisterEvent statementValue ifElse statementValue Call controlFlow printP Parameters < Body .
+	op BodyF : Body Body -> Body [ctor id: bv ] .
+
+	***Contract
+	sort Contract .
+
+	op errorC : -> Contract [ctor] .
+	op Contract : statements Functions -> Contract [ctor] .
+
+
+ ***a=[1,2,3]
+endfm
+
+fmod META-SIGN is
+ pr META-LEVEL .
+
+ op BUBBLES : -> FModule .
+ op GRAMMAR : -> FModule [memo] .
+
+ eq BUBBLES
+    = (fmod 'GRAMMAR is
+        including 'QID-LIST .
+        sorts none .
+        none
+        op 'token : 'Qid -> '@Token@
+             [special(
+               (id-hook('Bubble, '1 '1)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
+				id-hook('Exclude, 'public 'HashMap 'constant 'indexed 'assert '`, '`( '`) '> 'not 'log '= ':: '+ '< '@external '@internal '@pure '@view '@payable '@nonpayables '>= '<= '+= '-= '`[ '`] ': 'return '!= 'break 'range '== 'and 'continu '* '-> 'and '/ '** '% '; 'if 'for 'else 'else: 'elif '. )))] .
+        op 'logName : 'Qid -> '@Name@
+             [special(
+               (id-hook('Bubble, '1 '1)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
+				id-hook('Exclude, 'public 'HashMap 'constant 'indexed 'assert '`, '`( '`) '> 'not 'log '= 'return '. )))] .
+        op 'bubble : 'QidList -> '@Bubble@
+             [special(
+               (id-hook('Bubble, '1 '-1 '`( '`))
+                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
+                id-hook('Exclude, 'eq 'ceq 'rl '=)))] .
+        op 'neTokenList : 'QidList -> '@NeTokenList@
+             [special(
+               (id-hook('Bubble, '1 '-1 '`( '`))
+                op-hook('qidListSymbol, '__, 'QidList 'QidList, 'QidList)
+                op-hook('qidSymbol, '<Qids>, nil, 'Qid)
+                id-hook('Exclude, '. ': '`[ 'forall 'exists)))] .
+        none
+        none
+     endfm) .
+ eq GRAMMAR = addImports(BUBBLES, (including 'VYPER-GRAMMAR .)) .
+
+ var  SSDS : SubsortDeclSet .
+ vars IL IL' : ImportList .
+ var  EqS : EquationSet .
+ var  ODS : OpDeclSet .
+ var  MAS : MembAxSet .
+ var  RS : RuleSet .
+ var  M : Module .
+ var  SS : SortSet .
+ var  H : Header .
+
+ op setImports : Module ImportList -> Module .
+ eq setImports(fmod H is IL sorts SS . SSDS ODS MAS EqS endfm, IL')
+    = fmod H is IL' sorts SS . SSDS ODS MAS EqS endfm .
+ eq setImports(mod H is IL sorts SS . SSDS ODS MAS EqS RS endm, IL')
+    = mod H is IL' sorts SS . SSDS ODS MAS EqS RS endm .
+ eq setImports(fth H is IL sorts SS . SSDS ODS MAS EqS endfth, IL')
+    = fth H is IL' sorts SS . SSDS ODS MAS EqS endfth .
+ eq setImports(th H is IL sorts SS . SSDS ODS MAS EqS RS endth, IL')
+    = th H is IL' sorts SS . SSDS ODS MAS EqS RS endth .
+
+ op addImports : Module ImportList -> Module .
+ eq addImports(M, IL) = setImports(M, (getImports(M) IL)) .
+endfm
+
+fmod MEMORY is
+	pr MY-PROG .
+
+	*** VARIABLES
+	var M M1 : Memory .
+	var V : Variable .
+	var Q : Qid .
+	var T : type .
+	var N : Nat .
+	var Vsb : Visibilidad .
+	var Con : ConsIndexNorm .
+	var Agl : ArgList .
+	var S : Stack .
+	var F : Float .
+	var Va Va1 : Value .
+	sorts Variable Memory Visibilidad ConsIndexNorm .
+	subsort Variable < Memory .
+	ops public private : -> Visibilidad [ctor] .
+	ops constante indexed normal : -> ConsIndexNorm [ctor] .
+
+	*** STACK 
+	sort Stack .
+	subsort Memory < Stack .
+	op stackE : -> Stack [ctor] .
+	op push : Memory Stack -> Stack [ctor] .
+	op pop : Stack -> Stack .
+	op top : Stack -> Memory .
+	op isStackEmpty : Stack -> Bool .
+	eq pop(push(M,S)) = S .
+  	eq top(push(M,S)) = M .
+  	eq isStackEmpty(stackE) = true .
+  	eq isStackEmpty(push(M,S)) = false .
+
+	*** VARIABLE 
+	*** [name variable ,type variable ,value variable, atributos number ,public or private , constant index or normal]
+	op [_,_,_,_,_,_] : Qid type stringVar Float Visibilidad ConsIndexNorm -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid type VarEnt Float Visibilidad ConsIndexNorm -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid type Array Float Visibilidad ConsIndexNorm -> Variable [ctor] . 
+	op [_,_,_,_,_,_] : Qid type Qid Float Visibilidad ConsIndexNorm -> Variable [ctor] . 
+	op [_,_,_,_,_,_] : Qid type Bool Float Visibilidad ConsIndexNorm -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid type Float Float Visibilidad ConsIndexNorm -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid type String Float Visibilidad ConsIndexNorm -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid type Memory Float Visibilidad ConsIndexNorm -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid Qid Memory Float Visibilidad ConsIndexNorm -> Variable [ctor] .
+	op [_,_,_,_,_,_] : Qid type Mapa Float Visibilidad ConsIndexNorm -> Variable [ctor] .
+	op dv : -> Variable [ctor] .
+	op mv : -> Memory [ctor] .
+	op __ : Memory Memory -> Memory [ctor assoc comm id: mv] .
+
+	****MAPA
+	sort Mapa Map KeyValue TMapas .
+	subsort KeyValue < Map .
+	op mapv : -> Map [ctor] .
+	op __ : Map Map -> Map [ctor assoc comm id: mapv] .
+	op [_,_,_] : type Value Float -> TMapas [ctor] .
+	op D( _ -> _ )  : Value Value -> KeyValue [ctor] .
+	op D( _ -> _ )  : Value Array -> KeyValue [ctor] .
+	op D( _ -> _ )  : Value Memory -> KeyValue [ctor] .
+	op M|_,_| : TMapas Map -> Mapa [ctor] .
+	
+	*** ARRAY
+	sort ArraySample Array .
+	subsort ArraySample < Array .
+	op arrayS( _ | _ ) : Memory Value -> ArraySample [ctor] .
+	op arrayS( _ | _ ) : Value Value -> ArraySample [ctor] .
+	op arrayEmpty : -> Array [ctor] .
+	op __ : Array Array -> Array [ctor assoc comm id: arrayEmpty] .
+endfm
+
+fmod MEMORYFUNCTIONS is
+	pr MY-PROG .
+	var F : Functions .
+	var MF : MemoryFunctions .
+	var Q : Qid .
+	var D D1 : Decorator .
+	var LE : LEntry .
+	var B : Body . 
+	var V : Value .
+	sorts DataFunction Entry LEntry MemoryFunctions .
+	subsort Entry < LEntry .
+	subsort DataFunction < MemoryFunctions .
+
+	*** Entry Parameters from Functions
+	op `(_,_,_`) : Qid Value Float -> Entry [ctor] .
+	op pV : -> LEntry [ctor] .
+	op __ : LEntry LEntry -> LEntry [ctor assoc id: pV] .
+	*** [nombreFuncion,Decorador , Decorador ,Parameters , dato devuelto ,BodyF  ]
+	op FDDR[_,_,_,_,_,_] : Qid Decorator Decorator LEntry Value Body -> DataFunction [ctor] .
+	op FDD[_,_,_,_,_] : Qid Decorator Decorator LEntry Body -> DataFunction [ctor] .
+	op FD[_,_,_,_] : Qid Decorator LEntry Body -> DataFunction [ctor] .
+	op FR[_,_,_,_] : Qid LEntry Value Body -> DataFunction [ctor] .
+	op InitD[_,_,_] : Decorator LEntry Body -> DataFunction [ctor] .
+	op InitDD[_,_,_,_] : Decorator Decorator LEntry Body -> DataFunction [ctor] .
+
+	op mfv : -> MemoryFunctions [ctor] .
+	op __ : MemoryFunctions MemoryFunctions -> MemoryFunctions [ctor assoc comm id: mfv] .
+	
+	*** Retuns body from functions
+	op getF : MemoryFunctions Qid -> Body .
+	eq getF(InitD[D,LE,B] MF , '__init__) = B .
+	eq getF(InitDD[D,D1,LE,B] MF , '__init__) = B .
+	eq getF(FD[Q,D,LE,B] MF , Q) = B .
+	eq getF(FDD[Q,D,D1,LE,B] MF , Q) = B .
+	eq getF(FR[Q,LE,V,B] MF , Q) = B .
+	eq getF(FDDR[Q,D,D1,LE,V,B] MF , Q) = B .
+
+	*** if the function returns a value it returns true, false otherwise
+	op FunHasReturn? : MemoryFunctions Qid -> Bool .
+	eq FunHasReturn?(FR[Q,LE,V,B] MF , Q) = true .
+	eq FunHasReturn?(FDDR[Q,D,D1,LE,V,B] MF , Q) = true .
+	eq FunHasReturn?( MF , Q) = false [owise] . 
+
+	*** if the function returns a struct it returns true, false otherwise
+	op returnIsStruct : MemoryFunctions Qid -> Value .
+	eq returnIsStruct(FR[Q,LE,V,B] MF , Q) = V .
+	eq returnIsStruct(FDDR[Q,D,D1,LE,V,B] MF , Q) = V .
+endfm
+
+fmod EnvironmentVariables is
+	pr MEMORY .
+	sort EnvironmentVariable .
+	op EnvVar : VarEnt -> Float .
+	eq EnvVar(block.timestamp) = 100000.0 .
+	eq EnvVar(msg.value) = 1.0 .
+	eq EnvVar(msg.sender) = 3.0 .
+endfm
+
+fmod FOO is
+ pr META-LEVEL * (op _+_ to _++_, op _;_ to _;;;_) .
+ pr MY-PROG .
+ 
+endfm
+	rew downTerm('Contract['ListS['Dp[''beneficiary.Qid,'address.type,'"public".String],'ListS['Dp[
+    ''auctionStart.Qid,'uint256.type,'"public".String],'ListS['Dp[''auctionEnd.Qid,'uint256.type,
+    '"public".String],'ListS['Dp[''highestBidder.Qid,'address.type,'"public".String],'ListS['Dp[
+    ''highestBid.Qid,'uint256.type,'"public".String],'ListS['Dp[''ended.Qid,'bool.type,
+    '"public".String],'DhmP[''pendingReturns.Qid,'address.type,'uint256.type,'"public".String]]]]]]],
+    'ListF['Fun['init['@external.Decorator,'LParam['P[''_beneficiary.Qid,'address.type],'LParam['P[
+    ''_auction_start.Qid,'uint256.type],'P[''_bidding_time.Qid,'uint256.type]]]],'BodyF['=[
+    ''beneficiary.Qid,''_beneficiary.Qid],'BodyF['=[''auctionStart.Qid,''_auction_start.Qid],'BodyF[
+    '=[''auctionEnd.Qid,'_+._[''auctionStart.Qid,''_bidding_time.Qid]],'Assert['_<._[
+    'block.timestamp.VarEnt,''auctionEnd.Qid]]]]]],'ListF['Fun['headerDD['@external.Decorator,
+    '@payable.Decorator,''bid.Qid,'PaV.Parameters],'BodyF['Assert['_>=._['block.timestamp.VarEnt,
+    ''auctionStart.Qid]],'BodyF['Assert['_<._['block.timestamp.VarEnt,''auctionEnd.Qid]],'BodyF[
+    'Assert['_>._['msg.value.VarEnt,''highestBid.Qid]],'BodyF['+=['->[''pendingReturns.Qid,
+    ''highestBidder.Qid],''highestBid.Qid],'BodyF['=[''highestBidder.Qid,'msg.sender.VarEnt],'=[
+    ''highestBid.Qid,'msg.value.VarEnt]]]]]]],'ListF['Fun['headerD['@external.Decorator,
+    ''withdraw.Qid,'PaV.Parameters],'BodyF['Dv[''pending_amount.Qid,'uint256.type,'->[
+    ''pendingReturns.Qid,'msg.sender.VarEnt]],'BodyF['=['->[''pendingReturns.Qid,'msg.sender.VarEnt],
+    '0.0.FiniteFloat],'CallP[''send.Qid,'ArgL['msg.sender.VarEnt,''pending_amount.Qid]]]]],'Fun[
+    'headerD['@external.Decorator,''endAuction.Qid,'PaV.Parameters],'BodyF['Assert['_>=._[
+    'block.timestamp.VarEnt,''auctionEnd.Qid]],'BodyF['Assert['not._[''ended.Qid]],'BodyF['=[
+    ''ended.Qid,'True.bool],'CallP[''send.Qid,'ArgL[''beneficiary.Qid,''highestBid.Qid]]]]]]]]]], errorC) .
+
+fmod AuxiliarFunctions is
+	pr MY-PROG .
+	pr MEMORY .
+	pr MEMORYFUNCTIONS .
+	pr EnvironmentVariables .
+	--- pr CONVERSION .
+	vars C : Contract .
+	var Dec Dec2 : statement .
+	vars Decs Decs1 : statements .
+	vars Funs : Functions .
+	vars Fun : Function .
+	vars Q Q1 Q2 : Qid .
+	vars T T1 : type .
+	vars S S1 : String .
+	vars Dc Dc1 : Decorator .
+	var Ps : Parameters .
+	var P : Param .
+	var B : Body .
+	var N : Nat .
+	var F F1 F2 : Float .
+	var V V1 V2 : Value .
+	var VE : VarEnt .
+	var VI : Visibilidad .
+	var CIN : ConsIndexNorm .
+	var M M1 M2 : Memory .
+	var LE : LEntry .
+	var MF : MemoryFunctions .
+	var AL : ArgList .
+	var St St1 : Stack .
+	var TM : TMapas .
+	var Ma : Map .
+	var Ac : Access .
+	var Par : Parameters .
+	var Arr : Array .
+	var E : Exp .
+	var SV : stringVar .
+	var bo : bool .
+	var varB : Variable .
+
+	*** Parse allstatements
+	op parseStatements : statements -> Memory .
+	eq parseStatements(ListS(Dec,Decs)) = newVariable(Dec) parseStatements(Decs) .
+	eq parseStatements(ListS(Decs,Decs1)) = newVariable(Decs) parseStatements(Decs1) . ***struct
+	eq parseStatements(Decs) = newVariable(Decs) [owise] .
+
+	*** Parse statement
+	op newVariable : statement -> Variable .
+	eq newVariable(D( Q , T )) = [Q,T,0.0,0.0,private,normal] .
+	eq newVariable(D( Q , Q1 )) = [Q,Q1,mv,0.0,private,normal] .
+	eq newVariable(D( Q , ->(T, F) )) = [Q,T,0.0,F,private,normal] .
+	eq newVariable(Dp( Q , bool , S )) = [Q,bool,false,0.0,public,normal] .
+	eq newVariable(Dp( Q , T , S )) = [Q,T,0.0,0.0,public,normal] .
+	eq newVariable(Dp( Q , Q1 , S )) = [Q,Q1,mv,0.0,public,normal] .
+	eq newVariable(Dp( Q , ->(T, F) , S )) = [Q,T,0.0,F,public,normal] .
+	eq newVariable(Di( Q , T , S )) = [Q,T,0.0,0.0,private,indexed] .
+	eq newVariable(Ds( Q , Decs )) = [Q,struct,parseStatements(Decs),0.0,private,normal] .
+	eq newVariable(DhmP(Q , T , V , S)) = [Q,HashMap, M| [T , V , 0.0] , mapv |,0.0,public,normal] .
+	eq newVariable(Dhm(Q , T , Q1 )) = [Q,HashMap, M| [T , Q1 , 0.0] , mapv |,0.0,private,normal] .
+	eq newVariable(Dhm(Q , T , T1 )) = [Q,HashMap, M| [T , T1 , 0.0] , mapv |,0.0,private,normal] .
+	eq newVariable(Dhm(Q , T , ->(Q1 , F) )) = [Q,HashMap, M| [T , Q1 , F] , mapv |,0.0,private,normal] .
+	eq newVariable(De( Q , Decs )) = [Q,event,parseStatements(Decs),0.0,private,normal] .
+	eq newVariable(Dc(Q , T , F , S )) = [Q,T,F,0.0,private,constante] .
+	eq newVariable(Decs) = dv [owise] .
+
+	*** Parse all functions
+	op getFunctions : Functions -> MemoryFunctions .
+	eq getFunctions(ListF(Fun,Funs)) = newFunctionVariable(Fun) getFunctions(Funs)  .
+	eq getFunctions(Fun) = newFunctionVariable(Fun) [owise] .
+
+	*** Parse simple functiom
+	op newFunctionVariable : Function -> DataFunction .
+	eq newFunctionVariable(Fun(headerDD(Dc , Dc1 , Q , Ps),B)) = FDD[Q,Dc,Dc1,parseParams(Ps),B] .
+	eq newFunctionVariable(Fun(headerDDR(Dc , Dc1 , Q ,V, Ps),B)) = FDDR[Q,Dc,Dc1,parseParams(Ps),V,B] .
+	eq newFunctionVariable(Fun(headerD(Dc , Q , Ps),B)) = FD[Q,Dc,parseParams(Ps),B] .
+	eq newFunctionVariable(Fun(init(Dc , Ps),B)) = InitD[Dc,parseParams(Ps),B] .
+	eq newFunctionVariable(Fun(init(Dc , Dc1 , Ps),B)) = InitDD[Dc,Dc1,parseParams(Ps),B] .
+	eq newFunctionVariable(Fun(headerR(Q , V , Ps),B)) = FR[Q,parseParams(Ps),V,B] .
+
+	*** Parse parameters list into entry list
+	op parseParams : Parameters -> LEntry .
+	eq parseParams(PaV) = pV .
+	eq parseParams(LParam(P,Ps)) = parseParam(P)  parseParams(Ps) .
+	eq parseParams(P) = parseParam(P) .
+
+	*** parse param intro entry
+	op parseParam : Param -> LEntry .
+	eq parseParam(P(Q , ->(T , F) )) = (Q,T,F) .
+	eq parseParam(P(Q,T)) = (Q,T,0.0) .
+	eq parseParam(P(Q,Q1)) = (Q,Q1,0.0) .
+	eq parseParam(P(Q , ->(Q1 , F ) )) = (Q,Q1,F) .
+
+	*** initialize memory
+	op initMemory : Contract -> Memory .
+	eq initMemory(Contract(Decs,Funs)) = parseStatements(Decs) ['balance, uint256, 100.0 ,0.0 ,public , normal] .
+
+	*** initialize memory functions
+	op initMemoryFunctions : Contract -> MemoryFunctions .
+	eq initMemoryFunctions(Contract(Decs,Funs)) = getFunctions(Funs) .
+
+	***adds Vyper's own functions to the function memory
+	op addMemoryBuiltFunctions : MemoryFunctions -> MemoryFunctions .
+	eq addMemoryBuiltFunctions(MF) =  MF FD['send , @external , ('_receiver , address , 0.0) ('value , uint256 , 0.0), bv ] FDD['selfdestruct , @external , @payable , ('to, address , 0.0) , bv ]  .
+	
+	***get Exp from Access
+	op getAccessExp : Access -> Exp .
+	eq getAccessExp(->(Q , E)) = E .
+
+	***get Qid from Access
+	op getAccessQid : Access -> Qid .
+	eq getAccessQid(->(Q , E)) = Q .
+
+	*** get Access from Access
+	op getAccessRecursive : Access -> Access .
+	eq getAccessRecursive (->(Ac , V)) = Ac .
+	op getValueRecursive : Access -> Value .
+	eq getValueRecursive (->(Ac , V)) = V .
+	
+	*** if there is an access it returns true, false otherwise
+	op isAcces : Access -> Bool .
+	eq isAcces(->(Q , E)) = true .
+	eq isAcces(Ac) = false [owise] .
+
+	*** if there is an access recursive it returns true, false otherwise
+	op isAccesRecursive : Access -> Bool .
+	eq isAccesRecursive(-> (Ac, V) ) = isAcces(Ac) .
+	eq isAccesRecursive(V) = false [owise] .
+
+	*** if there is qid it returns true, false otherwise
+	op isQid : Value -> Bool .
+	eq isQid(Q) = true .
+	eq isQid(V) = false [owise] .
+
+	*** if there is point qid it returns true, false otherwise
+	op isPointQid : Qid -> Bool .
+	ceq isPointQid(Q) = true
+		if S := string(Q) /\
+		N := find(S, ".", 0) .
+	eq isPointQid(Q) = false [owise] .
+
+	*** Return qid before point
+	op getFQofPoint : Qid -> Qid .
+	ceq getFQofPoint(Q) = Q1
+		if S := string(Q) /\
+		N := find(S, ".", 0) /\
+		S1 := substr(S, 0, N) /\
+		Q1 := qid(S1) .
+
+	*** return qid after point
+	op getSQofPoint : Qid -> Qid .
+	ceq getSQofPoint(Q) = Q1
+		if S := string(Q) /\
+		N := find(S, ".", 0) /\
+		S1 := substr(S, N + 1, length(S)) /\
+		Q1 := qid(S1) .
+
+	*** if value is bool type it returns true, false otherwise
+	op isBool : Value -> Bool .
+	eq isBool(True) = true .
+	eq isBool(False) = true .
+	eq isBool(V) = false .
+
+	*** return Bool from bool 
+	op getValueOfBool : bool -> Bool .
+	eq getValueOfBool(True) = true .
+	eq getValueOfBool(False) = false .
+
+	*** if value is constant it returns true, false otherwise
+	op isConstant : Value -> Bool .
+	eq isConstant(ZERO-ADDRESS) = true .
+	eq isConstant(EMPTY-BYTES32) = true .
+	eq isConstant(V) = false [owise] .
+
+	*** return Constant
+	op getValueOfConstant : Value -> Value .
+	eq getValueOfConstant(ZERO-ADDRESS) = 0.0 .
+	eq getValueOfConstant(EMPTY-BYTES32) = 0.0 .
+
+	***returns the value of a variable from memory, searching by name
+	op getValueMemory : Qid Memory type -> Value .
+	eq getValueMemory(Q , [Q,T,V,F1,VI,CIN] M, T1 ) = if T == bool and (not (V :: Bool) )
+														then false
+														else V 
+														fi [print Q V T] .
+	eq getValueMemory(Q , M , T) = if T == bool
+									then false
+									else  0.5 
+									fi [owise] .
+
+	*** returns the value of a variable from memory, searching by name
+	op getValueStack : Stack Qid ~> Value .
+	eq getValueStack(push(M , St) ,  Q) = if inMemory(M , Q)
+									then getValueMemory(Q , M , getTypeFromMemory(M,Q))
+									else getValueStack(St , Q) 
+									fi .
+
+	*** returns entry parameters from functions
+	op getParametersFunction : Qid MemoryFunctions -> LEntry .
+	eq getParametersFunction('__init__ , InitD[Dc,LE,B] MF) = LE .
+	eq getParametersFunction('__init__ , InitDD[Dc,Dc1,LE,B] MF) = LE .
+	eq getParametersFunction(Q , FD[Q,Dc,LE,B] MF) = LE .
+	eq getParametersFunction(Q , FDD[Q,Dc,Dc1,LE,B] MF) = LE .
+	eq getParametersFunction(Q , FR[Q,LE,V,B] MF) = LE .
+	eq getParametersFunction(Q , FDDR[Q,Dc,Dc1,LE,V,B] MF) = LE .
+
+	***check if I have the same number of input parameters as requests for a function
+	op adjustParameters : LEntry ArgList -> Bool .
+	eq adjustParameters((Q,V,0.0) LE , ArgL(V1,AL) ) = adjustParameters(LE , AL) .
+	eq adjustParameters((Q,V,1.0) LE , ArgL(V1,AL) ) = adjustParameters(LE , AL) .
+	eq adjustParameters((Q,V,F) LE , ArgL(V1,AL) ) = if V == String
+													then  adjustParameters(LE , AL) 
+													else adjustParameters((Q,V, F - 1.0 ) LE , AL) 
+													fi  .
+	eq adjustParameters(pV, argV ) = true .
+	eq adjustParameters(LE , AL) = false [owise] .
+
+	***if there is value in stack it returns true, false otherwise
+	op inStack : Stack Value -> bool .
+	eq inStack(push(M,St), V) = inMemory(M,V) or inStack(St,V) .
+	eq inStack(stackE, V) = false .
+
+	***if there is value in memory it returns true, false otherwise
+	op inMemory : Memory Qid -> Bool .
+	eq inMemory(M [Q , T , V , F1 , VI, CIN ] M1 , Q) =  true  .
+	eq inMemory(M [Q , T , M| TM , Ma | , F1 , VI, CIN ] M1 , Q) =  true .
+	eq inMemory(M [Q , T , M2 , F1 , VI, CIN ] M1 , Q) =  true .
+	eq inMemory(M [Q , T , Arr , F1 , VI, CIN ] M1 , Q) =  true .
+	eq inMemory(M [Q , Q1 , M2 , F1 , VI, CIN ] M1 , Q) =  true .
+	eq inMemory(M,Q) = false [owise] .
+
+	*** create a memory with the parameters passed to the function
+	op addMemory : LEntry ArgList Memory -> Memory .
+	eq addMemory((Q,V,0.0) LE , ArgL(V1,AL) , M ) = addMemory(LE , AL , [Q,V,V1,0.0,private,normal] M) .
+	eq addMemory((Q,String,F) LE , ArgL(V1,AL) , M ) = addMemory(LE , AL , [Q,String,V1,F,private,normal] M) .
+	eq addMemory((Q,V,1.0) LE , ArgL(V1,AL) , [Q,V2,Arr,F1,VI,CIN] M ) = addMemory(LE , AL ,[Q,V2,addValuetoArray(V1,F1,Arr) ,F1 + 1.0 ,VI,CIN] M ) .
+	eq addMemory((Q,V,F) LE , ArgL(V1,AL) , [Q,V2,Arr,F1,VI,CIN] M ) = addMemory((Q,V,F - 1.0) LE , AL ,[Q,V2,addValuetoArray(V1,F1,Arr) ,F1 + 1.0 ,VI,CIN] M ) .
+	eq addMemory((Q,V,1.0) LE , ArgL(V1,AL) , M ) = addMemory(LE , AL , [Q,V,arrayS( V1 | 0.0) ,1.0,private,normal] M ) .
+	eq addMemory((Q,V,F) LE , ArgL(V1,AL) ,  M ) = addMemory((Q,V,F - 1.0) LE , AL , [Q,V,arrayS( V1 | 0.0) ,1.0,private,normal] M) .
+	eq addMemory((Q,V,0.0) , V1 , M ) =  [Q,V,V1,0.0,private,normal] M .
+	eq addMemory(pV , argV, M) = M .
+	
+	***add value to the array
+	op addValuetoArray : Value Value Array -> Array .
+	eq addValuetoArray(V,V1,Arr) = arrayS(V | V1) Arr .
+	eq addValuetoArray(V , V1 , arrayS(V2 | V1) Arr ) =  arrayS(V | V1) Arr .
+
+	*** store value in stack
+	op storeMemoryStack : Stack Qid Value ~> Stack .
+	eq storeMemoryStack(push(M , St) , Q , V) = if inMemory(M , Q) 
+												then push(storeMemory(M , Q , V) , St)
+												else push(M, storeMemoryStack(St, Q ,V))
+												fi .
+
+	***store value in memory
+	op storeMemory : Memory Qid Value -> Memory .
+	eq storeMemory([Q , T , V , F1 , VI, CIN ] M , Q , V1) =  [Q, T , V1 ,F1 ,VI,CIN ] M .
+	eq storeMemory(M , Q ,V) = M [owise] .
+
+	***store memory in stack
+	op storeMemoryOnMemoryStack : Stack Qid Memory ~> Stack . *** no se si es necesario añadir el caso base
+	eq storeMemoryOnMemoryStack(push(M , St) , Q , M1) = if inMemory(M , Q) 
+												then push(storeMemoryOnMemory(M , Q , M1) , St)
+												else push(M, storeMemoryOnMemoryStack(St, Q ,M1))
+												fi .
+
+	*** store memory in memory
+	op storeMemoryOnMemory : Memory Qid Memory -> Memory .
+	eq storeMemoryOnMemory([Q , T , M1 , F1 , VI, CIN ] M , Q , M2) =  [Q, T , M2 ,F1 ,VI,CIN ] M .
+	eq storeMemoryOnMemory([Q , Q1 , M1 , F1 , VI, CIN ] M , Q , M2) =  [Q, Q1 , M2 ,F1 ,VI,CIN ] M .
+	eq storeMemoryOnMemory(M , Q , M1) = M [owise] .
+
+	***stores a value in a variable inside struct and in turn inside a stack
+	op storeValueOnVariableStructStack : Stack Qid Qid Value Stack ~> Stack . *** no se si es necesario añadir el caso base
+	eq storeValueOnVariableStructStack(push(M , St) , Q , Q1 , V , St1 ) = if inMemory(M , Q) 
+												then push(storeValueOnVariableStructMemory(M , Q , Q1 , V , St1) , St)
+												else push(M, storeValueOnVariableStructStack(St, Q , Q1 , V , St1))
+												fi .
+
+	***stores a value in a variable inside struct and in turn inside a memory
+	op storeValueOnVariableStructMemory : Memory Qid Qid Value Stack -> Memory .
+	ceq storeValueOnVariableStructMemory([Q , Q2 , M1 , F1 , VI, CIN ] M , Q , Q1 , V , St ) =  [Q, Q2 , storeMemory(M1,Q1,V) ,F1 ,VI,CIN ] M 
+		if M1 =/= mv .
+	eq storeValueOnVariableStructMemory([Q , Q2 , mv , F1 , VI, CIN ] M , Q , Q1 , V , St ) =  [Q, Q2 , storeMemory(getMemoryStack(St , Q2) ,Q1,V) ,F1 ,VI,CIN ] M .
+
+	***stores a value in a hasmap within a stack
+	op storeMemoryHMStack : Stack Qid Value Value ~> Stack .
+	eq storeMemoryHMStack(push(M , St) , Q , V ,V1) = if inMemory(M , Q) 
+												then push(storeHMMemory(M , Q , V , V1) , St)
+												else push(M, storeMemoryHMStack(St, Q ,V , V1))
+												fi .
+
+	***stores a value in a hasmap within a memory
+	op storeHMMemory : Memory Qid Value Value -> Memory .
+	eq storeHMMemory([Q , HashMap , M| TM , Ma |, F1 , VI, CIN ] M , Q , V , V1) =  [Q, HashMap , M| TM , addMap(Ma, V , V1) | ,F1 ,VI,CIN ] M .
+	eq storeHMMemory(M , Q ,V , V1) = M [owise] .
+
+	*** store value in Map
+	op addMap : Map Value Value -> Map .
+	eq addMap( D(V -> V1) Ma , V , V2 ) = D(V -> V2) Ma .
+	eq addMap(Ma , V , V1) = D(V -> V1) Ma .
+	eq addMap(mapv , V , V1) = D(V -> V1) .
+
+	**** stores a value in an array within a hashmap and within a stack
+	op storeMemoryHMArrayStack : Stack Qid Value Value Qid Memory -> Stack .
+	eq storeMemoryHMArrayStack(push(M , St) , Q , V , V1 , Q1 , M1) = if inMemory(M , Q)
+																then push(storeMemoryHMArray(M , Q , V , V1 , Q1 , M1) , St)
+																else push(M , storeMemoryHMArrayStack(St , Q , V , V1 , Q1 , M1))
+																fi .
+
+	**** stores a value in an array within a hashmap and within a memory															
+	op storeMemoryHMArray : Memory Qid Value Value Qid Memory -> Memory .
+	eq storeMemoryHMArray([Q , HashMap , M| [T , Q1 , F] , Ma |, F1 , VI, CIN ] M , Q , V , V1, Q1, M1) = [Q , HashMap , M| [T , Q1 , F] , addMapArray(Ma , V , V1 , M1) |, F1 , VI, CIN ] M .
+
+	*** store array to the hashmap
+	op addMapArray : Map Value Value Memory -> Map .
+	eq addMapArray(D(V -> Arr) Ma , V , V1 , M1) = D(V -> addValueArray(Arr, V1 , M1)) Ma .
+	eq addMapArray(Ma , V , V1 , M1) = D(V -> addValueArray(arrayEmpty, V1 , M1)) Ma .
+
+	***store value to the array
+	op addValueArray : Array Value Memory -> Array .
+	eq addValueArray(arrayS( M | V ) Arr , V , M1 ) = arrayS( M1 | V ) Arr .
+	eq addValueArray( Arr , V , M ) = arrayS( M | V ) Arr .
+	eq addValueArray( arrayEmpty , V , M ) = arrayS( M | V ) .
+
+	***stores a value in a struct that is inside a hashamp and inside a stack
+	op storeMemoryHMStructStack : Stack Qid Value Qid Memory -> Stack .
+	eq storeMemoryHMStructStack(push(M , St) , Q , V  , Q1 , M1) = if inMemory(M , Q)
+																then push(storeMemoryHMStruct(M , Q , V  , Q1 , M1) , St)
+																else push(M , storeMemoryHMStructStack(St , Q , V , Q1 , M1))
+																fi .
+
+	***stores a value in a struct that is inside a hashamp and inside a stack
+	op storeMemoryHMStructStackWQ1 : Stack Qid Value Memory -> Stack .
+	eq storeMemoryHMStructStackWQ1(push(M , St) , Q , V   , M1) = if inMemory(M , Q)
+																then push(storeMemoryHMStructWQ1(M , Q , V  , M1) , St)
+																else push(M , storeMemoryHMStructStackWQ1(St , Q , V  , M1))
+																fi .
+
+	***stores a value in a struct that is inside a hashamp and inside a memory
+	op storeMemoryHMStruct : Memory Qid Value Qid Memory -> Memory .
+	eq storeMemoryHMStruct([Q , HashMap , M| [T , Q1 , F] , Ma |, F1 , VI, CIN ] M , Q , V , Q1, M1) = [Q , HashMap , M| [T , Q1 , F] , addMapStruct(Ma , V , M1) |, F1 , VI, CIN ] M .
+
+	***stores a value in a struct that is inside a hashamp and inside a memory
+	op storeMemoryHMStructWQ1 : Memory Qid Value Memory -> Memory .
+	eq storeMemoryHMStructWQ1([Q , HashMap , M| [T , Q1 , F] , Ma |, F1 , VI, CIN ] M , Q , V , M1) = [Q , HashMap , M| [T , Q1 , F] , addMapStruct(Ma , V , M1) |, F1 , VI, CIN ] M .
+
+	*** store map to the struct
+	op addMapStruct : Map Value Memory -> Map .
+	eq addMapStruct(D(V -> M) Ma , V , M1) = D(V -> M1) Ma .
+	eq addMapStruct(Ma , V , M1) = D(V -> M1) Ma .
+	eq addMapStruct(mapv , V , M1) = D(V -> M1) .
+
+	*** stores a value in a struct that is inside a hashamp and inside a stack
+	op storeValueIntoHMSStack : Stack Qid Value Value Value -> Stack .
+	eq storeValueIntoHMSStack(push(M , St) , Q , V  , V1 , V2) = if inMemory(M , Q)
+																then push(storeValueIntoHMSS(M , Q , V  , V1 , V2) , St)
+																else push(M , storeValueIntoHMSStack(St , Q , V  , V1 , V2))
+																fi .
+	
+	***stores a value in a struct that is inside a hashamp and inside a memory
+	op storeValueIntoHMSS : Memory Qid Value Value Value -> Memory .
+	eq storeValueIntoHMSS([Q , HashMap , M| [T , Q1 , F] , Ma |, F1 , VI, CIN ] M , Q , V , V1, V2) = [Q , HashMap , M| [T , Q1 , F] , addMapStructValue(Ma , V , V1 , V2, getMemoryFromMemory(M,Q1) ) |, F1 , VI, CIN ] M .
+
+	***store struct to the Map
+	op addMapStructValue : Map Value Value Value Memory -> Map .
+	eq addMapStructValue(D(V -> M) Ma , V , V1 , V2, M1) = D(V -> storeMemory(M ,V1 , V2)) Ma .
+	eq addMapStructValue(Ma , V , V1 , V2, M) = D(V -> storeMemory(M , V1 , V2)) Ma .
+
+	***returns value from hashamp into stack 
+	op getMemoryHMStack : Stack Qid Value  ~> Value . *** no se si es necesario añadir el caso base
+	eq getMemoryHMStack(push(M , St) , Q , V ) = if inMemory(M , Q) 
+												then getHMMemory(M , Q , V ) 
+												else  getMemoryHMStack(St, Q ,V )
+												fi  .
+
+	***returns value from hashamp into memory 
+	op getHMMemory : Memory Qid Value  -> Value .
+	eq getHMMemory([Q , HashMap , M| [T,V1,F2] , Ma |, F1 , VI, CIN ] M , Q , V ) =  getValueOfMap(Ma , V , V1) .
+	eq getHMMemory([Q , T , Arr , F1 , VI, CIN ] M , Q , V ) = getValueOfArray(Arr , V) .
+
+	***returns value from hashamp
+	op getValueOfMap : Map Value Value -> Value .
+	eq getValueOfMap( D(V -> V1) Ma , V , V2) = V1 .
+	eq getValueOfMap(Ma , V , V1) = if V1 == bool
+									then false 
+									else 0.5 
+									fi .
+
+	*** returns value from array
+	op getValueOfArray : Array Value -> Value .
+	eq getValueOfArray(arrayS(V | V1) Arr , V1) = V .
+	eq getValueOfArray(Arr , V1) = 0.0 [owise] .
+	
+	***add variable on stack
+	op addNewVariableStack : Stack Qid Value Value -> Stack .
+	eq addNewVariableStack(push(M , St) , Q , V , V1) = push(addNewVariableMemory(M , Q , V , V1) , St) .
+
+	***add variable on memory
+	op addNewVariableMemory : Memory Qid Value Value -> Memory .
+	eq addNewVariableMemory(M , Q, V , V1 ) = [Q , V , V1 , 0.0 , private , normal] M .
+
+	***add variable with struct on stack
+	op addNewVariableMStack : Stack Qid Value Memory -> Stack .
+	eq addNewVariableMStack(push(M , St) , Q , V , M1) = push(addNewVariableMMemory(M , Q , V , M1) , St) .
+
+	***add variable with struct on memory
+	op addNewVariableMMemory : Memory Qid Value Memory -> Memory .
+	eq addNewVariableMMemory(M , Q, V , M1 ) = [Q , V , M1 , 0.0 , private , normal] M .
+	
+	***delete variable on stack
+	op delVariableStack : Stack Qid -> Stack .
+	eq delVariableStack(push(M , St) , Q  ) = if inMemory(M , Q) 
+												then push(delVariableMemory(M , Q ) ,St) 
+												else  push(M, delVariableStack(St, Q ))
+												fi .
+
+	***delete variable on memory										
+	op delVariableMemory : Memory Qid -> Memory .
+	eq delVariableMemory([Q , T , V , F1 , VI, CIN ] M , Q ) = M .
+
+	***returns memory from stack
+	op getMemoryStack : Stack Qid -> Memory .
+	eq getMemoryStack(push(M , St) , Q) = if inMemory(M , Q)
+											then getMemoryFromMemory(M , Q)
+											else getMemoryStack(St , Q)
+											fi .
+
+	*** return memory from memory
+	op getMemoryFromMemory : Memory Qid -> Memory .
+	eq getMemoryFromMemory ([Q , T , M1 , F1 , VI, CIN ]  M , Q) = M1 .
+	eq getMemoryFromMemory ([Q , Q1 , M1 , F1 , VI, CIN ]  M , Q) = M1 .
+
+	***return value from hashmap into stack
+	op getValue.->Stack : Stack Qid Value Value -> Value .
+	eq getValue.->Stack(push(M,St) , Q , V1 , V2) = if inMemory(M , Q)
+													then getValue.->Memory(M, Q , V1 ,V2)
+													else getValue.->Stack(St , Q , V1 ,V2)
+													fi .
+	
+	***return value from hashmap into memory
+	op getValue.->Memory : Memory Qid Value Value -> Value .
+	eq getValue.->Memory([Q , HashMap , M| [T , Q1 , F]  , Ma |, F1 , VI, CIN ] M , Q , V1 , V2) = getValueMemory(V2 , getMemoryFromHM(Ma, V1), getTypeFrom(M , Q1 , V2)) .
+
+	*** return struct from hashamp
+	op getMemoryFromHM : Map Value -> Memory .
+	eq getMemoryFromHM( D(V -> M) Ma , V) = M .
+	eq getMemoryFromHM(Ma , V) = mv  .
+
+	*** return struct from array int hashamp int stack 
+	op getMemory->>Stack : Stack Qid Value Value -> Memory .
+	eq getMemory->>Stack(push(M,St) , Q , V1 , V2) = if inMemory(M , Q)
+													then getMemory->>Memory(M, Q , V1 ,V2)
+													else  getMemory->>Stack(St , Q , V1 ,V2)
+													fi .
+
+	*** return struct from array int hashamp int memory 
+	op getMemory->>Memory : Memory Qid Value Value -> Memory .
+	eq getMemory->>Memory([Q , HashMap , M| [T , Q1 , F]  , Ma |, F1 , VI, CIN ] M , Q , V1 , V2) = getMemoryFromArray(getArrayFromHM(Ma , V1) , V2) .
+	
+	***return array from hashmap										
+	op getArrayFromHM : Map Value -> Array .
+	eq getArrayFromHM( D(V -> Arr) Ma , V) = Arr .
+	eq getArrayFromHM(Ma , V) = arrayEmpty  .
+
+	***return struct from array
+	op getMemoryFromArray : Array Value -> Memory .
+	eq getMemoryFromArray(arrayS(M | V1) Arr , V1) = M .
+	eq getMemoryFromArray(Arr , V1) = mv [ owise ] .
+
+	*** returns the type of a variable from a stack
+	op getTypeFromStack : Stack Qid -> type .
+	eq getTypeFromStack(push(M,St) , Q) = if inMemory(M,Q)
+											then getTypeFromMemory(M,Q)
+											else getTypeFromStack(St , Q)
+											fi . 
+
+	*** returns the type of a variable from a memory
+	op getTypeFrom : Memory Qid Value -> type .
+	eq getTypeFrom([Q , T , M1 , F1 , VI, CIN ] M , Q , V) = getTypeFromMemory(M1 , V) .
+
+	*** returns the type of a variable from a memory
+	op getTypeFromMemory : Memory Qid -> type .
+	eq getTypeFromMemory([Q , T , V , F1 , VI, CIN ] M , Q) = T .
+	eq getTypeFromMemory([Q , T , M1 , F1 , VI, CIN ] M , Q) = T .
+
+	***returns the type of a variable from a stack
+	op getTypeVFromStack : Stack Qid -> Value .
+	eq getTypeVFromStack(push(M,St) , Q) = if inMemory(M,Q)
+											then getTypeVFromMemory(M,Q)
+											else getTypeVFromStack(St , Q)
+											fi . 
+	*** returns the type of a variable from a mmemory
+	op getTypeVFromMemory : Memory Qid -> Value .
+	eq getTypeVFromMemory([Q , V , M1 , F1 , VI, CIN ] M , Q) = V .
+
+	*** checks if the values ​​passed to a struct correspond to the necessary ones
+	op compareMemoryAL : Memory ArgList -> Bool .
+	eq compareMemoryAL([Q , T , V , F1 , VI, CIN ] M ,  ArgL(V1,AL)) = compareMemoryAL(M , AL) .
+	eq compareMemoryAL(mv , argV) = true .
+	eq compareMemoryAL(M , AL) = false [owise] .
+
+	*** replace the values ​​of a struct with the ones passed by parameters
+	op replaceMemorywithArgList : Memory ArgList -> Memory .
+	eq replaceMemorywithArgList([Q , T , V , F1 , VI, CIN ] M ,  ArgL(V1,AL)) = [Q , T , V1 , F1 , VI, CIN ]  replaceMemorywithArgList(M , AL) .
+	eq replaceMemorywithArgList(mv , argV) = mv [owise] .
+
+	***replace the values ​​of a struct with the ones passed by parameters
+	op changeValueMemoryParameters : Memory Param Stack -> Memory .
+	eq changeValueMemoryParameters([Q , T , V , F1 , VI, CIN ] M , LParam(P(Q, V1), Par), St) = [Q , T , V1 , F1 , VI, CIN ] changeValueMemoryParameters(M , Par,St) .
+	eq changeValueMemoryParameters([Q , T , V , F1 , VI, CIN ] M , LParam(P(Q, ->(Q1, V1)), Par) , St) = if V1 :: Qid
+																										then [Q , T , getMemoryHMStack(St , Q1 , getValueStack(St , V1)) , F1 , VI, CIN ] changeValueMemoryParameters(M , Par, St) 
+																										else [Q , T , getMemoryHMStack(St , Q1 , V1) , F1 , VI, CIN ] changeValueMemoryParameters(M , Par, St)
+																										fi .
+	eq changeValueMemoryParameters([Q , T , V , F1 , VI, CIN ] mv , P(Q, V1) , St) = [Q , T , V1 , F1 , VI, CIN ] .
+	eq changeValueMemoryParameters([Q , T , V , F1 , VI, CIN ] mv , P(Q, ->(Q1, V1)) , St) = if V1 :: Qid
+																							then [Q , T , getMemoryHMStack(St , Q1 , getValueStack(St , V1)) , F1 , VI, CIN ] 
+																							else [Q , T , getMemoryHMStack(St , Q1 , V1) , F1 , VI, CIN ] 
+																							fi .
+	
+	*** replace a stack with the parameterized values
+	op replaceArglistWithValue : ArgList Stack -> ArgList .
+	eq replaceArglistWithValue(ArgL(Q,AL) , St) = ArgL(getValueStack(St , Q) , replaceArglistWithValue(AL, St)) .
+	eq replaceArglistWithValue(ArgL(.(->(Q , V1), V2) ,AL) , St) = ArgL(getValue.->Stack(St, Q, V1, V2) , replaceArglistWithValue(AL, St)) .
+	eq replaceArglistWithValue(ArgL(F,AL) , St) = ArgL(F , replaceArglistWithValue(AL, St)) .
+	eq replaceArglistWithValue(ArgL(SV,AL) , St) = ArgL(SV , replaceArglistWithValue(AL, St)) .
+	eq replaceArglistWithValue(ArgL(VE,AL) , St) = ArgL(EnvVar(VE), replaceArglistWithValue(AL, St)) .
+	eq replaceArglistWithValue(Q , St) = getValueStack(St , Q) .
+	eq replaceArglistWithValue(.(->(Q , V1), V2) , St) = getValue.->Stack(St, Q, V1, V2) .
+	eq replaceArglistWithValue(F , St) = F .
+	eq replaceArglistWithValue(VE , St) = EnvVar(VE) .
+	eq replaceArglistWithValue(argV , St) = argV .
+	eq replaceArglistWithValue(SV,St) = SV .
+
+	*** values ​​are added to an array from an arglist that is inside a stack
+	op addArglistTOMemory : Value Stack -> Stack .
+	eq addArglistTOMemory(V , push(M,St)) = if inMemory(M, 'Arg)
+											then push(addValueArrayWQ(V , 'Arg , M) , St)  
+											else push(['Arg, int128 , arrayS(V | 0.0) , 1.0 , private , normal] M , St )
+											fi .
+
+	**** values ​​are added to an array from an arglist that is inside a memory
+	op addValueArrayWQ : Value Qid Memory -> Memory .
+	eq addValueArrayWQ(V , Q , [Q , T , Arr , F1 , VI , CIN] M) = [Q , T , arrayS( V | F1 ) Arr , F1 + 1.0 , VI , CIN] M [print V Q Arr ] .
+
+	*** entry parameters are qids
+	op lEntraIsMemory : LEntry -> Bool .
+	eq lEntraIsMemory((Q,V,F) LE) = isQid(V) or lEntraIsMemory(LE) .
+	eq lEntraIsMemory(pV) = false .
+
+	*** return value from entry parameters
+	op getQidFromLE : LEntry -> Qid .
+	eq getQidFromLE((Q,V,F) LE) = if isQid(V)
+								then V
+								else getQidFromLE(LE) 
+								fi .
+
+	***return qid from entry parameters
+	op getQidFromQidLE : LEntry -> Qid .
+	eq getQidFromQidLE((Q,V,F) LE) = if isQid(V)
+								then Q
+								else getQidFromQidLE(LE) 
+								fi .
+	*** convert
+	op convert : Value -> Value .
+	eq convert(true) = 1.0 .
+	eq convert(false) = 0.0 .
+	eq convert(V) = V [owise] .
+
+	*** concat
+	op concat : ArgList -> Value .
+	eq concat(ArgL(V,AL) ) = V + concat(AL) .
+	eq concat(argV) = 0.0 .
+
+	*** Stack to string
+	op stackToString : Stack -> String .
+	eq stackToString(push(M, St)) = memoryToString(M) + stackToString(St) .
+	eq stackToString(stackE) = "" .
+
+	***memory to string
+	op memoryToString : Memory -> String .
+	eq memoryToString(varB M) = varToString(varB) + "\n" + memoryToString(M) .
+	eq memoryToString(mv) = " " .
+
+	op varToString : Memory -> String .
+	--- eq varToString()
+	eq varToString([Q , T , V , F1 , VI, CIN ]) =  "variable: " + string(Q) + " tipo: " + typeToString(T) .
+	eq varToString([Q , T , M| [T1,Q1,F] , Ma | , F1 , VI, CIN ] ) =  "variable: " + string(Q) + ", tipo: " + "hashmap, tipos de mapa: " + typeToString(T1) + string(Q1) + "MAPA (" + mapToString(Ma)  + " )" .
+	--- eq varToString(M [Q , T , M2 , F1 , VI, CIN ] M1 , Q) =  true .
+	--- eq varToString(M [Q , T , Arr , F1 , VI, CIN ] M1 , Q) =  true .
+	--- eq varToString(M [Q , Q1 , M2 , F1 , VI, CIN ] M1 , Q) =  true .
+
+	--- op valueToString : Value -> String .
+	--- eq valueToString(F) = string(qid(F)) .
+	op typeToString : type -> String .
+	eq typeToString(bool) = "bool" .
+	eq typeToString(int128) = "int128" .
+	eq typeToString(address) = "address" .
+
+	op mapToString : Map -> String .
+	eq mapToString(D( V -> V1 ) Ma)  = "VALOR 1 " + " VALOR2 " + mapToString(Ma) .
+	eq mapToString(D( V -> Arr ) Ma) = "Todavia nada" + mapToString(Ma) .
+	eq mapToString(D( V -> M ) Ma)  = "valor1 " + memoryToString(M) + mapToString(Ma) .
+	eq mapToString(mapv) = "" .
+
+endfm
+rew noneV .
+--- rew valueToString(1.0) .
+rew stackToString(push(['aviso,(bool).type,0.0,0.0,private,normal] ['aviso2,(int128).type,0.0,0.0,private,normal] ['voters,HashMap,M| [address,'Voter,0.0],D(0.0 -> ['delegate,address,0.0,0.0,private,normal] [
+		'vote,int128,1.0,0.0,private,normal] ['voted,bool,true,0.0,private,normal] ['weight,int128,1.0,0.0,private,
+		normal]) D(3.0 -> ['delegate,address,0.0,0.0,private,normal] ['vote,int128,0.0,0.0,private,normal] ['voted,bool,true,0.0,private,normal] ['weight,int128,1.0,0.0,private,
+		normal]) |,0.0,public,normal], stackE)) .
+***['voters,HashMap,M| [address,'Voter,0.0],D(0.0 -> ['delegate,address,0.0,0.0,private,normal] [
+		--- 'vote,int128,1.0,0.0,private,normal] ['voted,bool,true,0.0,private,normal] ['weight,int128,1.0,0.0,private,
+		--- normal]) D(3.0 -> ['delegate,address,0.0,0.0,private,normal] ['vote,int128,0.0,0.0,private,normal] ['voted,bool,true,0.0,private,normal] ['weight,int128,1.0,0.0,private,
+		--- normal]) |,0.0,public,normal]
+mod SEMANTICS is
+	pr MY-PROG .
+	pr MEMORY .
+	pr MEMORYFUNCTIONS .
+	pr AuxiliarFunctions .
+	pr CONVERSION * (op string to stringF) .
+	sort ExecutionTuple .
+	--- subsort Value < ExecutionTuple .
+	--- subsort ArgList < ExecutionTuple .
+	subsort Parameters < ExecutionTuple .
+	--- subsort Value < ExecutionTuple .
+	op exec : Contract Body -> ExecutionTuple [ctor] .
+	--- op <_,_,_> : Body MemoryFunctions Stack -> ExecutionTuple [ctor] .
+	op <_,_,_,_,_> : Body MemoryFunctions Stack ArgList Memory -> ExecutionTuple [ctor] .
+	--- op a : ExecutionTuple -> Value .
+	var C : Contract .
+	var M M1 M2 M3 M4 : Memory .
+	var MF MF1 MF2 : MemoryFunctions . 
+	var E E1 E2 : Exp .
+	var Q Q1 Q2 Q3 : Qid .
+	var B B1 B2 B3 : Body .
+	var Ac Ac1 : Access .
+	var F F1 : Float .
+	var AL AL1 AL' : ArgList .
+	var Pa : Parameters .
+	var LE : LEntry .
+	var V V1 V2 V3 V4 V5 : Value .
+	var S S1 S2 S3 S4 : Stack .
+	var Par Par1 : Parameters .
+	var Str Str1 : String . 
+	var LEI : ListElseif .
+	var T : type .
+	var Decs : statements .
+	var Dec : statement .
+	var Funs : Functions .
+	var Fun : Function .
+
+	crl[exec] : exec(C,B) 
+	=> < B , MF1, push(initMemory(C) , stackE) , noneV , mv > 
+	if 	MF := initMemoryFunctions(C) /\
+	   MF1 := addMemoryBuiltFunctions(MF) .
+
+	--- crl[exec] : exec(C,B) 
+	--- => < B , MF1, push(initMemory(C) , stackE) , noneV , mv > 
+	--- if M := initMemory(C) /\
+	--- 	Contract(ListS(Dec,Decs),ListF(Fun,Funs)) := C /\
+	--- 	M1 := newVariable(Dec) /\
+	--- 	MF2 := newFunctionVariable(Fun) /\
+	--- 	--- eq parseStatements(ListS(Dec,Decs)) = newVariable(Dec) parseStatements(Decs) .
+	--- 	---eq getFunctions(ListF(Fun,Funs)) = newFunctionVariable(Fun) getFunctions(Funs)  .
+	--- 	MF := initMemoryFunctions(C) /\
+	---    MF1 := addMemoryBuiltFunctions(MF) [print "memoria " M " desc " Dec  " M1 " M1 " FUN " Fun " MF2 " MF2 ] .
+*** REGLA QUE LLAMA A UNA Function SIN Parameters 	CallP('convert, ArgL('value, bytes32))
+	crl [call] :
+    < BodyF(Call(Q), B) , MF , S , V , M > => < B , MF , S1 , V1 , M2 >
+ 	if not FunHasReturn?(MF,Q) /\
+	B1 := getF(MF,Q) /\
+	< B1 ,  MF , push(mv,S) , V , M > =>  < bv ,  MF , push(M1 ,S1) , V1 , M2 > [print "CALL " Q B1 ] . 
+
+---  crl [callReturnsStruct] :
+---     < BodyF(Call(Q), B) , MF , S > => V
+---  	if FunHasReturn?(MF,Q) /\ 
+--- 	V1 := returnIsStruct(MF,Q) /\
+--- 	isQid(V1) /\
+--- 	T := getTypeFromStack(S,V1) /\
+--- 	T == struct /\
+--- 	 B1 := getF(MF,Q) /\
+--- 	< B1 ,  MF , push(mv,S) > =>  V /\
+--- 	M := getMemoryStack(S , V) [print "Return = " M] .
+
+crl [callReturns] :
+    < BodyF(Call(Q), B) , MF , S , V , M > => < B ,  MF , S1 , V1 , M >
+ 	if FunHasReturn?(MF,Q) /\ 
+	V2 := returnIsStruct(MF,Q) /\
+	not isQid(V2) /\
+	 B1 := getF(MF,Q) /\
+	< B1 ,  MF , push(mv,S) , V , M > =>  < bv ,  MF , push(M1 , S1) , V1 , M > [print "CallR " Q " return " V1] .
+
+crl [callReturnsMemory] :
+    < BodyF(Call(Q), B) , MF , S , V , M > => < B ,  MF , S1 , V , M2 >
+ 	if FunHasReturn?(MF,Q) /\ 
+	V2 := returnIsStruct(MF,Q) /\
+	isQid(V2) /\
+	 B1 := getF(MF,Q) /\
+	< B1 ,  MF , push(mv,S) , V , M > =>  < bv ,  MF , push(M1 , S1) , V , M2 > [print "CallR memory " Q " return " M2] .
+--- *** REGLA QUE LLAMA A UNA Function CON Parameters 
+--- 	***CALL PARA VER LOS FALLOS
+--- 	crl [callParameters] :
+---     < CallP(Q,AL) ,  MF , S > => < B1 ,  MF , push(M1,S) >
+---  	if not FunHasReturn?(MF,Q) /\
+--- 	 LE := getParametersFunction(Q , MF) /\
+--- 	 	< AL , MF , S > => AL1  /\
+--- 	 	adjustParameters(LE , AL1) /\
+--- 		B1 := getF(MF,Q) /\
+--- 		M1 := addMemory(LE , AL1 , mv) [print "callParameters " Q  AL1 ] .
+*** calL por donde se pasa por parametro una MEMORY 
+crl [callParametersLE] :
+    < BodyF(CallP(Q,AL), B) ,  MF , S , V , M > => < B ,  MF , S1 , V1 , M >
+ 	if FunHasReturn?(MF,Q) /\
+	 	LE := getParametersFunction(Q , MF) /\
+		lEntraIsMemory(LE) == true /\
+		Q1 := getQidFromLE(LE) /\
+		< AL , MF , S , V , M > => < bv , MF , S , AL1 , M > /\
+		M3 := getMemoryStack(S , Q1) /\
+	 	compareMemoryAL(M3, AL1) /\
+		B1 := getF(MF,Q) /\
+		M1 := replaceMemorywithArgList(M3 , AL1) /\
+		Q2 := getQidFromQidLE(LE) /\
+		M2 := [Q2 , Q1 , M1 , 0.0 , private , normal] /\
+		< B1 ,  MF , push(M2, S) , V , M > =>  < bv ,  MF , push(M4 , S1) , V1 , M > [print "callParameters LE QID " Q " Q1 " Q1 " M1 " M2 " -> AL1 " AL1 "return v1" V1] .
+--- M1 := getMemoryStack(S , Q) /\
+--- 		< AL , MF , S , V , M > => < bv , MF , S , AL1 , M > /\
+--- 		compareMemoryAL(M1, AL1) /\
+--- 		M2 := replaceMemorywithArgList(M1 , AL1) [print "log Event " " AL1 -> " AL1 " Memory " M2 ] .
+--- 	*** CALLL DE VERDAD
+	crl [callParameters] :
+    < BodyF(CallP(Q,AL), B) ,  MF , S , V , M > => < B ,  MF , S1 , V , M >
+ 	if not FunHasReturn?(MF,Q) /\
+	 	LE := getParametersFunction(Q , MF) /\
+		< AL , MF , S , V , M > => < bv , MF , S , AL1 , M > /\
+	 	adjustParameters(LE , AL1)  /\
+		B1 := getF(MF,Q) /\
+		M1 := addMemory(LE , AL1 , mv) /\
+		< B1 ,  MF , push(M1, S) , V , M > =>  < bv ,  MF , push(M2 , S1) , V , M > [print "callParameters " Q "-> AL1 " AL1 ] .
+
+	crl [callParametersEnd] :
+    < BodyF(CallP(Q,AL), B) ,  MF , S , V , M > => < B ,  MF , S1 , V , M >
+ 	if not FunHasReturn?(MF,Q) /\
+	 	LE := getParametersFunction(Q , MF) /\
+		< AL , MF , S , V , M > => < bv , MF , S , AL1 , M > /\
+	 	adjustParameters(LE , AL1)  /\
+		B1 := getF(MF,Q) /\
+		M1 := addMemory(LE , AL1 , mv) /\
+		< B1 ,  MF , push(M1, S) , V , M > =>  < bv ,  MF , push(M2 , S1) , [Str] , M > /\
+		Str == "end" [print "callParameters end " Q "-> AL1 " AL1 " str " Str ] .
+	--- 	crl [callParameters] :
+    --- < BodyF(CallP(Q,AL), B) ,  MF , S , V , M > => < B ,  MF , S1 , V , M >
+ 	--- if not FunHasReturn?(MF,Q) /\
+	---  	LE := getParametersFunction(Q , MF) /\
+	--- 	< AL , MF , S , V , M > => < bv , MF , S , AL1 , M > /\
+	---  	adjustParameters(LE , AL)  /\ [print "callParameters " Q "-> AL1 " AL1 " " LE ] .
+
+	crl [callParametersReturn] :
+    < BodyF(CallP(Q,AL), B) ,  MF , S,  V , M > => < bv ,  MF , S1,  V1 , M >
+ 	if FunHasReturn?(MF,Q) /\
+	 	LE := getParametersFunction(Q , MF) /\
+		< AL , MF , S , V , M > => < bv , MF , S , AL1 , M > /\
+	 	adjustParameters(LE , AL1)  /\
+		B1 := getF(MF,Q) /\
+		M1 := addMemory(LE , AL1 , mv)  /\
+		< B1 ,  MF , push(M1,S) , V , M > => < bv ,  MF , push(M2,S1) , V1 , M > /\
+		V1 :: Value [print "callParametersReturn " Q "-> AL1 " AL1 " return " V1 ] .
+
+	crl [CallnewStruct] :
+    < CallP('empty, AL) ,  MF , S , V , M > => < bv , MF , S , V , M1 > 
+ 	if M1 := getMemoryStack(S, AL) [print " Call empty " AL " -> " M1] .
+
+	crl [CallConvert] :
+    < CallP('convert, AL) ,  MF , S , V , M > => < bv , MF ,S , V2 , M >
+ 	if < AL , MF ,S , V , M > => < bv , MF ,S , AL1 , M >  /\
+	 ArgL(V1 , T) := AL1 /\
+	 V2 := convert(V1) [print "Call CONVERT AL1 " AL1 " V1 " V1 " T " T " V2 " V2 ] .
+
+	crl [CallConcatenate] :
+    < CallP('concat, AL) ,  MF , S , V , M > => < bv , MF ,S , V1 , M >
+ 	if < AL , MF ,S , V , M > => < bv , MF ,S , AL1 , M >  /\
+	V1 := concat(AL1)  [print "Call concat AL1 " AL1 " V1 " V1 ] .
+
+	crl [CallKeccak256] :
+    < CallP('keccak256, AL) , MF , S , V , M > => < bv ,MF , S ,V1 , M >
+ 	if < AL , MF ,S , V, M > => < bv ,MF , S ,V1 , M > [print "Call Keccak256 " V1 ] .
+
+	crl [assig] : 
+	< BodyF( =(E,E1) , B) ,  MF, S , V , M > =>  < B ,  MF , S1 , noneV , M > 
+	if isQid(E) /\
+	< E1 ,  MF , S , V , M > =>  < bv ,  MF , S , V1 , M > /\
+	V1 =/= noneV /\
+	S1 := storeMemoryStack(S , E , V1) [print "assig"  E V1 V ]  .
+	
+	crl [assigEmptyStruct] : 
+	< BodyF( =(E,CallP('empty, Q)) , B) ,  MF, S , V , M > =>  < B ,  MF , S1 , V , M > 
+	if isQid(E) /\ 
+	getTypeFromStack(S,Q) == struct /\
+	M1 := getMemoryStack(S, Q) /\
+	S1 := storeMemoryOnMemoryStack(S , E , M1)  [print "asigEmptyStruct" E " = " Q " is " M1 ]  .
+
+	crl [assigAccess] : 
+	< BodyF( =(E,E1) , B) ,  MF, S  , V , M > =>  < B ,  MF , S1 , V , M > 
+	if isAcces(E) /\
+	< E1 ,  MF , S , V , M > =>  < bv ,  MF , S , V1 , M > /\
+	Q := getAccessQid(E) /\
+	E2 := getAccessExp(E) /\
+	< E2 ,  MF , S , V , M > =>  < bv ,  MF , S , V2 , M > /\
+	S1 := storeMemoryHMStack(S , Q ,  V2 , V1) [print "asigAccess" E " " E1 " ->" V1 " " V2 ]  .
+
+	crl [assigAccessPoint] : 
+	< BodyF( =(E,E1) , B) ,  MF, S , V , M > =>  < B ,  MF , S1 , V , M > 
+	if isPointQid(E) /\
+	< E1 ,  MF , S , V , M > => < bv,  MF , S , V1 , M > /\
+	Q := getFQofPoint(E) /\
+	Q1 := getSQofPoint(E) /\  
+	S1 := storeValueOnVariableStructStack(S , Q ,  Q1 , V1 , S) [print "asigpOINT Q " Q "  Q1 " Q1 " V1 " V1 " "  ]  .
+
+	crl [assigAccessMemory] : 
+	< BodyF( =(E,E1) , B) ,  MF, S , V , M > =>  < B ,  MF , S1 , V , M > 
+	if isAcces(E) /\
+	< E1 ,  MF , S , V , M > =>  < bv , MF , S , V , M1 > /\
+	Q := getAccessQid(E) /\
+	E2 := getAccessExp(E) /\
+	< E2 ,  MF , S , V , M > => < bv ,  MF , S , V1 , M > /\
+	S1 := storeMemoryHMStructStackWQ1(S , Q ,  V1 , M1) [print "asigAccessEmpty" E " = " Q " Y "  V1 " M = " M1 " S1 = " S1 ]  .
+
+	crl [assigHS] : 
+	< BodyF( =(E,E1) , B) ,  MF, S , V , M > =>  < B ,  MF , S1 , V , M > 
+	if .(->(Q , E2) , V1) := E /\
+	< E2 ,  MF , S , V , M > =>  < bv ,  MF , S , V3 , M > /\
+	< E1 ,  MF , S , V , M > =>  < bv ,  MF , S , V2 , M > /\
+	 S1 := storeValueIntoHMSStack(S , Q , V3 , V1 , V2) [print "asigHS"  Q " -> " E2 " . " V1 " = " V2 " " V3  ]  .
+
+	rl [addAssig] : 
+	< BodyF( +=(E,E1) , B) ,  MF, S , V , M > =>  < BodyF( =(E, E +. E1) , B) ,  MF , S , V , M >  [print "ADDasig" V ] .
+
+	rl [subAssig] : 
+	< BodyF( -=(E,E1) , B) ,  MF, S , V , M > =>  < BodyF( =(E, E -. E1) , B) ,  MF , S , V , M >  [print " sub assig " ] .
+--- 	***comprobar si es true pasar si no no
+	crl [assert] :
+	< BodyF( Assert( E ) , B) , MF, S , V , M > =>  < B ,  MF , S , noneV , M > 
+	if < E ,  MF , S , V , M > =>  < bv ,  MF , S , V1 , M >  [print "assert" V "->" V1 ] .
+
+	crl [assertString] : 
+	< BodyF( Assert( E, Str ) , B)  ,  MF, S , V, M > =>  < B ,  MF , S , V , M > 
+	if < E ,  MF , S , V , M > =>  < bv ,  MF , S , V1 , M >  [print "assert string " V1  " " Str] .
+
+	crl [newVariable] : 
+	< BodyF( Dv( Q , V , E ) , B)  ,  MF, S , V1 , M > =>  < B ,  MF , S1 , V1 , mv > 
+	if < E ,  MF , S , V1 , M > =>  < bv ,  MF , S , V2 , M > /\
+	S1 := addNewVariableStack(S, Q , V , V2) [print "newVariable " Q " " E "->" V "-->" S1] .
+
+	crl [newVariable2] : 
+	< BodyF( Dv( Q , V1 , E ) , B)  ,  MF, S , V , M > =>  < B ,  MF , S1 , V , M > 
+	if isQid(V1) /\
+	->(->(Q1 , V2), V3) := E /\
+	< V1 , MF , S , V , M > => < bv , MF , S , V4 , M > /\
+	< V2 , MF , S , V , M > => < bv , MF , S , V5 , M > /\
+	M1 := getMemory->>Stack(S , Q1 , V4 , V5) /\
+	S1 := addNewVariableMStack(S, Q , V1 , M1) [print "newVariable Q "  Q " V4 " V4 " V5 " V5 " M1 " M1 " S1 " S1 ] .
+
+
+--- 	*** comprueba si la expresion es un Access y en ese caso devuelve el valor |||||varias reglas si es qid , si es Access si es bool  etcccccc 
+	crl [ExpIsAcces] :
+	< E ,  MF, S , V , M > => < bv ,  MF, S , V2 , M > 
+	if  isAcces(E) /\
+	Q := getAccessQid(E) /\
+	E1 := getAccessExp(E) /\
+	< E1 , MF , S , V , M > => < bv , MF , S , V1 , M > /\
+	V2 := getMemoryHMStack(S , Q , V1) [print "expisaccess" E "->" V2  ]  .
+	
+--- 	***SERIA ESTA AUNQUE QUIZAS LA DE ARRIBVA TAMBIEN
+	crl [ExpIs->.] :
+	< .(->(Q , E) , V1) , MF, S , V , M > => < bv , MF , S , V3 , M >
+	if < E , MF , S , V , M > => < bv , MF , S , V2 , M > /\
+	V3 := getValue.->Stack(S, Q , V2 , V1) [print "EEE expis.-> " Q " -> " V2 " . " V1 "  =   " V3 ] .
+
+	crl [ExpIsEnviromentVariable] :
+	< E ,  MF, S , noneV , M > =>  < bv ,  MF , S , V , M >
+	if  not isAcces(E) /\ 
+	not isQid(E) /\
+	E :: VarEnt /\ 
+	V := EnvVar(E) [print "expisVE "  E "->" V ]  . 
+	
+	crl [ExpIsQid] :
+	< E ,  MF , S , noneV , M > =>  < bv ,  MF , S , V , M >
+	if not isAcces(E) /\
+	isQid(E) /\
+	V := getValueStack(S , E) [print "expisQID " E " -> " V]  .
+
+	crl [ExpIsPoinTQid] :
+	< E ,  MF, S , V , M > => < bv ,  MF, S , V1 , M > 
+	if  isPointQid(E) /\
+	Q := getFQofPoint(E) /\
+	Q1 := getSQofPoint(E) /\ 
+	M1 := getMemoryStack(S , Q) /\
+	V1 := getValueMemory(Q1 , M1  , getTypeFromMemory(M,Q1)) [print "expisPointQID " Q " " Q1 " -> " V1 ]  .
+
+	crl [ExpIsBool] :
+	< E , MF, S , noneV , M > =>  < bv , MF, S , V , M > 
+	if not isAcces(E) /\
+	not isQid(E) /\
+	isBool(E) /\
+	V := getValueOfBool(E) [print "expisbool" E " = " V]  .
+
+	crl [ExpIsFloat] :
+	< E , MF, S , noneV , M > =>  < bv , MF, S , E , M >
+	if not isAcces(E) /\
+	not isQid(E) /\
+	not isBool(E) /\
+	E :: Float  [print "expisfloat " E ]  .
+
+	crl [ExpIsBuiltConstant] :
+	< E , MF, S , V , M > =>  < bv , MF, S , V1 , M >
+	if not isAcces(E) /\
+	not isQid(E) /\
+	not isBool(E) /\
+	isConstant(E) /\ 
+	V1 := getValueOfConstant(E) [print "expisConstant" E " -> " V1 ] .
+
+	crl [ExpIsTipo] :
+	< E ,  MF, S , V , M > =>  < bv ,  MF, S , E , M >
+	if E :: type [print "Exp is type " E ]  .
+	
+	crl [ExpIsStringVar] :
+	< E , MF, S , V , M > => < bv , MF, S , E , M >
+	if not isAcces(E) /\
+	not isQid(E) /\
+	not isBool(E) /\
+	E :: stringVar [print "exp is StringVar " E ]  .
+--- 	*** si las descomento me da ejecucion infinita
+	crl [ExpIsArglRecursive] :
+	< ArgL(E, AL) , MF, S , V , M > => < bv , MF , S1 ,  ArgL(V1 , AL') , M1 >  
+	if  AL =/= argV /\ 
+	< E , MF , S , V , M > => < bv , MF , S1 , V1 , M1 > /\ 
+	< AL , MF , S , V , M > => < bv , MF , S1 , AL' , M1 >  [print "expisALR" V1 AL' ] .
+
+	rl [ExpIsArgV] :
+	< argV , MF, S , V , M > => < bv , MF, S , argV, M > [print "expisALvACIA" ] .
+--- 	*** PUES NO SE SI PARAM ESTA BIEN
+	crl [ExpIsParamRecursive] :
+	< LParam(P(Q, E) , Par) , MF, S , V , M > =>  LParam(P(Q , V1) , Par1)
+	if  Par =/= PaV /\ 
+	< E , MF , S , V , M > => < bv , MF , S , V1 , M > /\ 
+	< Par , MF , S , V , M > => Par1  [print "expisParam" E Par ] .
+
+	crl [ExpIsP] :
+	< P(Q,E) , MF, S , V , M > => P(Q , V1)  
+	if < E , MF , S , V , M  > => < bv , MF , S , V1 , M > [print "expisparaP" V1 ] .
+
+	rl [ExpIsPaV] :
+	< PaV , MF, S , V , M > =>  PaV [print "expisparamvACIA" ] .
+
+
+	rl [ExpIsReturn] :
+	< BodyF(return , B) , MF, S , V , M > => < B, MF , S , ["end"], M > [print "return " B " end"] .
+	
+	rl [ExpIsContinue] :
+	< BodyF(continu , B) , MF, S , V , M > => < B , MF , S ,V , M > [print "continue" B ] .
+
+	rl [ExpIsBreak] :
+	< BodyF(break , B) , MF, S , V , M > => < B , MF , S , V , M > [print "BREAK " B ] .
+
+	crl [not] :
+	< not. E ,  MF, S , V , M > => < bv ,  MF, S , V2 , M >
+	if < E ,  MF , S , V , M > =>  < bv ,  MF , S , V1 , M > /\
+	V2 := not V1  [print "not" V1 "=" V2] .
+
+	crl [and] :
+	< E and. E1 ,  MF, S , V , M > =>  < bv ,  MF, S , V3 , M > 
+	if < E ,  MF , S , V , M > =>  < bv ,  MF , S , V1 , M > /\
+	 < E1 ,  MF , S , V , M > =>   < bv ,  MF , S , V2 , M > /\
+	 V3 := V1 and V2 [print "and" V1 " and " V2 " = " V3 ] .
+	crl [or] :
+	< E or. E1 ,  MF, S , V , M > =>  < bv ,  MF, S , V3 , M > 
+	if < E ,  MF , S , V , M > =>  < bv ,  MF , S , V1 , M > /\
+	 < E1 ,  MF , S , V , M > =>   < bv ,  MF , S , V2 , M > /\
+	 V3 := V1 or V2 [print "or " V1 " or " V2 " = " V3 ] .
+
+	crl [add] :
+	< E +. E1 ,  MF, S , V , M > =>  < bv ,  MF, S , V3 , M >
+	if < E ,  MF , S , V , M > =>  < bv ,  MF , S , V1 , M > /\
+	 < E1 ,  MF , S , V , M > =>   < bv ,  MF , S , V2 , M > /\
+	 V3 := V1 + V2 [print "add" V1 "+" V2 "->" V3 ] .
+	
+	crl [sub] :
+	< E -. E1 ,  MF, S , V , M > =>  < bv ,  MF, S , V3 , M >
+	if < E ,  MF , S , V , M > =>  < bv ,  MF , S , V1 , M > /\
+	 < E1 ,  MF , S , V , M > =>   < bv ,  MF , S , V2 , M > /\
+	 V3 := V1 - V2 [print "sub " V1 " - " V2 " = " V3 ] .
+
+	crl [mul] :
+	< E *. E1 ,  MF, S , V , M > => < bv ,  MF, S , V3 , M >
+	if < E ,  MF , S , V , M > =>  < bv ,  MF , S , V1 , M > /\ 
+	 < E1 ,  MF , S , V , M > =>   < bv ,  MF , S , V2 , M > /\
+	 V1 :: Float /\
+	 V2 :: Float /\
+	 V3 := V1 * V2 [print "mul: " V1 " * " V2 " = " V3 ] .
+	 
+	crl [div] :
+	< E /. E1 ,  MF, S , V , M > => < bv ,  MF, S , V3 , M >
+	if < E ,  MF , S , V , M > =>  < bv ,  MF , S , V1 , M > /\ 
+	 < E1 ,  MF , S , V , M > =>   < bv ,  MF , S , V2 , M > /\
+	 V1 :: Float /\
+	 V2 :: Float /\
+	 V3 := V1 / V2 [print "div: " V1 " / " V2 " = " V3 ] .
+
+
+	crl [lessThan] :
+	< E <. E1 ,  MF, S , V , M > => < bv ,  MF, S , V3 , M >
+	if < E ,  MF , S , V , M > =>  < bv ,  MF , S , V1 , M > /\ 
+	 < E1 ,  MF , S , V , M > =>   < bv ,  MF , S , V2 , M > /\
+	 V1 :: Float /\
+	 V2 :: Float /\
+	 V3 := V1 < V2 [print "lessthan" V V1 " < " V2 "->" V3 ] .
+	
+	crl [lessEqualThan] :
+	< E <=. E1 ,  MF, S , V , M > => < bv ,  MF, S , V3 , M >
+	if < E ,  MF , S , V , M > =>  < bv ,  MF , S , V1 , M > /\ 
+	 < E1 ,  MF , S , V , M > =>   < bv ,  MF , S , V2 , M > /\
+	 V1 :: Float /\
+	 V2 :: Float /\
+	 V3 := V1 <= V2 [print "lessEqualthan" V1 " < " V2 " = " V3 ] .
+	
+	crl [greatherEqualThan] :
+	< E >=. E1 ,  MF, S , V , M > => < bv ,  MF, S , V3 , M >
+	if < E ,  MF , S , V , M > =>  < bv ,  MF , S , V1 , M > /\ 
+	 < E1 ,  MF , S , V , M > =>   < bv ,  MF , S , V2 , M > /\
+	 V1 :: Float /\
+	 V2 :: Float /\
+	 V3 := V1 >= V2 [print "greatherEqualThan" V1 ">=" V2 "=" V3 ] .
+
+	crl [greatherThan] :
+	< E >. E1 ,  MF, S , V , M > => < bv ,  MF, S , V3 , M >
+	if < E ,  MF , S , V , M > =>  < bv ,  MF , S , V1 , M > /\ 
+	 < E1 ,  MF , S , V , M > =>   < bv ,  MF , S , V2 , M > /\
+	 V1 :: Float /\
+	 V2 :: Float /\
+	 V3 := V1 > V2 [print "greathertjan" V1 " > " V2 "->" V3 ] .
+
+	crl [distinct] :
+	< E !=. E1 ,  MF, S , V , M > => < bv ,  MF, S , V3 , M >
+	if < E ,  MF , S , V , M > =>  < bv ,  MF , S , V1 , M > /\ 
+	 < E1 ,  MF , S , V , M > =>   < bv ,  MF , S , V2 , M > /\
+	 V1 :: Float /\
+	 V2 :: Float /\
+	 V3 := V1 =/= V2 [print "different " V1 " != " V2 " = " V3] .
+
+	
+	crl [equal] :
+	< E ==. E1 ,  MF, S , V , M > => < bv ,  MF, S , V3 , M >
+	if < E ,  MF , S , V , M > =>  < bv ,  MF , S , V1 , M > /\ 
+	 < E1 ,  MF , S , V , M > =>   < bv ,  MF , S , V2 , M > /\
+	 V1 :: Float /\
+	 V2 :: Float /\
+	 V3 := V1 == V2 [print "equal : " V1 " == " V2 " -> " V3 ] .
+
+	crl [equalStr] :
+	< E ==. E1 ,  MF, S , V , M > => < bv ,  MF, S , V3 , M >
+	if < E ,  MF , S , V , M > =>  < bv ,  MF , S , V1 , M > /\ 
+	 < E1 ,  MF , S , V , M > =>   < bv ,  MF , S , V2 , M > /\
+	 V1 :: stringVar /\
+	 V2 :: stringVar /\
+	[Str] := V1 /\
+	[Str1] := V2 /\
+	V3 := Str == Str1 [print "equal Str " Str " == " Str1 " = " V3] .
+--- *** coger float pasarlo a string quitar lo de delante del punto hacer el modulo y concatenarle otra vez .0
+	crl [mod] : 
+	< E %. E1 ,  MF, S , V , M > => < bv ,  MF, S , V3 , M >
+	if < E ,  MF , S , V , M > =>  < bv ,  MF , S , V1 , M > /\ 
+	 < E1 ,  MF , S , V , M > =>   < bv ,  MF , S , V2 , M > /\
+	 V1 :: Float /\
+	 V2 :: Float /\
+	--- Str := stringF(V) /\
+	 V3 := V1 + V2 [print "mod: " V1 " % " V2 " = " V3 " "] .
+	
+	rl [Parenthesis] :
+	< PA E PC ,  MF, S , V , M > =>  < E , MF , S , V , M > [print "PARENTHESIS"] .
+
+	crl [ifBasicT] : 
+	<  BodyF( If(E , B) , B1) ,  MF , S , V , M > => < B1 ,  MF , S1 , V , M > 
+	if < E , MF , S , V , M > => < bv , MF , S , V1 , M >  /\ 
+	V1 == true /\
+	< B , MF , S , V , M > => < bv , MF , S1 , V , M > [print "IF basic is True " V1 ] .
+
+	crl [ifBasicTR] : 
+	<  BodyF( If(E , B) , B1) ,  MF , S , V , M > => < bv ,  MF , S1 , V2 , M > 
+	if < E , MF , S , V , M > => < bv , MF , S , V1 , M >  /\ 
+	V1 == true /\
+	< B , MF , S , V , M > => < bv , MF , S1 , V2 , M > [print "IF basic is True EXP " V1 " RETURN " V2 ] .
+
+	crl [ifBasicTREnd] : 
+	<  BodyF( If(E , B) , B1) ,  MF , S , V , M > => < bv ,  MF , S1 , ["end"] , M > 
+	if < E , MF , S , V , M > => < bv , MF , S , V1 , M >  /\ 
+	V1 == true /\
+	< B , MF , S , V , M > => < bv , MF , S1 , [Str] , M > /\ 
+	Str == "end" [print "IF basic is True vv " V1] .
+
+	crl [ifBasicF] : 
+		<  BodyF( If(E , B) , B1) ,  MF , S , V , M > => < B1 ,  MF , S , V , M > 
+		if < E , MF , S , V , M > => < bv , MF , S , V1 , M >  /\ 
+		V1 == false [print "IF basic is false " V1 ] .
+
+
+	crl [ifElseT] : 
+	< BodyF( IfElse(E , B , B1) , B2) ,  MF , S , V , M > => < B2 ,  MF , S1 , V , M > 
+	if < E , MF , S , V , M > => < bv , MF , S , V1 , M  > /\ 
+	V1 == true /\
+	< B , MF , S , V , M > => < bv , MF , S1 , V , M  > [print "IFelse TRUE " E " -> " V1 ] .
+
+	crl [ifElseTReturnV] : 
+	<  BodyF( IfElse(E , B , B1) , B2) ,  MF , S , V , M > => < bv ,  MF , S1 , ["end"] , M > 
+	if < E , MF , S , V , M > => < bv , MF , S , V1 , M >  /\ 
+	V1 == true /\
+	< B , MF , S , V , M > => < bv , MF , S1 , [Str] , M > /\ 
+	Str == "end" [ print "IF else is True R vv " V1 ] .
+
+	crl [ifElseF] : 
+	< BodyF( IfElse(E , B , B1) , B2) ,  MF , S , V , M > => < B2 ,  MF , S1 , V , M > 
+	if  < E , MF , S , V , M > => < bv , MF , S , V1 , M  > /\
+	V1 == false /\
+	< B1 , MF , S , V , M > => < bv , MF , S1 , V , M  >  [print "IFelse FALSE " E " -> " V1  ] .
+
+	crl [ifElifTFF] : 
+	< BodyF( IfElif(E , B , Elif(E1 , B3) ,B1) , B2) ,  MF , S , V , M > => < B2 ,  MF , S1 , V , M > 
+	if < E , MF , S , V , M > => < bv , MF , S , V1 , M > /\ 
+	V1 == true /\
+	< B , MF , S , V , M > => < bv , MF , S1 , V , M > [print " IFelif TRUE " V1] .
+
+	crl [ifElifFTF] : 
+	< BodyF( IfElif(E , B , Elif(E1 , B3) ,B1) , B2) ,  MF , S , V , M > => < B2 ,  MF , S1 , V , M > 
+	if < E , MF , S , V , M > => < bv , MF , S , V1 , M > /\ 
+	V1 == false /\
+	< E1 , MF , S , V , M  > => < bv , MF , S , V2 , M > /\
+	V2 == true /\
+	< B3 , MF , S , V , M > => < bv , MF , S1 , V , M > [print " IF elif False True " V1 " " V2  ] .
+
+	crl [ifElifFFT] : 
+	< BodyF( IfElif(E , B , Elif(E1 , B3) ,B1) , B2) ,  MF , S , V , M > => < B2 ,  MF , S1 , V , M > 
+	if < E , MF , S , V , M > => < bv , MF , S , V1 , M > /\ 
+	V1 == false /\
+	< E1 , MF , S , V , M  > => < bv , MF , S , V2 , M > /\
+	V2 == false /\
+	< B1 , MF , S , V , M > => < bv , MF , S1 , V , M > [print "IFelif False tRUE" V1 " " V2 ] .
+
+	crl [LogEvent] : 
+	<  BodyF( logE(Q , AL) , B) ,  MF , S , V , M > => < B ,  MF , S , V , M > 
+	if M1 := getMemoryStack(S , Q) /\
+		< AL , MF , S , V , M > => < bv , MF , S , AL1 , M > /\
+		compareMemoryAL(M1, AL1) /\
+		M2 := replaceMemorywithArgList(M1 , AL1) [print "log Event " " AL1 -> " AL1 " Memory " M2 ] .
+	
+	crl [ReturnStruct] :
+	<  BodyF( Return(E) , B) ,  MF , S , V , M  > => <  bv ,  MF , S , V , M1  >
+	if isQid(E) /\
+	V1 := getTypeVFromStack(S ,E) /\
+	getTypeFromStack(S,V1) == struct /\
+	M1 := getMemoryStack(S , V1) [print "Return ValueS struct V1 " V1 " M1 " M1 ] .
+	
+	crl [ReturnValue] :
+	<  BodyF( Return(E) , B) ,  MF , S ,V , M > => < bv , MF , S , V1 , M >
+	if < E , MF , S , V , M > => < bv , MF , S , V1 , M > [print "ReturnValue " V1  ] .
+
+	crl [StructValueQid] : 
+	<  BodyF( =St(E , Q , Par) , B) ,  MF , S , V , M > => < B ,  MF , S1 , V , M >
+	if isQid(E) /\
+	M1 := getMemoryStack(S,Q) /\
+	< Par , MF , S , V , M > => Par1 /\
+	M2 := changeValueMemoryParameters(M1 , Par1, S) /\
+	S1 := storeMemoryOnMemoryStack(S , E , M2) [print "=ST qid " E " M2 " M2 " S1 " S1  ] . 
+
+	crl [StructValueAsig] : 
+	<  BodyF( =St(E , Q , Par) , B) ,  MF , S , V , M > => < B ,  MF , S1 , V , M >
+	if isAcces(E) /\
+	Q1 := getAccessQid(E) /\
+	E1 := getAccessExp(E) /\
+	< E1 , MF , S , V , M > => < bv ,  MF , S , V1 , M > /\
+	< Par , MF , S , V , M > => Par1 /\
+	M1 := getMemoryStack(S,Q) /\
+	M2 := changeValueMemoryParameters(M1 , Par1, S) /\
+	S1 := storeMemoryHMStructStack(S , Q1, V1 , Q , M2) [print "STRCT ACCESS " Q1 " " V1 " PAR " Par1 " M " M2 ] .
+
+	crl [StructValueAsigRecursive] : 
+	<  BodyF( =St(E , Q , Par) , B) ,  MF , S , V , M > => < B ,  MF , S1 , V , M >
+	if isAccesRecursive(E) /\
+	Ac := getAccessRecursive(E) /\
+	V1 := getValueRecursive(E) /\ 
+	Q1 := getAccessQid(Ac) /\
+	V2 := getAccessExp(Ac) /\
+	M1 := getMemoryStack(S,Q) /\
+	< V1 , MF , S , V , M > => < bv , MF , S , V3 , M > /\
+	< V2 , MF , S , V , M > => < bv , MF , S , V4 , M > /\
+	< Par , MF , S , V , M > => Par1 /\
+	M2 := changeValueMemoryParameters(M1 , Par1 , S) /\
+	S1 := storeMemoryHMArrayStack(S , Q1, V4 , V3 , Q , M2) [ print " =ST recursive Q1 " Q1 " V2 " V2 " V1 " V1  " S1 " S1 " V3 " V3 " V4 " V4 ] .
+
+	crl [ForRangeTrueFirstReturnEnd] : 
+	<  BodyF( ForR(Q , ArgL(E ,E1) , B) , B1) ,  MF , S , V , M > => < bv,  MF , S4 , ["end"] , M > 
+	if 	< E , MF , S ,V , M > => < bv , MF , S , V1 , M > /\
+	< E1 , MF , S , V , M > => < bv , MF , S , V2 , M > /\ 
+	V1 < V2 /\
+	< Dv( Q , int128 , V1 ) , MF , S , V , M > => < bv , MF , S1 , V , M > /\
+	< B , MF , S1 , V , M > => < bv , MF , S2 , V , M > /\
+	S3 := delVariableStack(S2 , Q) /\
+	V3 := V1 + 1.0 /\
+	< ForR(Q , ArgL(V3 , E1) , B) , MF , S3 , V , M > => < bv , MF , S4 , [Str] , M > /\
+	Str == "end" [print "FORR3" V " " V1 " " V2  B1 Str] .
+	
+	crl [ForRangeTrueFirstReturnEnd] : 
+	<  BodyF( ForR(Q , ArgL(E ,E1) , B) , B1) ,  MF , S , V , M > => < bv ,  MF , S3 , ["end"] , M > 
+	if 	< E , MF , S ,V , M > => < bv , MF , S , V1 , M > /\
+	< E1 , MF , S , V , M > => < bv , MF , S , V2 , M > /\ 
+	V1 < V2 /\
+	< Dv( Q , int128 , V1 ) , MF , S , V , M > => < bv , MF , S1 , V , M > /\
+	< B , MF , S1 , V , M > => < bv , MF , S2 , [Str] , M > /\
+	Str == "end" /\
+	S3 := delVariableStack(S2 , Q) [print "FORR2" V " " V1 " " V2  B1 " " Str ] .	
+
+	crl [ForRangeTrue] : 
+	<  BodyF( ForR(Q , ArgL(E ,E1) , B) , B1) ,  MF , S , V , M > => < B1,  MF , S4 , noneV , M > 
+	if < E , MF , S ,V , M > => < bv , MF , S , V1 , M > /\
+	< E1 , MF , S , V , M > => < bv , MF , S , V2 , M > /\ 
+	V1 < V2 /\
+	< Dv( Q , int128 , V1 ) , MF , S , V , M > => < bv , MF , S1 , V , M > /\
+	< B , MF , S1 , V , M > => < bv , MF , S2 , V , M > /\
+	S3 := delVariableStack(S2 , Q) /\
+	V3 := V1 + 1.0 /\
+	< ForR(Q , ArgL(V3 , E1) , B) , MF , S3 , ["for"], M > => < bv , MF , S4 , ["for"] , M > [print "FORR1" V " " V1 " " V2  B1 ] .
+
+	crl [ForRangeTrueCuerpo] : 
+	<  BodyF( ForR(Q , ArgL(E ,E1) , B) , B1) ,  MF , S , ["for"] , M > => < bv,  MF , S4 , ["for"] , M > 
+	if 	< E , MF , S , noneV , M > => < bv , MF , S , V1 , M > /\
+	< E1 , MF , S , noneV , M > => < bv , MF , S , V2 , M > /\ 
+	V1 < V2 /\
+	< Dv( Q , int128 , V1 ) , MF , S , noneV , M > => < bv , MF , S1 , noneV , M > /\
+	< B , MF , S1 , noneV , M > => < bv , MF , S2 , noneV , M > /\
+	S3 := delVariableStack(S2 , Q) /\
+	V3 := V1 + 1.0 /\
+	< ForR(Q , ArgL(V3 , E1) , B) , MF , S3 , ["for"], M > => < bv , MF , S4 , ["for"], M > [print "FORR12 "  V1 " " V2  B1 ] .
+
+	crl [ForRangeFalse] : 
+	<  BodyF( ForR(Q , ArgL(E ,E1) , B) , B1) ,  MF , S , V , M > => < bv ,  MF , S , V , M > 
+	if < E , MF , S , noneV, M > => < bv , MF , S , V1 , M > /\
+	< E1 , MF , S , noneV , M > => < bv , MF , S , V2 , M > /\
+	V1 >= V2  [print "FORRFalse" V1 " >= " V2 ] .
+
+	rl [ForRange1] : 
+	<  BodyF( ForR(Q , E , B) , B1) ,  MF , S , V , M > => < BodyF( ForR(Q , ArgL(0.0 ,E) , B) , B1) ,  MF , S , V , M > [print "FORRange 1" Q E ] .
+
+endm
+--- rew  isQid(block.timestamp) .
+--- rew isAcces('DA) .
+--- rew =St(->(->('bids, msg.sender), 'numBids), 'Bid, LParam(P('blindedBid, '_blindedBid), P('deposit, msg.value))) .
+--- rew  LParam(P('blindedBid, '_blindedBid), P('deposit, msg.value)) .
+--- rew replaceArglistWithValue([ "dale"] ,stackE) .
+--- rew < =('beneficiary, '_beneficiary) bv, mv ,mfv > .
+*** prueba de una Function vacia
+--- rew  BodyF(=('beneficiary, 'highestBid) .
+--- rew < =('beneficiary, 'highestBid) ,InitD[@external,('_beneficiary,address,0.0) ('_auction_start,uint256,0.0) ('_bidding_time,
+---     uint256,0.0),BodyF(=('beneficiary, '_beneficiary), BodyF(=('auctionStart, '_auction_start), BodyF(=('auctionEnd,
+---     '_bidding_time +. 'auctionStart), Assert(block.timestamp <. 'auctionEnd))))] FD['endAuction,@external,pV,BodyF(
+---     Assert(block.timestamp >=. 'auctionEnd), BodyF(Assert(not. 'ended), BodyF(=('ended, True), CallP('send, ArgL(
+---     'beneficiary, 'highestBid)))))] FD['send,@external,('_receiver,address,0.0) ('value,uint256,0.0),bv] FD['withdraw,
+---     @external,pV,BodyF(Dv('pending_amount, uint256, ->('pendingReturns, msg.sender)), BodyF(=(->('pendingReturns,
+---     msg.sender), 0.0), CallP('send, ArgL(msg.sender, 'pending_amount))))] FDD['bid,@external,@payable,pV,BodyF(Assert(
+---     block.timestamp >=. 'auctionStart), BodyF(Assert(block.timestamp <. 'auctionEnd), BodyF(Assert(msg.value >.
+---     'highestBid), BodyF(+=(->('pendingReturns, 'highestBidder), 'highestBid), BodyF(=('highestBidder, msg.sender), =(
+---     'highestBid, msg.value))))))] FDD['selfdestruct,@external,@payable,('to,address,0.0),bv],push(['auctionEnd,uint256,
+---     0.0,0.0,public,normal] ['auctionStart,uint256,0.0,0.0,public,normal] ['balance,uint256,1.0e+2,0.0,public,normal] [
+---     'beneficiary,address,0.0,0.0,public,normal] ['ended,bool,false,0.0,public,normal] ['highestBid,uint256,0.0,0.0,public,
+---     normal] ['highestBidder,address,0.0,0.0,public,normal] ['pendingReturns,HashMap,M| [address,uint256,0.0],mapv |,0.0,
+---     public,normal], stackE) > .
+*** prueba de init contrato1 INIT B SIN ARGL , Call('withdraw) B ,Call('endAuction) B Call('bid)
+	rew exec(Contract(ListS(Dp('beneficiary, address, "public"), ListS(Dp('auctionStart, uint256,
+    "public"), ListS(Dp('auctionEnd, uint256, "public"), ListS(Dp('highestBidder, address, "public"),
+    ListS(Dp('highestBid, uint256, "public"), ListS(Dp('ended, bool, "public"), DhmP('pendingReturns,
+    address, uint256, "public"))))))), ListF(Fun(init(@external, LParam(P('_beneficiary, address),
+    LParam(P('_auction_start, uint256), P('_bidding_time, uint256)))), BodyF(=('beneficiary,
+    '_beneficiary), BodyF(=('auctionStart, '_auction_start), BodyF(=('auctionEnd, '_bidding_time +.
+    'auctionStart), Assert(block.timestamp <. 'auctionEnd))))), ListF(Fun(headerDD(@external,
+    @payable, 'bid, PaV), BodyF(Assert(block.timestamp >=. 'auctionStart), BodyF(Assert(
+    block.timestamp <. 'auctionEnd), BodyF(Assert(msg.value >. 'highestBid), BodyF(+=(->(
+    'pendingReturns, 'highestBidder), 'highestBid), BodyF(=('highestBidder, msg.sender), =(
+    'highestBid, msg.value))))))), ListF(Fun(headerD(@external, 'withdraw, PaV), BodyF(Dv(
+    'pending_amount, uint256, ->('pendingReturns, msg.sender)), BodyF(=(->('pendingReturns,
+    msg.sender), 0.0), CallP('send, ArgL(msg.sender, 'pending_amount))))), Fun(headerD(@external,
+    'endAuction, PaV), BodyF(Assert(block.timestamp >=. 'auctionEnd), BodyF(Assert(not. 'ended),
+    BodyF(=('ended, True), CallP('send, ArgL('beneficiary, 'highestBid)))))))))), CallP('__init__, ArgL(1.0, ArgL(2.0, 3.0)))) .
+	--- rew <  Call('bid) ,InitD[@external,('_beneficiary,address,0.0) ('_auction_start,uint256,0.0) ('_bidding_time,
+    --- uint256,0.0),BodyF(=('beneficiary, '_beneficiary), BodyF(=('auctionStart, '_auction_start), BodyF(=('auctionEnd,
+    --- '_bidding_time +. 'auctionStart), Assert(block.timestamp <. 'auctionEnd))))] FD['endAuction,@external,pV,BodyF(
+    --- Assert(block.timestamp >=. 'auctionEnd), BodyF(Assert(not. 'ended), BodyF(=('ended, True), CallP('send, ArgL(
+    --- 'beneficiary, 'highestBid)))))] FD['send,@external,('_receiver,address,0.0) ('value,uint256,0.0),bv] FD['withdraw,
+    --- @external,pV,BodyF(Dv('pending_amount, uint256, ->('pendingReturns, msg.sender)), BodyF(=(->('pendingReturns,
+    --- msg.sender), 0.0), CallP('send, ArgL(msg.sender, 'pending_amount))))] FDD['bid,@external,@payable,pV,BodyF(Assert(
+    --- block.timestamp >=. 'auctionStart), BodyF(Assert(block.timestamp <. 'auctionEnd), BodyF(Assert(msg.value >.
+    --- 'highestBid), BodyF(+=(->('pendingReturns, 'highestBidder), 'highestBid), BodyF(=('highestBidder, msg.sender), =(
+    --- 'highestBid, msg.value))))))] FDD['selfdestruct,@external,@payable,('to,address,0.0),bv],push(['auctionEnd,uint256,
+    --- 3.0,0.0,public,normal] ['auctionStart,uint256,2.0,0.0,public,normal] ['balance,uint256,1.0e+2,0.0,public,normal] [
+    --- 'beneficiary,address,3.0,0.0,public,normal] ['ended,bool,false,0.0,public,normal] ['highestBid,uint256,0.0,0.0,public,
+    --- normal] ['highestBidder,address,0.0,0.0,public,normal] ['pendingReturns,HashMap,M| [address,uint256,0.0],mapv |,0.0,
+    --- public,normal], stackE),noneV,mv > .
+***CONTRATO2
+***init 
+	--- rew exec(Contract(ListS(Ds('Bid, ListS(D('blindedBid, bytes32), D('deposit, uint256))), ListS(Dc('MAX_BIDS, int128,
+    --- 1.28e+2, "constant"), ListS(De('AuctionEnded, ListS(D('highestBidder, address), D('highestBid, uint256))), ListS(Dp(
+    --- 'beneficiary, address, "public"), ListS(Dp('biddingEnd, uint256, "public"), ListS(Dp('revealEnd, uint256, "public"),
+    --- ListS(Dp('ended, bool, "public"), ListS(Dp('highestBid, uint256, "public"), ListS(Dp('highestBidder, address, "public"),
+    --- ListS(Dhm('bids, address, ->('Bid, 1.28e+2)), ListS(Dhm('bidCounts, address, int128), Dhm('pendingReturns, address,
+    --- uint256)))))))))))), ListF(Fun(init(@external, LParam(P('_beneficiary, address), LParam(P('_biddingTime, uint256), P(
+    --- '_revealTime, uint256)))), BodyF(=('beneficiary, '_beneficiary), BodyF(=('biddingEnd, '_biddingTime +. block.timestamp), =(
+    --- 'revealEnd, '_revealTime +. 'biddingEnd)))), ListF(Fun(headerDD(@external, @payable, 'bid, P('_blindedBid, bytes32)),
+    --- BodyF(Assert(block.timestamp <. 'biddingEnd), BodyF(Dv('numBids, int128, ->('bidCounts, msg.sender)), BodyF(Assert(
+    --- 'numBids <. 'MAX_BIDS), BodyF(=St(->(->('bids, msg.sender), 'numBids), 'Bid, LParam(P('blindedBid, '_blindedBid), P(
+    --- 'deposit, msg.value))), +=(->('bidCounts, msg.sender), 1.0)))))), ListF(Fun(headerR('placeBid, bool, LParam(P('bidder,
+    --- address), P('_value, uint256))), BodyF(If(PA '_value <=. 'highestBid PC, Return(False)), BodyF(If(PA 'highestBidder !=.
+    --- ZERO-ADDRESS PC, +=(->('pendingReturns, 'highestBidder), 'highestBid)), BodyF(=('highestBid, '_value), BodyF(=(
+    --- 'highestBidder, 'bidder), Return(True)))))), ListF(Fun(headerD(@external, 'reveal, LParam(P('_numBids, int128), LParam(P(
+    --- '_values, ->(uint256, 1.28e+2)), LParam(P('_fakes, ->(bool, 1.28e+2)), P('_secrets, ->(bytes32, 1.28e+2)))))), BodyF(Assert(
+    --- block.timestamp >. 'biddingEnd), BodyF(Assert(block.timestamp <. 'revealEnd), BodyF(Assert('_numBids ==. ->('bidCounts,
+    --- msg.sender)), BodyF(Dv('refund, uint256, 0.0), BodyF(ForR('i, 'MAX_BIDS, BodyF(If(PA 'i >=. '_numBids PC, break), BodyF(
+    --- Dv('bidToCheck, 'Bid, ->(->('bids, msg.sender), 'i)), BodyF(Dv('value, uint256, ->('_values, 'i)), BodyF(Dv('fake, bool,
+    --- ->('_fakes, 'i)), BodyF(Dv('secret, bytes32, ->('_secrets, 'i)), BodyF(Dv('blindedBid, bytes32, CallP('keccak256, CallP(
+    --- 'concat, ArgL(CallP('convert, ArgL('value, bytes32)), CallP('convert, ArgL('fake, bytes32)), 'secret)))), BodyF(If(PA
+    --- 'blindedBid !=. 'bidToCheck.blindedBid PC, BodyF(Assert(1.0 ==. 0.0), continu)), BodyF(+=('refund, 'bidToCheck.deposit),
+    --- BodyF(If(PA not. 'fake and. 'bidToCheck.deposit >=. 'value PC, If(PA CallP('placeBid, ArgL(msg.sender, 'value)) PC, -=(
+    --- 'refund, 'value))), BodyF(Dv('zeroBytes32, bytes32, EMPTY-BYTES32), =('bidToCheck.blindedBid, 'zeroBytes32)))))))))))), If(
+    --- PA 'refund !=. 0.0 PC, CallP('send, ArgL(msg.sender, 'refund))))))))), ListF(Fun(headerD(@external, 'withdraw, PaV), BodyF(
+    --- Dv('pendingAmount, uint256, ->('pendingReturns, msg.sender)), If(PA 'pendingAmount >. 0.0 PC, BodyF(=(->('pendingReturns,
+    --- msg.sender), 0.0), CallP('send, ArgL(msg.sender, 'pendingAmount)))))), Fun(headerD(@external, 'auctionEnd, PaV), BodyF(
+    --- Assert(block.timestamp >. 'revealEnd), BodyF(Assert(not. 'ended), BodyF(logE('AuctionEnded, ArgL('highestBidder,
+    --- 'highestBid)), BodyF(=('ended, True), CallP('send, ArgL('beneficiary, 'highestBid))))))))))))) , CallP('__init__, ArgL(3.0, ArgL(2.0, 1.0)))) .
+	*** CallP('bid,1.5) B  CallP('placeBid,ArgL(1.5, 2.5)) b , Call('withdraw) b , Call('auctionEnd) B CallP('reveal, ArgL(1.0, ArgL(1.5, ArgL(2.5, ArgL(True, ArgL(False, ArgL(3.5, 4.5))))))) B
+	--- rew  < CallP('bid,0.0), InitD[@external,('_beneficiary,address,0.0) ('_biddingTime,uint256,0.0) (
+    --- '_revealTime,uint256,0.0),BodyF(=('beneficiary, '_beneficiary), BodyF(=('biddingEnd, '_biddingTime
+    --- +. block.timestamp), =('revealEnd, '_revealTime +. 'biddingEnd)))] FD['auctionEnd,@external,pV,BodyF(
+    --- Assert(block.timestamp >. 'revealEnd), BodyF(Assert(not. 'ended), BodyF(logE('AuctionEnded, ArgL(
+    --- 'highestBidder, 'highestBid)), BodyF(=('ended, True), CallP('send, ArgL('beneficiary,
+    --- 'highestBid))))))] FD['reveal,@external,('_numBids,int128,0.0) ('_values,uint256,1.28e+2) ('_fakes,
+    --- bool,1.28e+2) ('_secrets,bytes32,1.28e+2),BodyF(Assert(block.timestamp >. 'biddingEnd), BodyF(
+    --- Assert(block.timestamp <. 'revealEnd), BodyF(Assert('_numBids ==. ->('bidCounts, msg.sender)),
+    --- BodyF(Dv('refund, uint256, 0.0), BodyF(ForR('i, 'MAX_BIDS, BodyF(If(PA 'i >=. '_numBids PC, break),
+    --- BodyF(Dv('bidToCheck, 'Bid, ->(->('bids, msg.sender), 'i)), BodyF(Dv('value, uint256, ->('_values,
+    --- 'i)), BodyF(Dv('fake, bool, ->('_fakes, 'i)), BodyF(Dv('secret, bytes32, ->('_secrets, 'i)), BodyF(
+    --- Dv('blindedBid, bytes32, CallP('keccak256, CallP('concat, ArgL(CallP('convert, ArgL('value, bytes32)),
+    --- CallP('convert, ArgL('fake, bytes32)), 'secret)))), BodyF(If(PA 'blindedBid !=.
+    --- 'bidToCheck.blindedBid PC, BodyF(Assert(1.0 ==. 0.0), continu)), BodyF(+=('refund,
+    --- 'bidToCheck.deposit), BodyF(If(PA not. 'fake and. 'bidToCheck.deposit >=. 'value PC, If(PA CallP(
+    --- 'placeBid, ArgL(msg.sender, 'value)) PC, -=('refund, 'value))), BodyF(Dv('zeroBytes32, bytes32,
+    --- EMPTY-BYTES32), =('bidToCheck.blindedBid, 'zeroBytes32)))))))))))), If(PA 'refund !=. 0.0 PC, CallP(
+    --- 'send, ArgL(msg.sender, 'refund))))))))] FD['send,@external,('_receiver,address,0.0) ('value,uint256,
+    --- 0.0),bv] FD['withdraw,@external,pV,BodyF(Dv('pendingAmount, uint256, ->('pendingReturns,
+    --- msg.sender)), If(PA 'pendingAmount >. 0.0 PC, BodyF(=(->('pendingReturns, msg.sender), 0.0), CallP(
+    --- 'send, ArgL(msg.sender, 'pendingAmount)))))] FR['placeBid,('bidder,address,0.0) ('_value,uint256,0.0),
+    --- bool,BodyF(If(PA '_value <=. 'highestBid PC, Return(False)), BodyF(If(PA 'highestBidder !=.
+    --- ZERO-ADDRESS PC, +=(->('pendingReturns, 'highestBidder), 'highestBid)), BodyF(=('highestBid,
+    --- '_value), BodyF(=('highestBidder, 'bidder), Return(True)))))] FDD['bid,@external,@payable,(
+    --- '_blindedBid,bytes32,0.0),BodyF(Assert(block.timestamp <. 'biddingEnd), BodyF(Dv('numBids, int128,
+    --- ->('bidCounts, msg.sender)), BodyF(Assert('numBids <. 'MAX_BIDS), BodyF(=St(->(->('bids,
+    --- msg.sender), 'numBids), 'Bid, LParam(P('blindedBid, '_blindedBid), P('deposit, msg.value))), +=(->(
+    --- 'bidCounts, msg.sender), 1.0)))))] FDD['selfdestruct,@external,@payable,('to,address,0.0),bv],push([
+    --- 'MAX_BIDS,(int128).type,1.28e+2,0.0,private,constante] ['balance,(uint256).type,1.0e+2,0.0,public,
+    --- normal] ['beneficiary,(address).type,3.0,0.0,public,normal] ['biddingEnd,(uint256).type,1.00002e+5,
+    --- 0.0,public,normal] ['ended,(bool).type,false,0.0,public,normal] ['highestBid,(uint256).type,0.0,0.0,
+    --- public,normal] ['highestBidder,(address).type,1.0,0.0,public,normal] ['revealEnd,(uint256).type,
+    --- 1.00003e+5,0.0,public,normal] ['AuctionEnded,event,['highestBid,(uint256).type,0.0,0.0,private,normal]
+    --- ['highestBidder,(address).type,0.0,0.0,private,normal],0.0,private,normal] ['Bid,(struct).type,[
+    --- 'blindedBid,(bytes32).type,0.0,0.0,private,normal] ['deposit,(uint256).type,0.0,0.0,private,normal],
+    --- 0.0,private,normal] ['bidCounts,(HashMap).type,M| [address,int128,0.0],mapv |,0.0,private,normal] [
+    --- 'bids,(HashMap).type,M| [address,'Bid,1.28e+2],mapv |,0.0,private,normal] ['pendingReturns,(
+    --- HashMap).type,M| [address,uint256,0.0],D(2.0 -> 0.0) |,0.0,private,normal], stackE) > .
+	*** Contrato21
+	--- 	rew exec(Contract(ListS(Ds('Bid, ListS(D('blindedBid, bytes32), D('deposit, uint256))), ListS(Dc(
+    --- 'MAX_BIDS, int128, 2.0, "constant"), ListS(De('AuctionEnded, ListS(D('highestBidder, address), D(
+    --- 'highestBid, uint256))), ListS(Dp('beneficiary, address, "public"), ListS(Dp('biddingEnd, uint256,
+    --- "public"), ListS(Dp('revealEnd, uint256, "public"), ListS(Dp('ended, bool, "public"), ListS(Dp(
+    --- 'highestBid, uint256, "public"), ListS(Dp('highestBidder, address, "public"), ListS(Dhm('bids, address,
+    --- ->('Bid, 1.28e+2)), ListS(Dhm('bidCounts, address, int128), Dhm('pendingReturns, address,
+    --- uint256)))))))))))), ListF(Fun(init(@external, LParam(P('_beneficiary, address), LParam(P('_biddingTime,
+    --- uint256), P('_revealTime, uint256)))), BodyF(=('beneficiary, '_beneficiary), BodyF(=('biddingEnd,
+    --- '_biddingTime +. block.timestamp), =('revealEnd, '_revealTime +. 'biddingEnd)))), ListF(Fun(headerDD(
+    --- @external, @payable, 'bid, P('_blindedBid, bytes32)), BodyF(Assert(block.timestamp <. 'biddingEnd),
+    --- BodyF(Dv('numBids, int128, ->('bidCounts, msg.sender)), BodyF(Assert('numBids <. 'MAX_BIDS), BodyF(
+    --- =St(->(->('bids, msg.sender), 'numBids), 'Bid, LParam(P('blindedBid, '_blindedBid), P('deposit,
+    --- msg.value))), +=(->('bidCounts, msg.sender), 1.0)))))), ListF(Fun(headerR('placeBid, bool, LParam(P(
+    --- 'bidder, address), P('_value, uint256))), BodyF(If(PA '_value <=. 'highestBid PC, Return(False)),
+    --- BodyF(If(PA 'highestBidder !=. ZERO-ADDRESS PC, +=(->('pendingReturns, 'highestBidder), 'highestBid)),
+    --- BodyF(=('highestBid, '_value), BodyF(=('highestBidder, 'bidder), Return(True)))))), ListF(Fun(headerD(
+    --- @external, 'reveal, LParam(P('_numBids, int128), LParam(P('_values, ->(uint256, 2.0)), LParam(P('_fakes,
+    --- ->(bool, 2.0)), P('_secrets, ->(bytes32, 2.0)))))), BodyF(Assert(block.timestamp >. 'biddingEnd),
+    --- BodyF(Assert(block.timestamp <. 'revealEnd), BodyF(Assert('_numBids ==. ->('bidCounts, msg.sender)),
+    --- BodyF(Dv('refund, uint256, 0.0), BodyF(ForR('i, 'MAX_BIDS, BodyF(If(PA 'i >=. '_numBids PC, break),
+    --- BodyF(Dv('bidToCheck, 'Bid, ->(->('bids, msg.sender), 'i)), BodyF(Dv('value, uint256, ->('_values,
+    --- 'i)), BodyF(Dv('fake, bool, ->('_fakes, 'i)), BodyF(Dv('secret, bytes32, ->('_secrets, 'i)), BodyF(Dv(
+    --- 'conver1, bytes32, CallP('convert, ArgL('value, bytes32))), BodyF(Dv('conver2, bytes32, CallP('convert,
+    --- ArgL('fake, bytes32))), BodyF(Dv('concat1, int128, CallP('concat, ArgL('conver1, 'conver2, 'secret))),
+    --- BodyF(Dv('blindedBid, bytes32, CallP('keccak256, 'concat1)), BodyF(If(PA 'blindedBid !=.
+    --- 'bidToCheck.blindedBid PC, BodyF(Assert(1.0 ==. 0.0), continu)), BodyF(+=('refund,
+    --- 'bidToCheck.deposit), BodyF(If(PA not. 'fake and. 'bidToCheck.deposit >=. 'value PC, If(PA CallP(
+    --- 'placeBid, ArgL(msg.sender, 'value)) PC, -=('refund, 'value))), BodyF(Dv('zeroBytes32, bytes32,
+    --- EMPTY-BYTES32), =('bidToCheck.blindedBid, 'zeroBytes32))))))))))))))), If(PA 'refund !=. 0.0 PC, CallP(
+    --- 'send, ArgL(msg.sender, 'refund))))))))), ListF(Fun(headerD(@external, 'withdraw, PaV), BodyF(Dv(
+    --- 'pendingAmount, uint256, ->('pendingReturns, msg.sender)), If(PA 'pendingAmount >. 0.0 PC, BodyF(=(->(
+    --- 'pendingReturns, msg.sender), 0.0), CallP('send, ArgL(msg.sender, 'pendingAmount)))))), Fun(headerD(
+    --- @external, 'auctionEnd, PaV), BodyF(Assert(block.timestamp >. 'revealEnd), BodyF(Assert(not. 'ended),
+    --- BodyF(logE('AuctionEnded, ArgL('highestBidder, 'highestBid)), BodyF(=('ended, True), CallP('send, ArgL(
+    --- 'beneficiary, 'highestBid))))))))))))) , CallP('__init__, ArgL(3.0, ArgL(2.0, 1.0)))) .
+	--- 	--- < CallP('bid,1.5) < CallP('placeBid,ArgL(1.5, 2.5))   Call('withdraw)
+	--- rew < CallP('reveal, ArgL(1.0, ArgL(1.5, ArgL(2.5, ArgL(True, ArgL(False, ArgL(3.5, 4.5))))))) ,InitD[@external,('_beneficiary,address,0.0) ('_biddingTime,uint256,0.0) (
+    --- '_revealTime,uint256,0.0),BodyF(=('beneficiary, '_beneficiary), BodyF(=('biddingEnd, '_biddingTime +.
+    --- block.timestamp), =('revealEnd, '_revealTime +. 'biddingEnd)))] FD['auctionEnd,@external,pV,BodyF(
+    --- Assert(block.timestamp >. 'revealEnd), BodyF(Assert(not. 'ended), BodyF(logE('AuctionEnded, ArgL(
+    --- 'highestBidder, 'highestBid)), BodyF(=('ended, True), CallP('send, ArgL('beneficiary, 'highestBid))))))]
+    --- FD['reveal,@external,('_numBids,int128,0.0) ('_values,uint256,2.0) ('_fakes,bool,2.0) ('_secrets,bytes32,
+    --- 2.0),BodyF(Assert(block.timestamp >. 'biddingEnd), BodyF(Assert(block.timestamp <. 'revealEnd), BodyF(
+    --- Assert('_numBids ==. ->('bidCounts, msg.sender)), BodyF(Dv('refund, uint256, 0.0), BodyF(ForR('i,
+    --- 'MAX_BIDS, BodyF(If(PA 'i >=. '_numBids PC, break), BodyF(Dv('bidToCheck, 'Bid, ->(->('bids,
+    --- msg.sender), 'i)), BodyF(Dv('value, uint256, ->('_values, 'i)), BodyF(Dv('fake, bool, ->('_fakes, 'i)),
+    --- BodyF(Dv('secret, bytes32, ->('_secrets, 'i)), BodyF(Dv('conver1, bytes32, CallP('convert, ArgL('value,
+    --- bytes32))), BodyF(Dv('conver2, bytes32, CallP('convert, ArgL('fake, bytes32))), BodyF(Dv('concat1,
+    --- int128, CallP('concat, ArgL('conver1, 'conver2, 'secret))), BodyF(Dv('blindedBid, bytes32, CallP(
+    --- 'keccak256, 'concat1)), BodyF(If(PA 'blindedBid !=. 'bidToCheck.blindedBid PC, BodyF(Assert(1.0 ==.
+    --- 0.0), continu)), BodyF(+=('refund, 'bidToCheck.deposit), BodyF(If(PA not. 'fake and.
+    --- 'bidToCheck.deposit >=. 'value PC, If(PA CallP('placeBid, ArgL(msg.sender, 'value)) PC, -=('refund,
+    --- 'value))), BodyF(Dv('zeroBytes32, bytes32, EMPTY-BYTES32), =('bidToCheck.blindedBid,
+    --- 'zeroBytes32))))))))))))))), If(PA 'refund !=. 0.0 PC, CallP('send, ArgL(msg.sender, 'refund))))))))] FD[
+    --- 'send,@external,('_receiver,address,0.0) ('value,uint256,0.0),bv] FD['withdraw,@external,pV,BodyF(Dv(
+    --- 'pendingAmount, uint256, ->('pendingReturns, msg.sender)), If(PA 'pendingAmount >. 0.0 PC, BodyF(=(->(
+    --- 'pendingReturns, msg.sender), 0.0), CallP('send, ArgL(msg.sender, 'pendingAmount)))))] FR['placeBid,(
+    --- 'bidder,address,0.0) ('_value,uint256,0.0),bool,BodyF(If(PA '_value <=. 'highestBid PC, Return(False)),
+    --- BodyF(If(PA 'highestBidder !=. ZERO-ADDRESS PC, +=(->('pendingReturns, 'highestBidder), 'highestBid)),
+    --- BodyF(=('highestBid, '_value), BodyF(=('highestBidder, 'bidder), Return(True)))))] FDD['bid,@external,
+    --- @payable,('_blindedBid,bytes32,0.0),BodyF(Assert(block.timestamp <. 'biddingEnd), BodyF(Dv('numBids,
+    --- int128, ->('bidCounts, msg.sender)), BodyF(Assert('numBids <. 'MAX_BIDS), BodyF(=St(->(->('bids,
+    --- msg.sender), 'numBids), 'Bid, LParam(P('blindedBid, '_blindedBid), P('deposit, msg.value))), +=(->(
+    --- 'bidCounts, msg.sender), 1.0)))))] FDD['selfdestruct,@external,@payable,('to,address,0.0),bv],push([
+    --- 'MAX_BIDS,int128,2.0,0.0,private,constante] ['balance,uint256,1.0e+2,0.0,public,normal] ['beneficiary,
+    --- address,3.0,0.0,public,normal] ['biddingEnd,uint256,1.00002e+5,0.0,public,normal] ['ended,bool,false,0.0,
+    --- public,normal] ['highestBid,uint256,0.0,0.0,public,normal] ['highestBidder,address,0.0,0.0,public,normal]
+    --- ['revealEnd,uint256,1.00003e+5,0.0,public,normal] ['AuctionEnded,event,['highestBid,uint256,0.0,0.0,
+    --- private,normal] ['highestBidder,address,0.0,0.0,private,normal],0.0,private,normal] ['Bid,struct,[
+    --- 'blindedBid,bytes32,0.0,0.0,private,normal] ['deposit,uint256,0.0,0.0,private,normal],0.0,private,normal]
+    --- ['bidCounts,HashMap,M| [address,int128,0.0],mapv |,0.0,private,normal] ['bids,HashMap,M| [address,'Bid,
+    --- 1.28e+2],mapv |,0.0,private,normal] ['pendingReturns,HashMap,M| [address,uint256,0.0],mapv |,0.0,private,
+    --- normal], stackE),noneV,mv >.
+***CONTRATO3
+--- rew in CONVERSION :string(2.0) . Call('__init__) b Call('abort) b Call('purchase) B Call('received)
+	--- rew exec(Contract(ListS(Dp('value, uint256, "public"), ListS(Dp('seller, address, "public"),
+	---     ListS(Dp('buyer, address, "public"), ListS(Dp('unlocked, bool, "public"), Dp('ended, bool,
+	---     "public"))))), ListF(Fun(init(@external, @payable, PaV), BodyF(Assert(PA msg.value %. 2.0 PC ==. 0.0),
+	---     BodyF(=('value, msg.value /. 2.0), BodyF(=('seller, msg.sender), =('unlocked, True))))), ListF(Fun(
+	---     headerD(@external, 'abort, PaV), BodyF(Assert('unlocked), BodyF(Assert(msg.sender ==. 'seller), CallP(
+	---     'selfdestruct, 'seller)))), ListF(Fun(headerDD(@external, @payable, 'purchase, PaV), BodyF(Assert(
+	---     'unlocked), BodyF(Assert(msg.value ==. PA 'value *. 2.0 PC), BodyF(=('buyer, msg.sender), =('unlocked,
+	---     False))))), Fun(headerD(@external, 'received, PaV), BodyF(Assert(not. 'unlocked), BodyF(Assert(
+	---     msg.sender ==. 'buyer), BodyF(Assert(not. 'ended), BodyF(=('ended, True), BodyF(CallP('send, ArgL(
+	---     'buyer, 'value)), CallP('selfdestruct, 'seller))))))))))), Call('__init__)) .
+	***ABORT
+	--- rew < Call('received) ,FD['abort,@external,pV,BodyF(Assert('unlocked), BodyF(Assert(msg.sender
+    --- ==. 'seller), CallP('selfdestruct, 'seller)))] FD['received,@external,pV,BodyF(Assert(not.
+    --- 'unlocked), BodyF(Assert(msg.sender ==. 'buyer), BodyF(Assert(not. 'ended), BodyF(=('ended,
+    --- True), BodyF(CallP('send, ArgL('buyer, 'value)), CallP('selfdestruct, 'seller))))))] FD['send,
+    --- @external,('_receiver,address,0.0) ('value,uint256,0.0),bv] InitDD[@external,@payable,pV,BodyF(
+    --- Assert(PA msg.value %. 2.0 PC ==. 0.0), BodyF(=('value, msg.value /. 2.0), BodyF(=('seller,
+    --- msg.sender), =('unlocked, True))))] FDD['purchase,@external,@payable,pV,BodyF(Assert('unlocked),
+    --- BodyF(Assert(msg.value ==. PA 2.0 *. 'value PC), BodyF(=('buyer, msg.sender), =('unlocked,
+    --- False))))] FDD['selfdestruct,@external,@payable,('to,address,0.0),bv],push(['balance,uint256,
+    --- 1.0e+2,0.0,public,normal] ['buyer,address,0.0,0.0,public,normal] ['ended,bool,false,0.0,public,
+    --- normal] ['seller,address,3.0,0.0,public,normal] ['unlocked,bool,true,0.0,public,normal] ['value,
+    --- uint256,5.0e-1,0.0,public,normal], stackE),noneV,mv > .
+***contrato4 CallP('__init__, ArgL(3.0, ArgL(2.0, 1.0))) b Call('participate) b all('finalize)  Call('refund) b
+	--- rew exec(Contract(ListS(Ds('Funder, ListS(D('sender, address), D('value, uint256))), ListS(Dhm(
+	--- 	'funders, int128, 'Funder), ListS(D('nextFunderIndex, int128), ListS(D('beneficiary, address), ListS(
+	--- 	Dp('deadline, uint256, "public"), ListS(Dp('goal, uint256, "public"), ListS(D('refundIndex, int128),
+	--- 	Dp('timelimit, uint256, "public")))))))), ListF(Fun(init(@external, LParam(P('_beneficiary, address),
+	--- 	LParam(P('_goal, uint256), P('_timelimit, uint256)))), BodyF(=('beneficiary, '_beneficiary), BodyF(=(
+	--- 	'deadline, '_timelimit +. block.timestamp), BodyF(=('timelimit, '_timelimit), =('goal, '_goal))))),
+	--- 	ListF(Fun(headerDD(@external, @payable, 'participate, PaV), BodyF(Assert(block.timestamp <. 'deadline,
+	--- 	"deadline not met (yet)"), BodyF(Dv('nfi, int128, 'nextFunderIndex), BodyF(=St(->('funders, 'nfi),
+	--- 	'Funder, LParam(P('sender, msg.sender), P('value, msg.value))), =('nextFunderIndex, 'nfi +. 1.0))))),
+	--- 	ListF(Fun(headerD(@external, 'finalize, PaV), BodyF(Assert(block.timestamp >=. 'deadline,
+	--- 	"deadline has passed"), BodyF(Assert('balance >=. 'goal, "the goal has been reached"), CallP(
+	--- 	'selfdestruct, 'beneficiary)))), Fun(headerD(@external, 'refund, PaV), BodyF(Assert(block.timestamp >=.
+	--- 	'deadline and. 'balance <. 'goal), BodyF(Dv('ind, int128, 'refundIndex), BodyF(ForR('i, ArgL('ind,
+	--- 	'ind +. 3.0e+1), BodyF(If('i >=. 'nextFunderIndex, BodyF(=('refundIndex, 'nextFunderIndex), return)),
+	--- 	BodyF(CallP('send, ArgL(.(->('funders, 'i), 'sender), .(->('funders, 'i), 'value))), =(->('funders,
+	--- 	'i), CallP('empty, 'Funder))))), =('refundIndex, 'ind +. 3.0e+1))))))))), CallP('__init__, ArgL(3.0, ArgL(2.0, 1.0)))) .
+	
+	--- rew < Call('refund) ,InitD[@external,('_beneficiary,address,0.0) ('_goal,uint256,0.0) (
+    --- '_timelimit,uint256,0.0),BodyF(=('beneficiary, '_beneficiary), BodyF(=('deadline, '_timelimit +.
+    --- block.timestamp), BodyF(=('timelimit, '_timelimit), =('goal, '_goal))))] FD['finalize,@external,
+    --- pV,BodyF(Assert(block.timestamp >=. 'deadline, "deadline has passed"), BodyF(Assert('balance >=.
+    --- 'goal, "the goal has been reached"), CallP('selfdestruct, 'beneficiary)))] FD['refund,@external,
+    --- pV,BodyF(Assert(block.timestamp >=. 'deadline and. 'balance <. 'goal), BodyF(Dv('ind, int128,
+    --- 'refundIndex), BodyF(ForR('i, ArgL('ind, 3.0e+1 +. 'ind), BodyF(If('i >=. 'nextFunderIndex,
+    --- BodyF(=('refundIndex, 'nextFunderIndex), return)), BodyF(CallP('send, ArgL(.(->('funders, 'i),
+    --- 'sender), .(->('funders, 'i), 'value))), =(->('funders, 'i), CallP('empty, 'Funder))))), =(
+    --- 'refundIndex, 3.0e+1 +. 'ind))))] FD['send,@external,('_receiver,address,0.0) ('value,uint256,
+    --- 0.0),bv] FDD['participate,@external,@payable,pV,BodyF(Assert(block.timestamp <. 'deadline,
+    --- "deadline not met (yet)"), BodyF(Dv('nfi, int128, 'nextFunderIndex), BodyF(=St(->('funders,
+    --- 'nfi), 'Funder, LParam(P('sender, msg.sender), P('value, msg.value))), =('nextFunderIndex, 1.0 +.
+    --- 'nfi))))] FDD['selfdestruct,@external,@payable,('to,address,0.0),bv],push(['balance,uint256,
+    --- 1.0e+2,0.0,public,normal] ['beneficiary,address,3.0,0.0,private,normal] ['deadline,uint256,
+    --- 1.00001e+5,0.0,public,normal] ['goal,uint256,2.0,0.0,public,normal] ['nextFunderIndex,int128,37.0,
+    --- 0.0,private,normal] ['refundIndex,int128,0.0,0.0,private,normal] ['timelimit,uint256,1.0,0.0,
+    --- public,normal] ['Funder,struct,['sender,address,0.0,0.0,private,normal] ['value,uint256,0.0,0.0,
+    --- private,normal],0.0,private,normal] ['funders,HashMap,M| [int128,'Funder,0.0],D(0.0 -> ['sender,
+    --- address,1.0,0.0,private,normal] ['value,uint256,1.0,0.0,private,normal]) |,0.0,private,
+    --- normal], stackE),noneV,mv > .
+
+	***Contract 5 CallP('_delegated, 1.0) B , CallP('delegated, 1.0) B , CallP('_directlyVoted, 1.0) B,CallP('directlyVoted, 1.0) B
+	*** giveRightToVote b , CallP('vote, 3.0) b , Call('_winningProposal) , Call('winningProposal) Call('winnerName) b CallP('_forwardWeight,4.0) B , CallP('forwardWeight,4.0)
+	*** CallP('delegate,4.0) , CallP('__init__ , ArgL(4.0,2.0)) B , Call('_debt) b , Call('worth) b
+	--- rew exec(Contract(ListS(Ds('Voter, ListS(D('weight, int128), ListS(D('voted, bool), ListS(D(
+	--- 	'delegate, address), D('vote, int128))))), ListS(Ds('Proposal, ListS(D('name, bytes32), D('voteCount,
+	--- 	int128))), ListS(DhmP('voters, address, 'Voter, "public"), ListS(DhmP('proposals, int128, 'Proposal,
+	--- 	"public"), ListS(Dp('voterCount, int128, "public"), ListS(Dp('chairperson, address, "public"), Dp(
+	--- 	'int128Proposals, int128, "public"))))))), ListF(Fun(headerDDR(@view, @internal, '_delegated, bool, P(
+	--- 	'addr, address)), Return(.(->('voters, 'addr), 'delegate) !=. ZERO-ADDRESS)), ListF(Fun(headerDDR(
+	--- 	@view, @external, 'delegated, bool, P('addr, address)), Return(CallP('_delegated, 'addr))), ListF(Fun(
+	--- 	headerDDR(@view, @internal, '_directlyVoted, bool, P('addr, address)), Return(.(->('voters, 'addr),
+	--- 	'voted) and. PA .(->('voters, 'addr), 'delegate) ==. ZERO-ADDRESS PC)), ListF(Fun(headerDDR(@view,
+	--- 	@external, 'directlyVoted, bool, P('addr, address)), Return(CallP('_directlyVoted, 'addr))), ListF(Fun(
+	--- 	init(@external, P('_proposalNames, ->(bytes32, 2.0))), BodyF(=('chairperson, msg.sender), BodyF(=(
+	--- 	'voterCount, 0.0), ForR('i, 2.0, BodyF(=St(->('proposals, 'i), 'Proposal, LParam(P('name, ->(
+	--- 	'_proposalNames, 'i)), P('voteCount, 0.0))), +=('int128Proposals, 1.0)))))), ListF(Fun(headerD(
+	--- 	@external, 'giveRightToVote, P('voter, address)), BodyF(Assert(msg.sender ==. 'chairperson), BodyF(
+	--- 	Assert(not. .(->('voters, 'voter), 'voted)), BodyF(Assert(.(->('voters, 'voter), 'weight) ==. 0.0),
+	--- 	BodyF(=(.(->('voters, 'voter), 'weight), 1.0), +=('voterCount, 1.0)))))), ListF(Fun(headerD(@internal,
+	--- 	'_forwardWeight, P('delegate_with_weight_to_forward, address)), BodyF(Assert(CallP('_delegated,
+	--- 	'delegate_with_weight_to_forward)), BodyF(Assert(.(->('voters, 'delegate_with_weight_to_forward),
+	--- 	'weight) >. 0.0), BodyF(Dv('target, address, .(->('voters, 'delegate_with_weight_to_forward),
+	--- 	'delegate)), BodyF(ForR('i, 4.0, IfElse(CallP('_delegated, 'target), BodyF(=('target, .(->('voters,
+	--- 	'target), 'delegate)), Assert('target !=. 'delegate_with_weight_to_forward)), break)), BodyF(Dv(
+	--- 	'weight_to_forward, int128, .(->('voters, 'delegate_with_weight_to_forward), 'weight)), BodyF(=(.(->(
+	--- 	'voters, 'delegate_with_weight_to_forward), 'weight), 0.0), BodyF(+=(.(->('voters, 'target), 'weight),
+	--- 	'weight_to_forward), If(CallP('_directlyVoted, 'target), BodyF(+=(.(->('proposals, .(->('voters,
+	--- 	'target), 'vote)), 'voteCount), 'weight_to_forward), =(.(->('voters, 'target), 'weight), 0.0))))))))))),
+	--- 	ListF(Fun(headerD(@external, 'forwardWeight, P('delegate_with_weight_to_forward, address)), CallP(
+	--- 	'_forwardWeight, 'delegate_with_weight_to_forward)), ListF(Fun(headerD(@external, 'delegate, P('to,
+	--- 	address)), BodyF(Assert(not. .(->('voters, msg.sender), 'voted)), BodyF(Assert('to !=. msg.sender),
+	--- 	BodyF(Assert('to !=. ZERO-ADDRESS), BodyF(=(.(->('voters, msg.sender), 'voted), True), BodyF(=(.(->(
+	--- 	'voters, msg.sender), 'delegate), 'to), CallP('_forwardWeight, msg.sender))))))), ListF(Fun(headerD(
+	--- 	@external, 'vote, P('proposal, int128)), BodyF(Assert(not. .(->('voters, msg.sender), 'voted)), BodyF(
+	--- 	Assert('proposal <. 'int128Proposals), BodyF(=(.(->('voters, msg.sender), 'vote), 'proposal), BodyF(=(
+	--- 	.(->('voters, msg.sender), 'voted), True), BodyF(+=(.(->('proposals, 'proposal), 'voteCount), .(->(
+	--- 	'voters, msg.sender), 'weight)), =(.(->('voters, msg.sender), 'weight), 0.0))))))), ListF(Fun(
+	--- 	headerDDR(@view, @internal, '_winningProposal, int128, PaV), BodyF(Dv('winning_vote_count, int128,
+	--- 	0.0), BodyF(Dv('winning_proposal, int128, 0.0), BodyF(ForR('i, 2.0, If(.(->('proposals, 'i),
+	--- 	'voteCount) >. 'winning_vote_count, BodyF(=('winning_vote_count, .(->('proposals, 'i), 'voteCount)), =(
+	--- 	'winning_proposal, 'i)))), Return('winning_proposal))))), ListF(Fun(headerDDR(@view, @external,
+	--- 	'winningProposal, int128, PaV), Return(Call('_winningProposal))), Fun(headerDDR(@view, @external,
+	--- 	'winnerName, bytes32, PaV), Return(.(->('proposals, Call('_winningProposal)), 'name)))))))))))))))), CallP('__init__ , ArgL(4.0,2.0))) .
+	*** CallP('giveRightToVote, 3.0) b , CallP('delegated, 3.0) , CallP('_delegated, 3.0) b CallP('_directlyVoted, 3.0) b , CallP('directlyVoted, 3.0) , CallP('_forwardWeight,0.0)
+	*** CallP('forwardWeight,0.0) b   CallP('delegate, 4.0) b , CallP('vote, 1.0) b , Call('_winningProposal) b Call('winningProposal) Call('winnerName)
+		rew < CallP('_delegated, 3.0), InitD[@external,('_proposalNames,bytes32,2.0),BodyF(=('chairperson, msg.sender),
+		BodyF(=('giveRightToVote, 0.0), ForR('i, 2.0, BodyF(=St(->('proposals, 'i), 'Proposal, LParam(P('name, ->(
+		'_proposalNames, 'i)), P('voteCount, 0.0))), +=('int128Proposals, 1.0)))))] FD['_forwardWeight,@internal,(
+		'delegate_with_weight_to_forward,address,0.0),BodyF(Assert(CallP('_delegated,
+		'delegate_with_weight_to_forward)), BodyF(Assert(.(->('voters, 'delegate_with_weight_to_forward), 'weight) >.
+		0.0), BodyF(Dv('target, address, .(->('voters, 'delegate_with_weight_to_forward), 'delegate)), BodyF(ForR(
+		'i, 4.0, IfElse(CallP('_delegated, 'target), BodyF(=('target, .(->('voters, 'target), 'delegate)), Assert(
+		'target !=. 'delegate_with_weight_to_forward)), break)), BodyF(Dv('weight_to_forward, int128, .(->('voters,
+		'delegate_with_weight_to_forward), 'weight)), BodyF(=(.(->('voters, 'delegate_with_weight_to_forward),
+		'weight), 0.0), BodyF(+=(.(->('voters, 'target), 'weight), 'weight_to_forward), If(CallP('_directlyVoted,
+		'target), BodyF(+=(.(->('proposals, .(->('voters, 'target), 'vote)), 'voteCount), 'weight_to_forward), =(.(
+		->('voters, 'target), 'weight), 0.0))))))))))] FD['delegate,@external,('to,address,0.0),BodyF(Assert(not. .(
+		->('voters, msg.sender), 'voted)), BodyF(Assert('to !=. msg.sender), BodyF(Assert('to !=. ZERO-ADDRESS),
+		BodyF(=(.(->('voters, msg.sender), 'voted), True), BodyF(=(.(->('voters, msg.sender), 'delegate), 'to),
+		CallP('_forwardWeight, msg.sender))))))] FD['forwardWeight,@external,('delegate_with_weight_to_forward,
+		address,0.0),CallP('_forwardWeight, 'delegate_with_weight_to_forward)] FD['giveRightToVote,@external,('voter,
+		address,0.0),BodyF(Assert(msg.sender ==. 'chairperson), BodyF(Assert(not. .(->('voters, 'voter), 'voted)),
+		BodyF(Assert(.(->('voters, 'voter), 'weight) ==. 0.0), BodyF(=(.(->('voters, 'voter), 'weight), 1.0), +=(
+		'voterCount, 1.0)))))] FD['send,@external,('_receiver,address,0.0) ('value,uint256,0.0),bv] FD['vote,
+		@external,('proposal,int128,0.0),BodyF(Assert(not. .(->('voters, msg.sender), 'voted)), BodyF(Assert(
+		'proposal <. 'int128Proposals), BodyF(=(.(->('voters, msg.sender), 'vote), 'proposal), BodyF(=(.(->('voters,
+		msg.sender), 'voted), True), BodyF(+=(.(->('proposals, 'proposal), 'voteCount), .(->('voters, msg.sender),
+		'weight)), =(.(->('voters, msg.sender), 'weight), 0.0))))))] FDD['selfdestruct,@external,@payable,('to,
+		address,0.0),bv] FDDR['_delegated,@view,@internal,('addr,address,0.0),bool,Return(.(->('voters, 'addr),
+		'delegate) !=. ZERO-ADDRESS)] FDDR['_directlyVoted,@view,@internal,('addr,address,0.0),bool,Return(.(->(
+		'voters, 'addr), 'voted) and. PA .(->('voters, 'addr), 'delegate) ==. ZERO-ADDRESS PC)] FDDR[
+		'_winningProposal,@view,@internal,pV,int128,BodyF(Dv('winning_vote_count, int128, 0.0), BodyF(Dv(
+		'winning_proposal, int128, 0.0), BodyF(ForR('i, 2.0, If(.(->('proposals, 'i), 'voteCount) >.
+		'winning_vote_count, BodyF(=('winning_vote_count, .(->('proposals, 'i), 'voteCount)), =('winning_proposal,
+		'i)))), Return('winning_proposal))))] FDDR['delegated,@view,@external,('addr,address,0.0),bool,Return(CallP(
+		'_delegated, 'addr))] FDDR['directlyVoted,@view,@external,('addr,address,0.0),bool,Return(CallP(
+		'_directlyVoted, 'addr))] FDDR['winnerName,@view,@external,pV,bytes32,Return(.(->('proposals, Call(
+		'_winningProposal)), 'name))] FDDR['winningProposal,@view,@external,pV,int128,Return(Call(
+		'_winningProposal))],push(['balance,uint256,1.0e+2,0.0,public,normal] ['chairperson,address,3.0,0.0,public,
+		normal] ['int128Proposals,int128,2.0,0.0,public,normal] ['voterCount,int128,1.0,0.0,public,normal] ['Proposal,
+		struct,['name,bytes32,0.0,0.0,private,normal] ['voteCount,int128,0.0,0.0,private,normal],0.0,private,normal] [
+		'Voter,struct,['delegate,address,0.0,0.0,private,normal] ['vote,int128,0.0,0.0,private,normal] ['voted,bool,
+		0.0,0.0,private,normal] ['weight,int128,0.0,0.0,private,normal],0.0,private,normal] ['proposals,HashMap,M| [
+		int128,'Proposal,0.0],D(0.0 -> ['name,bytes32,4.0,0.0,private,normal] ['voteCount,int128,3.0,0.0,private,
+		normal]) D(1.0 -> ['name,bytes32,2.0,0.0,private,normal] ['voteCount,int128,6.0,0.0,private,normal]) |,0.0,
+		public,normal] ['voters,HashMap,M| [address,'Voter,0.0],D(0.0 -> ['delegate,address,0.0,0.0,private,normal] [
+		'vote,int128,1.0,0.0,private,normal] ['voted,bool,true,0.0,private,normal] ['weight,int128,1.0,0.0,private,
+		normal]) D(3.0 -> ['delegate,address,0.0,0.0,private,normal] ['vote,int128,0.0,0.0,private,normal] ['voted,bool,true,0.0,private,normal] ['weight,int128,1.0,0.0,private,
+		normal]) |,0.0,public,normal], stackE),noneV,mv > .
+	*** Contract 6 CallP('__init__ , ArgL(4.0,ArgL(4.0,2.0))) b , Call('_stockAvailable)  b Call('stockAvailable) b , Call('buyStock) b , CallP('_getHolding, 4.0) B
+		*** Call('cash) B , 'transferStock, ArgL(1.0,2.0) B , CallP('payBill, ArgL(1.0,2.0)) B , Call('debt)  b
+	--- rew exec(Contract(ListS(De('Transfer, ListS(Di('sender, address, "indexed"), ListS(Di('receiver,
+	---     address, "indexed"), D('value, uint256)))), ListS(De('Buy, ListS(Di('buyer, address, "indexed"), D(
+	---     'buy_order, uint256))), ListS(De('Sell, ListS(Di('seller, address, "indexed"), D('sell_order,
+	---     uint256))), ListS(De('Pay, ListS(Di('vendor, address, "indexed"), D('amount, uint256))), ListS(Dp(
+	---     'company, address, "public"), ListS(Dp('totalShares, uint256, "public"), ListS(Dp('price, uint256,
+	---     "public"), Dhm('holdings, address, uint256)))))))), ListF(Fun(init(@external, LParam(P('_company,
+	---     address), LParam(P('_total_shares, uint256), P('initial_price, uint256)))), BodyF(Assert('_total_shares
+	---     >. 0.0), BodyF(Assert('initial_price >. 0.0), BodyF(=('company, '_company), BodyF(=('totalShares,
+	---     '_total_shares), BodyF(=('price, 'initial_price), =(->('holdings, 'company), '_total_shares))))))),
+	---     ListF(Fun(headerDDR(@view, @internal, '_stockAvailable, uint256, PaV), Return(->('holdings,
+	---     'company))), ListF(Fun(headerDDR(@view, @external, 'stockAvailable, uint256, PaV), Return(Call(
+	---     '_stockAvailable))), ListF(Fun(headerDD(@external, @payable, 'buyStock, PaV), BodyF(Dv('buy_order,
+	---     uint256, msg.value /. 'price), BodyF(Assert(Call('_stockAvailable) >=. 'buy_order), BodyF(-=(->(
+	---     'holdings, 'company), 'buy_order), BodyF(+=(->('holdings, msg.sender), 'buy_order), logE('Buy, ArgL(
+	---     msg.sender, 'buy_order))))))), ListF(Fun(headerDDR(@view, @internal, '_getHolding, uint256, P(
+	---     '_stockholder, address)), Return(->('holdings, '_stockholder))), ListF(Fun(headerDDR(@view, @external,
+	---     'getHolding, uint256, P('_stockholder, address)), Return(CallP('_getHolding, '_stockholder))), ListF(
+	---     Fun(headerDDR(@view, @external, 'cash, uint256, PaV), Return('balance)), ListF(Fun(headerD(@external,
+	---     'sellStock, P('sell_order, uint256)), BodyF(Assert('sell_order >. 0.0), BodyF(Assert(CallP(
+	---     '_getHolding, msg.sender) >=. 'sell_order), BodyF(Assert('balance >=. PA 'price *. 'sell_order PC),
+	---     BodyF(-=(->('holdings, msg.sender), 'sell_order), BodyF(+=(->('holdings, 'company), 'sell_order),
+	---     BodyF(CallP('send, ArgL(msg.sender, 'price *. 'sell_order)), logE('Sell, ArgL(msg.sender,
+	---     'sell_order))))))))), ListF(Fun(headerD(@external, 'transferStock, LParam(P('receiver, address), P(
+	---     'transfer_order, uint256))), BodyF(Assert('transfer_order >. 0.0), BodyF(Assert(CallP('_getHolding,
+	---     msg.sender) >=. 'transfer_order), BodyF(-=(->('holdings, msg.sender), 'transfer_order), BodyF(+=(->(
+	---     'holdings, 'receiver), 'transfer_order), logE('Transfer, ArgL(msg.sender, 'receiver,
+	---     'transfer_order))))))), ListF(Fun(headerD(@external, 'payBill, LParam(P('vendor, address), P('amount,
+	---     uint256))), BodyF(Assert(msg.sender ==. 'company), BodyF(Assert('balance >=. 'amount), BodyF(CallP(
+	---     'send, ArgL('vendor, 'amount)), logE('Pay, ArgL('vendor, 'amount)))))), ListF(Fun(headerDDR(@view,
+	---     @internal, '_debt, uint256, PaV), Return('price *. PA 'totalShares -. Call('_stockAvailable) PC)),
+	---     ListF(Fun(headerDDR(@view, @external, 'debt, uint256, PaV), Return(Call('_debt))), Fun(headerDDR(@view,
+	---     @external, 'worth, uint256, PaV), Return('balance -. Call('_debt)))))))))))))))),CallP('__init__ , ArgL(4.0,ArgL(4.0,2.0)))) .
+	*** Call('_stockAvailable) b  Call('stockAvailable) b Call('buyStock) b CallP('_getHolding, 4.0) , CallP('getHolding, 4.0) , Call('cash) b , CallP('transferStock, ArgL(5.0,8.0)) 
+	*** CallP('payBill, ArgL(3.5,4.5)) , b Call('debt) , Call('worth)b 
+	--- 	rew < Call('worth),InitD[@external,('_company,address,0.0) ('_total_shares,uint256,0.0) ('initial_price,
+    --- uint256,0.0),BodyF(Assert('_total_shares >. 0.0), BodyF(Assert('initial_price >. 0.0), BodyF(=('company,
+    --- '_company), BodyF(=('totalShares, '_total_shares), BodyF(=('price, 'initial_price), =(->('holdings,
+    --- 'company), '_total_shares))))))] FD['payBill,@external,('vendor,address,0.0) ('amount,uint256,0.0),BodyF(
+    --- Assert(msg.sender ==. 'company), BodyF(Assert('balance >=. 'amount), BodyF(CallP('send, ArgL('vendor,
+    --- 'amount)), logE('Pay, ArgL('vendor, 'amount)))))] FD['sellStock,@external,('sell_order,uint256,0.0),BodyF(
+    --- Assert('sell_order >. 0.0), BodyF(Assert(CallP('_getHolding, msg.sender) >=. 'sell_order), BodyF(Assert(
+    --- 'balance >=. PA 'price *. 'sell_order PC), BodyF(-=(->('holdings, msg.sender), 'sell_order), BodyF(+=(->(
+    --- 'holdings, 'company), 'sell_order), BodyF(CallP('send, ArgL(msg.sender, 'price *. 'sell_order)), logE('Sell,
+    --- ArgL(msg.sender, 'sell_order))))))))] FD['send,@external,('_receiver,address,0.0) ('value,uint256,0.0),bv]
+    --- FD['transferStock,@external,('receiver,address,0.0) ('transfer_order,uint256,0.0),BodyF(Assert(
+    --- 'transfer_order >. 0.0), BodyF(Assert(CallP('_getHolding, msg.sender) >=. 'transfer_order), BodyF(-=(->(
+    --- 'holdings, msg.sender), 'transfer_order), BodyF(+=(->('holdings, 'receiver), 'transfer_order), logE(
+    --- 'Transfer, ArgL(msg.sender, 'receiver, 'transfer_order))))))] FDD['buyStock,@external,@payable,pV,BodyF(Dv(
+    --- 'buy_order, uint256, msg.value /. 'price), BodyF(Assert(Call('_stockAvailable) >=. 'buy_order), BodyF(-=(
+    --- ->('holdings, 'company), 'buy_order), BodyF(+=(->('holdings, msg.sender), 'buy_order), logE('Buy, ArgL(
+    --- msg.sender, 'buy_order))))))] FDD['selfdestruct,@external,@payable,('to,address,0.0),bv] FDDR['_debt,@view,
+    --- @internal,pV,uint256,Return('price *. PA 'totalShares -. Call('_stockAvailable) PC)] FDDR['_getHolding,@view,
+    --- @internal,('_stockholder,address,0.0),uint256,Return(->('holdings, '_stockholder))] FDDR['_stockAvailable,
+    --- @view,@internal,pV,uint256,Return(->('holdings, 'company))] FDDR['cash,@view,@external,pV,uint256,Return(
+    --- 'balance)] FDDR['debt,@view,@external,pV,uint256,Return(Call('_debt))] FDDR['getHolding,@view,@external,(
+    --- '_stockholder,address,0.0),uint256,Return(CallP('_getHolding, '_stockholder))] FDDR['stockAvailable,@view,
+    --- @external,pV,uint256,Return(Call('_stockAvailable))] FDDR['worth,@view,@external,pV,uint256,Return('balance
+    --- -. Call('_debt))],push(['balance,uint256,1.0e+2,0.0,public,normal] ['company,address,4.0,0.0,public,normal] [
+    --- 'price,uint256,2.0,0.0,public,normal] ['totalShares,uint256,4.0,0.0,public,normal] ['Buy,event,['buy_order,
+    --- uint256,0.0,0.0,private,normal] ['buyer,address,0.0,0.0,private,indexed],0.0,private,normal] ['Pay,event,[
+    --- 'amount,uint256,0.0,0.0,private,normal] ['vendor,address,0.0,0.0,private,indexed],0.0,private,normal] ['Sell,
+    --- event,['sell_order,uint256,0.0,0.0,private,normal] ['seller,address,0.0,0.0,private,indexed],0.0,private,
+    --- normal] ['Transfer,event,['receiver,address,0.0,0.0,private,indexed] ['sender,address,0.0,0.0,private,
+    --- indexed] ['value,uint256,0.0,0.0,private,normal],0.0,private,normal] ['holdings,HashMap,M| [address,uint256,
+    --- 0.0],D(4.0 -> 4.0) |,0.0,private,normal], stackE),noneV,mv > .
+
+	*** Contract 7.
+	--- rew exec(	Contract(ListS(Ds('Juego, ListS(D('apostador, address), ListS(D('equipo1, uint256), ListS(D(
+    --- 'equipo2, uint256), D('apuesta, uint256))))), ListS(Dp('casa, address, "public"), ListS(Dp('inicial,
+    --- uint256, "public"), ListS(Dp('empieza, uint256, "public"), ListS(Dp('termina, uint256, "public"), ListS(D(
+    --- 'pequipo1, uint256), ListS(D('pequipo2, uint256), ListS(D('indice, uint256), ListS(Dhm('apostadores,
+    --- uint256, 'Juego), ListS(D('sigindice, uint256), ListS(D('invertido, bool), D('apuntados, bool)))))))))))),
+    --- ListF(Fun(init(@payable, @external, LParam(P('tiempo_inicio, uint256), P('duracion, uint256))), BodyF(
+    --- Assert('tiempo_inicio >. 0.0), BodyF(Assert('duracion >. 0.0), BodyF(=('inicial, msg.value), BodyF(=(
+    --- 'casa, msg.sender), BodyF(=('empieza, 'tiempo_inicio +. block.timestamp), =('termina, 'duracion +.
+    --- 'empieza))))))), ListF(Fun(headerDD(@external, @payable, 'apostar, LParam(P('eq1, uint256), P('eq2,
+    --- uint256))), BodyF(Assert(block.timestamp <=. 'empieza, "Antes de empezar"), BodyF(Assert(msg.sender !=.
+    --- 'casa, "Jugador"), BodyF(Assert(msg.value >. 0.0, "Apuesta positiva"), BodyF(Dv('nfi, uint256, 'indice),
+    --- BodyF(=St(->('apostadores, 'nfi), 'Juego, LParam(P('apostador, msg.sender), LParam(P('equipo1, 'eq1),
+    --- LParam(P('equipo2, 'eq2), P('apuesta, msg.value))))), =('indice, 'nfi +. 1.0))))))), ListF(Fun(headerDDR(
+    --- @view, @external, 'necesario, uint256, PaV), BodyF(Assert(msg.sender ==. 'casa, "Casa"), BodyF(Assert(
+    --- block.timestamp >. 'empieza, "Despues de empezar"), Return(PA 'balance -. 'inicial PC /. 2.0)))), ListF(Fun(
+    --- headerDD(@payable, @external, 'mitad, PaV), BodyF(Assert(block.timestamp >. 'empieza, "Despues de empezar"),
+    --- BodyF(Assert('casa ==. msg.sender, "Casa"), BodyF(Assert('inicial +. msg.value >=. PA PA 'balance -.
+    --- 'inicial -. msg.value PC /. 2.0 PC, "Valor suficiente"), =('invertido, True))))), ListF(Fun(headerD(
+    --- @external, 'ganadores, LParam(P('_eq1, uint256), P('_eq2, uint256))), BodyF(Assert(msg.sender ==. 'casa),
+    --- BodyF(Assert(block.timestamp >. 'termina), BodyF(Assert(not. 'apuntados), BodyF(=('apuntados, True),
+    --- BodyF(=('pequipo1, '_eq1), =('pequipo2, '_eq2))))))), ListF(Fun(headerD(@external, 'devolver, PaV), BodyF(
+    --- Assert('apuntados, "Apuntados"), BodyF(Assert('casa ==. msg.sender, "Casa"), BodyF(Assert('invertido,
+    --- "Ha invertido"), BodyF(Dv('nive, uint256, 'sigindice), ForR('i, ArgL('nive, 'nive +. 3.0e+1), IfElse('i >.
+    --- 'indice, CallP('selfdestruct, 'casa), If(PA PA .(->('apostadores, 'i), 'equipo1) ==. 'pequipo1 PC and. PA .(
+    --- ->('apostadores, 'i), 'equipo2) ==. 'pequipo2 PC PC, BodyF(CallP('send, ArgL(.(->('apostadores, 'i),
+    --- 'apostador), PA .(->('apostadores, 'i), 'apuesta) /. 2.0 PC +. .(->('apostadores, 'i), 'apuesta))), =(
+    --- 'sigindice, 'nive +. 3.0e+1)))))))))), ListF(Fun(headerD(@external, 'ganadores, LParam(P('_eq1, uint256), P(
+    --- '_eq2, uint256))), BodyF(Assert(msg.sender ==. 'casa, "Casa"), BodyF(Assert(block.timestamp >. 'termina,
+    --- "Despues de terminar"), BodyF(Assert(not. 'apuntados, "No apuntados"), BodyF(=('apuntados, True), BodyF(=(
+    --- 'pequipo1, '_eq1), =('pequipo2, '_eq2))))))), ListF(Fun(headerDDR(@view, @external, 'terminado, bool, PaV),
+    --- Return(block.timestamp >. 'termina)), ListF(Fun(headerDDR(@view, @external, 'empezado, bool, PaV), Return(
+    --- block.timestamp >. 'empieza)), ListF(Fun(headerDDR(@view, @external, 'ganar, uint256, P('apos, 'Juego)),
+    --- Return('apos.apuesta +. PA 'apos.apuesta /. 2.0 PC)), Fun(headerDDR(@view, @external, 'ganado, bool, P('apos,
+    --- 'Juego)), BodyF(Assert('apuntados), Return(PA 'apos.equipo1 ==. 'pequipo1 PC and. PA 'apos.equipo2 ==.
+    --- 'pequipo2 PC)))))))))))))) , CallP('__init__ , ArgL(1.0, 2.0))) .
+	*** CallP('__init__ , ArgL(1.0, 2.0)) , CallP('apostar , ArgL(3.0, 5.0) ) , Call('necesario ) , Call('mitad ) , CallP('ganadores , ArgL(3.0, 5.0) ) , Call('devolver )
+	*** Call('terminado ) ,  Call('empezado ) , CallP('ganar, ArgL(1.0, ArgL(2.0, ArgL(3.0, 4.0))) ) , CallP('ganado, ArgL(1.0, ArgL(2.0, ArgL(3.0, 4.0))) V
+--- rew < Call('devolver ) , FD['devolver,@external,pV,BodyF(Assert('apuntados, "Apuntados"), BodyF(Assert('casa
+---     ==. msg.sender, "Casa"), BodyF(Assert('invertido, "Ha invertido"), BodyF(Dv('nive, uint256, 'sigindice),
+---     ForR('i, ArgL('nive, 3.0e+1 +. 'nive), IfElse('i >. 'indice, CallP('selfdestruct, 'casa), If(PA PA .(->(
+---     'apostadores, 'i), 'equipo1) ==. 'pequipo1 PC and. PA .(->('apostadores, 'i), 'equipo2) ==. 'pequipo2 PC PC,
+---     BodyF(CallP('send, ArgL(.(->('apostadores, 'i), 'apostador), PA .(->('apostadores, 'i), 'apuesta) /. 2.0 PC
+---     +. .(->('apostadores, 'i), 'apuesta))), =('sigindice, 3.0e+1 +. 'nive)))))))))] FD['ganadores,@external,(
+---     '_eq1,uint256,0.0) ('_eq2,uint256,0.0),BodyF(Assert(msg.sender ==. 'casa), BodyF(Assert(block.timestamp >.
+---     'termina), BodyF(Assert(not. 'apuntados), BodyF(=('apuntados, True), BodyF(=('pequipo1, '_eq1), =(
+---     'pequipo2, '_eq2))))))] FD['ganadores,@external,('_eq1,uint256,0.0) ('_eq2,uint256,0.0),BodyF(Assert(
+---     msg.sender ==. 'casa, "Casa"), BodyF(Assert(block.timestamp >. 'termina, "Despues de terminar"), BodyF(
+---     Assert(not. 'apuntados, "No apuntados"), BodyF(=('apuntados, True), BodyF(=('pequipo1, '_eq1), =('pequipo2,
+---     '_eq2))))))] FD['send,@external,('_receiver,address,0.0) ('value,uint256,0.0),bv] InitDD[@payable,@external,(
+---     'tiempo_inicio,uint256,0.0) ('duracion,uint256,0.0),BodyF(Assert('tiempo_inicio >. 0.0), BodyF(Assert(
+---     'duracion >. 0.0), BodyF(=('inicial, msg.value), BodyF(=('casa, msg.sender), BodyF(=('empieza,
+---     'tiempo_inicio +. block.timestamp), =('termina, 'duracion +. 'empieza))))))] FDD['apostar,@external,@payable, ('eq1,uint256,0.0) ('eq2,uint256,0.0),
+---      BodyF(Assert(block.timestamp <=. 'empieza, "Antes de empezar"),
+---     BodyF(Assert(msg.sender !=. 'casa, "Jugador"), BodyF(Assert(msg.value >. 0.0, "Apuesta positiva"), BodyF(
+---     Dv('nfi, uint256, 'indice), BodyF(=St(->('apostadores, 'nfi), 'Juego, LParam(P('apostador, msg.sender),
+---     LParam(P('equipo1, 'eq1), LParam(P('equipo2, 'eq2), P('apuesta, msg.value))))), =('indice, 1.0 +. 'nfi))))))]
+---     FDD['mitad,@payable,@external,pV,BodyF(Assert(block.timestamp >. 'empieza, "Despues de empezar"), BodyF(
+---     Assert('casa ==. msg.sender, "Casa"), BodyF(Assert('inicial +. msg.value >=. PA PA 'balance -. 'inicial -.
+---     msg.value PC /. 2.0 PC, "Valor suficiente"), =('invertido, True))))] FDD['selfdestruct,@external,@payable,(
+---     'to,address,0.0),bv] FDDR['empezado,@view,@external,pV,bool,Return(block.timestamp >. 'empieza)] FDDR[
+---     'ganado,@view,@external,parseParam(P('apos, 'Juego)),bool,BodyF(Assert('apuntados), Return(PA 'apos.equipo1
+---     ==. 'pequipo1 PC and. PA 'apos.equipo2 ==. 'pequipo2 PC))] FDDR['ganar,@view,@external,parseParam(P('apos,
+---     'Juego)),uint256,Return('apos.apuesta +. PA 'apos.apuesta /. 2.0 PC)] FDDR['necesario,@view,@external,pV,
+---     uint256,BodyF(Assert(msg.sender ==. 'casa, "Casa"), BodyF(Assert(block.timestamp >. 'empieza,
+---     "Despues de empezar"), Return(PA 'balance -. 'inicial PC /. 2.0)))] FDDR['terminado,@view,@external,pV,bool,
+---     Return(block.timestamp >. 'termina)],push(['apuntados,bool,0.0,0.0,private,normal] ['balance,uint256,1.0e+2,
+---     0.0,public,normal] ['casa,address,3.0,0.0,public,normal] ['empieza,uint256,1.00001e+5,0.0,public,normal] [
+---     'indice,uint256,20.0,0.0,private,normal] ['inicial,uint256,1.0,0.0,public,normal] ['invertido,bool,0.0,0.0,
+---     private,normal] ['pequipo1,uint256,0.0,0.0,private,normal] ['pequipo2,uint256,0.0,0.0,private,normal] [
+---     'sigindice,uint256,0.0,0.0,private,normal] ['termina,uint256,1.00003e+5,0.0,public,normal] ['Juego,struct,[
+---     'apostador,address,0.0,0.0,private,normal] ['apuesta,uint256,0.0,0.0,private,normal] ['equipo1,uint256,0.0,
+---     0.0,private,normal] ['equipo2,uint256,0.0,0.0,private,normal],0.0,private,normal] ['apostadores,HashMap,M| [
+---     uint256,'Juego,0.0],mapv |,0.0,private,normal], stackE),noneV,mv > .
+
+--- rew < CallP('ganado, ArgL(1.0, ArgL(2.0, ArgL(3.0, 4.0))) ) ,FD['devolver,@external,pV,BodyF(Assert('apuntados, "Apuntados"), BodyF(Assert('casa
+---     ==. msg.sender, "Casa"), BodyF(Assert('invertido, "Ha invertido"), BodyF(Dv('nive, uint256, 'sigindice),
+---     ForR('i, ArgL('nive, 3.0e+1 +. 'nive), IfElse('i >. 'indice, CallP('selfdestruct, 'casa), If(PA PA .(->(
+---     'apostadores, 'i), 'equipo1) ==. 'pequipo1 PC and. PA .(->('apostadores, 'i), 'equipo2) ==. 'pequipo2 PC PC,
+---     BodyF(CallP('send, ArgL(.(->('apostadores, 'i), 'apostador), PA .(->('apostadores, 'i), 'apuesta) /. 2.0 PC
+---     +. .(->('apostadores, 'i), 'apuesta))), =('sigindice, 3.0e+1 +. 'nive)))))))))] FD['ganadores,@external,(
+---     '_eq1,uint256,0.0) ('_eq2,uint256,0.0),BodyF(Assert(msg.sender ==. 'casa, "Casa"), BodyF(Assert(
+---     block.timestamp >. 'termina, "Despues de terminar"), BodyF(Assert(not. 'apuntados, "No apuntados"), BodyF(
+---     =('apuntados, True), BodyF(=('pequipo1, '_eq1), =('pequipo2, '_eq2))))))] FD['send,@external,('_receiver,
+---     address,0.0) ('value,uint256,0.0),bv] InitDD[@payable,@external,('tiempo_inicio,uint256,0.0) ('duracion,
+---     uint256,0.0),BodyF(Assert('tiempo_inicio >. 0.0), BodyF(Assert('duracion >. 0.0), BodyF(=('inicial,
+---     msg.value), BodyF(=('casa, msg.sender), BodyF(=('empieza, 'tiempo_inicio +. block.timestamp), =('termina,
+---     'duracion +. 'empieza))))))] FDD['apostar,@external,@payable,('eq1,uint256,0.0) ('eq2,uint256,0.0),BodyF(
+---     Assert(block.timestamp <=. 'empieza, "Antes de empezar"), BodyF(Assert(msg.sender !=. 'casa, "Jugador"),
+---     BodyF(Assert(msg.value >. 0.0, "Apuesta positiva"), BodyF(Dv('nfi, uint256, 'indice), BodyF(=St(->(
+---     'apostadores, 'nfi), 'Juego, LParam(P('apostador, msg.sender), LParam(P('equipo1, 'eq1), LParam(P('equipo2,
+---     'eq2), P('apuesta, msg.value))))), =('indice, 1.0 +. 'nfi))))))] FDD['mitad,@payable,@external,pV,BodyF(
+---     Assert(block.timestamp >. 'empieza, "Despues de empezar"), BodyF(Assert('casa ==. msg.sender, "Casa"),
+---     BodyF(Assert('inicial +. msg.value >=. PA PA 'balance -. 'inicial -. msg.value PC /. 2.0 PC,
+---     "Valor suficiente"), =('invertido, True))))] FDD['selfdestruct,@external,@payable,('to,address,0.0),bv] FDDR[
+---     'empezado,@view,@external,pV,bool,Return(block.timestamp >. 'empieza)] FDDR['ganado,@view,@external,('apos,
+---     'Juego,0.0),bool,BodyF(Assert('apuntados), Return(PA 'apos.equipo1 ==. 'pequipo1 PC and. PA 'apos.equipo2
+---     ==. 'pequipo2 PC))] FDDR['ganar,@view,@external,('apos,'Juego,0.0),uint256,Return('apos.apuesta +. PA
+---     'apos.apuesta /. 2.0 PC)] FDDR['necesario,@view,@external,pV,uint256,BodyF(Assert(msg.sender ==. 'casa,
+---     "Casa"), BodyF(Assert(block.timestamp >. 'empieza, "Despues de empezar"), Return(PA 'balance -. 'inicial PC
+---     /. 2.0)))] FDDR['terminado,@view,@external,pV,bool,Return(block.timestamp >. 'termina)],push(['apuntados,
+---     bool,0.0,0.0,private,normal] ['balance,uint256,1.0e+2,0.0,public,normal] ['casa,address,3.0,0.0,public,
+---     normal] ['empieza,uint256,1.00001e+5,0.0,public,normal] ['indice,uint256,2.1e+1,0.0,private,normal] [
+---     'inicial,uint256,1.0,0.0,public,normal] ['invertido,bool,0.0,0.0,private,normal] ['pequipo1,uint256,3.0,0.0,
+---     private,normal] ['pequipo2,uint256,5.0,0.0,private,normal] ['sigindice,uint256,0.0,0.0,private,normal] [
+---     'termina,uint256,1.00003e+5,0.0,public,normal] ['Juego,struct,['apostador,address,0.0,0.0,private,normal] [
+---     'apuesta,uint256,0.0,0.0,private,normal] ['equipo1,uint256,0.0,0.0,private,normal] ['equipo2,uint256,0.0,0.0,
+---     private,normal],0.0,private,normal] ['apostadores,HashMap,M| [uint256,'Juego,0.0],D(2.0e+1 -> ['apostador,
+---     address,3.0,0.0,private,normal] ['apuesta,uint256,1.0,0.0,private,normal] ['equipo1,uint256,3.0,0.0,private,
+---     normal] ['equipo2,uint256,5.0,0.0,private,normal]) |,0.0,private,normal], stackE),noneV,mv > .
+	*** Contract 8 CallP('__init__, ArgL(4.0, ArgL(["PRUEBA"] , ArgL(2.0, 1.0 )) B "PERO FALTA EL ORDEN CORERCTO"
+		--- rew exec(Contract(ListS(Ds('DatosE, ListS(D('nombre, ->(String, 2.0e+1)), ListS(D('apellidos, ->(String,
+		--- 4.0e+1)), ListS(D('direccion, ->(String, 2.0e+1)), D('telefono, ->(String, 9.0)))))), ListS(Dp(
+		--- 'tiempo_revision, uint256, "public"), ListS(Dp('protectora, address, "public"), ListS(Dp('microchip, ->(
+		--- String, 1.5e+1), "public"), ListS(Dp('veterinario, address, "public"), ListS(Dp('tasas, uint256, "public"),
+		--- ListS(Dp('dueno, address, "public"), ListS(Dp('adoptado, bool, "public"), ListS(D('tope, uint256), ListS(
+		--- Dp('datos, 'DatosE, "public"), D('vacunado, bool))))))))))), ListF(Fun(init(@external, LParam(P('_revision,
+		--- uint256), LParam(P('_numerochip, ->(String, 1.5e+1)), LParam(P('_veterinario, address), P('_tasas,
+		--- uint256))))), BodyF(=('protectora, msg.sender), BodyF(=('tiempo_revision, '_revision), BodyF(=('microchip,
+		--- '_numerochip), BodyF(=('veterinario, '_veterinario), =('tasas, '_tasas)))))), ListF(Fun(headerDD(@payable,
+		--- @external, 'adoptar, LParam(P('_direccion, ->(String, 2.0e+1)), LParam(P('_telefono, ->(String, 9.0)), LParam(
+		--- P('_nombre, ->(String, 2.0e+1)), P('_apellidos, ->(String, 4.0e+1)))))), BodyF(Assert(not. 'adoptado,
+		--- "No adoptado"), BodyF(Assert(msg.value ==. 'tasas, "Tasas exactas"), BodyF(=('dueno, msg.sender), BodyF(=(
+		--- 'adoptado, True), BodyF(=('tope, 'tiempo_revision +. block.timestamp), BodyF(=St('datos, 'DatosE, LParam(P(
+		--- 'nombre, '_nombre), LParam(P('apellidos, '_apellidos), LParam(P('direccion, '_direccion), P('telefono,
+		--- '_telefono))))), BodyF(CallP('send, ArgL('protectora, 'tasas)), =('vacunado, True))))))))), ListF(Fun(
+		--- headerD(@external, 'vacunar, LParam(P('maltrato, bool), LParam(P('operaciones, bool), P('_chip, ->(String,
+		--- 1.5e+1))))), BodyF(Assert('adoptado, "Adoptado"), BodyF(Assert(msg.sender ==. 'veterinario, "Veterinario"),
+		--- BodyF(Assert(block.timestamp <. 'tope, "Dentro de tiempo"), BodyF(Assert('microchip ==. '_chip,
+		--- "Microchip correcto"), BodyF(=('vacunado, True), If('maltrato or. 'operaciones, BodyF(=('adoptado, False),
+		--- BodyF(=('dueno, 'protectora), =('datos, CallP('empty, 'DatosE))))))))))), ListF(Fun(headerD(@external,
+		--- 'revision, LParam(P('apto, bool), P('_chip, ->(String, 1.5e+1)))), BodyF(Assert('adoptado, "Adoptado"),
+		--- BodyF(Assert(msg.sender ==. 'protectora, "Protectora"), BodyF(Assert(block.timestamp >. 'tope,
+		--- "Superior al tope"), BodyF(Assert('microchip ==. '_chip, "Microchip correcto"), IfElse('apto or. not.
+		--- 'vacunado, BodyF(=('adoptado, False), BodyF(=('dueno, 'protectora), =('datos, CallP('empty, 'DatosE)))),
+		--- BodyF(=('vacunado, False), =('tope, 'tiempo_revision +. block.timestamp)))))))), ListF(Fun(headerD(@external,
+		--- 'ceder, P('_chip, ->(String, 1.5e+1))), BodyF(Assert('adoptado, "Adoptado"), BodyF(Assert('microchip ==.
+		--- '_chip, "Microchip correcto"), BodyF(Assert(msg.sender ==. 'dueno, "Dueno"), BodyF(=('adoptado, False),
+		--- BodyF(=('dueno, 'protectora), =('datos, CallP('empty, 'DatosE)))))))), ListF(Fun(headerD(@external,
+		--- 'dar_baja, P('_chip, ->(String, 1.5e+1))), BodyF(Assert(msg.sender ==. 'veterinario, "Veterinario"), BodyF(
+		--- Assert('microchip ==. '_chip, "Microchip correcto"), CallP('selfdestruct, 'protectora)))), ListF(Fun(headerD(
+		--- @external, 'cambio_domicilio, LParam(P('_domicilio, ->(String, 2.0e+1)), P('_chip, ->(String, 1.5e+1)))),
+		--- BodyF(Assert('adoptado, "Adoptado"), BodyF(Assert(msg.sender ==. 'dueno, "Dueno"), BodyF(Assert('microchip
+		--- ==. '_chip, "Microchip correcto"), =('datos.direccion, '_domicilio))))), ListF(Fun(headerD(@external,
+		--- 'cambio_telefono, LParam(P('_telefono, ->(String, 9.0)), P('_chip, ->(String, 1.5e+1)))), BodyF(Assert(
+		--- 'adoptado, "Adoptado"), BodyF(Assert(msg.sender ==. 'dueno, "Dueno"), BodyF(Assert('microchip ==. '_chip,
+		--- "Microchip correcto"), =('datos.telefono, '_telefono))))), ListF(Fun(headerD(@external, 'cambio_veterinario,
+		--- LParam(P('_veterinario, address), P('_chip, ->(String, 1.5e+1)))), BodyF(Assert(msg.sender ==. 'dueno or.
+		--- msg.sender ==. 'protectora, "Dueno o protectora"), BodyF(Assert('microchip ==. '_chip, "Microchip correcto"),
+		--- =('veterinario, '_veterinario)))), ListF(Fun(headerDDR(@view, @external, 'consultar_datos, 'DatosE, PaV),
+		--- BodyF(Assert(msg.sender ==. 'protectora, "Protectora"), Return('datos))), Fun(headerDDR(@view, @external,
+		--- 'consultar_adoptado, bool, PaV), Return('adoptado))))))))))))), CallP('__init__, ArgL(4.0, ArgL(["PRUEBA"] , ArgL(2.0, 1.0 ))))) .
+	***CallP('adoptar, ArgL(["aquitania"] , ArgL(["622334204"],ArgL(["Adrian"],["Burillo"])))) b , CallP('vacunar, ArgL(False ,ArgL(True, ["chip22"]))) B , CallP('revision, ArgL(False , ["chip22"])) B
+	*** CallP('ceder, ["chip22"]) B , CallP('dar_baja, ["chip22"]) B , CallP('cambio_domicilio, ArgL(["munoz_sexca"] , ["chip22"])) b , CallP('cambio_veterinario, ArgL(10.0 , ["chip22"])) b ,
+	*** CallP('cambio_telefono, ArgL(["66000000"] , ["chip22"])) b , Call('consultar_adoptado) b , CallP('vacunar, ArgL(True ,ArgL(False, ["chip22"])))
+	--- rew <  Call('consultar_datos) ,InitD[@external,('_revision,uint256,0.0) ('_numerochip,String,1.5e+1) (
+    --- '_veterinario,address,0.0) ('_tasas,uint256,0.0),BodyF(=('protectora, msg.sender), BodyF(=(
+    --- 'tiempo_revision, '_revision), BodyF(=('microchip, '_numerochip), BodyF(=('veterinario, '_veterinario),
+    --- =('tasas, '_tasas)))))] FD['cambio_domicilio,@external,('_domicilio,String,2.0e+1) ('_chip,String,1.5e+1),
+    --- BodyF(Assert('adoptado, "Adoptado"), BodyF(Assert(msg.sender ==. 'dueno, "Dueno"), BodyF(Assert(
+    --- 'microchip ==. '_chip, "Microchip correcto"), =('datos.direccion, '_domicilio))))] FD['cambio_telefono,
+    --- @external,('_telefono,String,9.0) ('_chip,String,1.5e+1),BodyF(Assert('adoptado, "Adoptado"), BodyF(
+    --- Assert(msg.sender ==. 'dueno, "Dueno"), BodyF(Assert('microchip ==. '_chip, "Microchip correcto"), =(
+    --- 'datos.telefono, '_telefono))))] FD['cambio_veterinario,@external,('_veterinario,address,0.0) ('_chip,
+    --- String,1.5e+1),BodyF(Assert(msg.sender ==. 'dueno or. msg.sender ==. 'protectora, "Dueno o protectora"),
+    --- BodyF(Assert('microchip ==. '_chip, "Microchip correcto"), =('veterinario, '_veterinario)))] FD['ceder,
+    --- @external,('_chip,String,1.5e+1),BodyF(Assert('adoptado, "Adoptado"), BodyF(Assert('microchip ==.
+    --- '_chip, "Microchip correcto"), BodyF(Assert(msg.sender ==. 'dueno, "Dueno"), BodyF(=('adoptado, False),
+    --- BodyF(=('dueno, 'protectora), =('datos, CallP('empty, 'DatosE)))))))] FD['dar_baja,@external,('_chip,
+    --- String,1.5e+1),BodyF(Assert(msg.sender ==. 'veterinario, "Veterinario"), BodyF(Assert('microchip ==.
+    --- '_chip, "Microchip correcto"), CallP('selfdestruct, 'protectora)))] FD['revision,@external,('apto,bool,
+    --- 0.0) ('_chip,String,1.5e+1),BodyF(Assert('adoptado, "Adoptado"), BodyF(Assert(msg.sender ==.
+    --- 'protectora, "Protectora"), BodyF(Assert(block.timestamp >. 'tope, "Superior al tope"), BodyF(Assert(
+    --- 'microchip ==. '_chip, "Microchip correcto"), IfElse('apto or. not. 'vacunado, BodyF(=('adoptado, False),
+    --- BodyF(=('dueno, 'protectora), =('datos, CallP('empty, 'DatosE)))), BodyF(=('vacunado, False), =('tope,
+    --- 'tiempo_revision +. block.timestamp)))))))] FD['send,@external,('_receiver,address,0.0) ('value,uint256,
+    --- 0.0),bv] FD['vacunar,@external,('maltrato,bool,0.0) ('operaciones,bool,0.0) ('_chip,String,1.5e+1),BodyF(
+    --- Assert('adoptado, "Adoptado"), BodyF(Assert(msg.sender ==. 'veterinario, "Veterinario"), BodyF(Assert(
+    --- block.timestamp <. 'tope, "Dentro de tiempo"), BodyF(Assert('microchip ==. '_chip, "Microchip correcto"),
+    --- BodyF(=('vacunado, True), If('maltrato or. 'operaciones, BodyF(=('adoptado, False), BodyF(=('dueno,
+    --- 'protectora), =('datos, CallP('empty, 'DatosE))))))))))] FDD['adoptar,@payable,@external,('_direccion,
+    --- String,2.0e+1) ('_telefono,String,9.0) ('_nombre,String,2.0e+1) ('_apellidos,String,4.0e+1),BodyF(Assert(
+    --- not. 'adoptado, "No adoptado"), BodyF(Assert(msg.value ==. 'tasas, "Tasas exactas"), BodyF(=('dueno,
+    --- msg.sender), BodyF(=('adoptado, True), BodyF(=('tope, 'tiempo_revision +. block.timestamp), BodyF(=St(
+    --- 'datos, 'DatosE, LParam(P('nombre, '_nombre), LParam(P('apellidos, '_apellidos), LParam(P('direccion,
+    --- '_direccion), P('telefono, '_telefono))))), BodyF(CallP('send, ArgL('protectora, 'tasas)), =('vacunado,
+    --- True))))))))] FDD['selfdestruct,@external,@payable,('to,address,0.0),bv] FDDR['consultar_adoptado,@view,
+    --- @external,pV,bool,Return('adoptado)] FDDR['consultar_datos,@view,@external,pV,'DatosE,BodyF(Assert(
+    --- msg.sender ==. 'protectora, "Protectora"), Return('datos))],push(['adoptado,bool,false,0.0,public,normal]
+    --- ['balance,uint256,1.0e+2,0.0,public,normal] ['dueno,address,0.0,0.0,public,normal] ['microchip,String,[
+    --- "PRUEBA"],1.5e+1,public,normal] ['protectora,address,3.0,0.0,public,normal] ['tasas,uint256,1.0,0.0,
+    --- public,normal] ['tiempo_revision,uint256,4.0,0.0,public,normal] ['tope,uint256,0.0,0.0,private,normal] [
+    --- 'vacunado,bool,true,0.0,private,normal] ['veterinario,address,2.0,0.0,public,normal] ['DatosE,struct,[
+    --- 'apellidos,String,0.0,4.0e+1,private,normal] ['direccion,String,0.0,2.0e+1,private,normal] ['nombre,
+    --- String,0.0,2.0e+1,private,normal] ['telefono,String,0.0,9.0,private,normal],0.0,private,normal] ['datos,
+    --- 'DatosE,mv,0.0,public,normal], stackE),noneV,mv > .
+	***CONTRATO9
+		--- rew exec(Contract(ListS(De('Transaccion, ListS(Di('receptor, address, "indexed"), ListS(Di('emisor,
+		--- address, "indexed"), D('valor, uint256)))), ListS(De('Clave, ListS(Di('receptor, address, "indexed"),
+		--- ListS(Di('emisor, address, "indexed"), D('clave_, uint256)))), ListS(Dp('arrendador, address, "public"),
+		--- ListS(Dp('fianza, uint256, "public"), ListS(Dp('mensualidad, uint256, "public"), ListS(Dp('tiempo, uint256,
+		--- "public"), ListS(Dp('tiempo_contrato, uint256, "public"), ListS(Dp('tiempo_mensual, uint256, "public"),
+		--- ListS(Dp('arrendatario, address, "public"), ListS(Dp('alquilada, bool, "public"), ListS(D('pagada, bool),
+		--- D('llave, uint256)))))))))))), ListF(Fun(init(@payable, @external, LParam(P('_mensualidad, uint256), LParam(
+		--- P('_tiempo, uint256), LParam(P('_tiempo_contrato, uint256), P('_llave, uint256))))), BodyF(Assert(msg.value
+		--- >. 0.0), BodyF(Assert('_mensualidad >. 0.0), BodyF(Assert('_tiempo >. 0.0), BodyF(Assert('_tiempo_contrato
+		--- >=. '_tiempo), BodyF(=('fianza, msg.value), BodyF(=('arrendador, msg.sender), BodyF(=('mensualidad,
+		--- '_mensualidad), BodyF(=('tiempo, '_tiempo), BodyF(=('llave, '_llave), =('tiempo_contrato,
+		--- '_tiempo_contrato))))))))))), ListF(Fun(headerDD(@payable, @external, 'alquilar, PaV), BodyF(Assert(not.
+		--- 'alquilada, "No esta alquilada"), BodyF(Assert(msg.value ==. 'fianza +. 'mensualidad, "Valor exacto"),
+		--- BodyF(=('arrendatario, msg.sender), BodyF(=('alquilada, True), BodyF(=('tiempo_mensual, 'tiempo +.
+		--- block.timestamp), BodyF(+=('tiempo_contrato, block.timestamp), BodyF(=('pagada, True), BodyF(CallP('send,
+		--- ArgL('arrendador, 'mensualidad)), BodyF(logE('Transaccion, ArgL('arrendador, 'arrendatario, 'mensualidad)),
+		--- BodyF(logE('Clave, ArgL('arrendatario, 'arrendador, 'llave)), =('llave, 0.0)))))))))))), ListF(Fun(headerD(
+		--- @external, 'darllave, P('clave, uint256)), BodyF(Assert('alquilada, "Alquilada"), BodyF(Assert(msg.sender
+		--- ==. 'arrendador, "Arrendador"), BodyF(Assert(block.timestamp <. 'tiempo_mensual, "Dentro de plazo"), =(
+		--- 'llave, 'clave))))), ListF(Fun(headerD(@external, 'cambio, PaV), BodyF(Assert('alquilada, "Alquilada"),
+		--- BodyF(Assert(block.timestamp >. 'tiempo_mensual, "Plazo cumplido"), BodyF(Assert(msg.sender ==. 'arrendador
+		--- or. msg.sender ==. 'arrendatario, "Arrendador o arrendatario"), IfElse(block.timestamp >. 'tiempo_contrato,
+		--- BodyF(CallP('send, ArgL('arrendatario, 'fianza)), CallP('selfdestruct, 'arrendador)), IfElse('llave !=. 0.0,
+		--- IfElse('pagada, BodyF(logE('Transaccion, ArgL('arrendador, 'arrendatario, 'mensualidad)), BodyF(CallP('send,
+		--- ArgL('arrendador, 'mensualidad)), BodyF(logE('Clave, ArgL('arrendatario, 'arrendador, 'llave)), BodyF(=(
+		--- 'tiempo_mensual, 'tiempo +. block.timestamp), BodyF(=('llave, 0.0), =('pagada, False)))))), CallP(
+		--- 'selfdestruct, 'arrendador)), CallP('selfdestruct, 'arrendatario))))))), ListF(Fun(headerD(@external, 'pagar,
+		--- PaV), BodyF(Assert('alquilada, "Alquilada"), BodyF(Assert(msg.sender ==. 'arrendatario, "Arrendatario"),
+		--- BodyF(Assert(block.timestamp <. 'tiempo_mensual, "Dentro del plazo"), BodyF(Assert(msg.value ==.
+		--- 'mensualidad, "Mensualidad"), =('pagada, True)))))), Fun(headerD(@external, 'eliminarcontrato, PaV), BodyF(
+		--- Assert(msg.sender ==. 'arrendador, "Arrendador"), BodyF(Assert(block.timestamp <. 'tiempo_contrato,
+		--- "Dentro del tiempo del Contract"), IfElse('alquilada, CallP('selfdestruct, 'arrendatario), CallP(
+		--- 'selfdestruct, 'arrendador))))))))))), CallP('__init__ , ArgL(30.0 , ArgL(12.0 , ArgL(3.0 ,44.0))))) .
+	*** CallP('__init__ , ArgL(30.0 , ArgL(12.0 , ArgL(3.0 ,44.0)))) B  Call('alquilar) B , CallP('darllave, 22.0 ) b , 'Call('pagar ) b ,
+	*** Call('eliminarcontrato ) b ,Call('cambio ) b
+	--- rew < Call('eliminarcontrato ), FD['cambio,@external,pV,BodyF(Assert('alquilada, "Alquilada"), BodyF(Assert(block.timestamp >.
+    --- 'tiempo_mensual, "Plazo cumplido"), BodyF(Assert(msg.sender ==. 'arrendador or. msg.sender ==. 'arrendatario,
+    --- "Arrendador o arrendatario"), IfElse(block.timestamp >. 'tiempo_contrato, BodyF(CallP('send, ArgL('arrendatario, 'fianza)),
+    --- CallP('selfdestruct, 'arrendador)), IfElse('llave !=. 0.0, IfElse('pagada, BodyF(logE('Transaccion, ArgL('arrendador,
+    --- 'arrendatario, 'mensualidad)), BodyF(CallP('send, ArgL('arrendador, 'mensualidad)), BodyF(logE('Clave, ArgL('arrendatario,
+    --- 'arrendador, 'llave)), BodyF(=('tiempo_mensual, 'tiempo +. block.timestamp), BodyF(=('llave, 0.0), =('pagada, False)))))),
+    --- CallP('selfdestruct, 'arrendador)), CallP('selfdestruct, 'arrendatario))))))] FD['darllave,@external,('clave,uint256,0.0),
+    --- BodyF(Assert('alquilada, "Alquilada"), BodyF(Assert(msg.sender ==. 'arrendador, "Arrendador"), BodyF(Assert(
+    --- block.timestamp <. 'tiempo_mensual, "Dentro de plazo"), =('llave, 'clave))))] FD['eliminarcontrato,@external,pV,BodyF(
+    --- Assert(msg.sender ==. 'arrendador, "Arrendador"), BodyF(Assert(block.timestamp <. 'tiempo_contrato,
+    --- "Dentro del tiempo del Contract"), IfElse('alquilada, CallP('selfdestruct, 'arrendatario), CallP('selfdestruct,
+    --- 'arrendador))))] FD['pagar,@external,pV,BodyF(Assert('alquilada, "Alquilada"), BodyF(Assert(msg.sender ==. 'arrendatario,
+    --- "Arrendatario"), BodyF(Assert(block.timestamp <. 'tiempo_mensual, "Dentro del plazo"), BodyF(Assert(msg.value ==.
+    --- 'mensualidad, "Mensualidad"), =('pagada, True)))))] FD['send,@external,('_receiver,address,0.0) ('value,uint256,0.0),bv]
+    --- InitDD[@payable,@external,('_mensualidad,uint256,0.0) ('_tiempo,uint256,0.0) ('_tiempo_contrato,uint256,0.0) ('_llave,
+    --- uint256,0.0),BodyF(Assert(msg.value >. 0.0), BodyF(Assert('_mensualidad >. 0.0), BodyF(Assert('_tiempo >. 0.0), BodyF(
+    --- Assert('_tiempo_contrato >=. '_tiempo), BodyF(=('fianza, msg.value), BodyF(=('arrendador, msg.sender), BodyF(=(
+    --- 'mensualidad, '_mensualidad), BodyF(=('tiempo, '_tiempo), BodyF(=('llave, '_llave), =('tiempo_contrato,
+    --- '_tiempo_contrato))))))))))] FDD['alquilar,@payable,@external,pV,BodyF(Assert(not. 'alquilada, "No esta alquilada"),
+    --- BodyF(Assert(msg.value ==. 'fianza +. 'mensualidad, "Valor exacto"), BodyF(=('arrendatario, msg.sender), BodyF(=(
+    --- 'alquilada, True), BodyF(=('tiempo_mensual, 'tiempo +. block.timestamp), BodyF(+=('tiempo_contrato, block.timestamp),
+    --- BodyF(=('pagada, True), BodyF(CallP('send, ArgL('arrendador, 'mensualidad)), BodyF(logE('Transaccion, ArgL('arrendador,
+    --- 'arrendatario, 'mensualidad)), BodyF(logE('Clave, ArgL('arrendatario, 'arrendador, 'llave)), =('llave, 0.0)))))))))))] FDD[
+    --- 'selfdestruct,@external,@payable,('to,address,0.0),bv],push(['alquilada,bool,true,0.0,public,normal] ['arrendador,address,
+    --- 3.0,0.0,public,normal] ['arrendatario,address,0.0,0.0,public,normal] ['balance,uint256,1.0e+2,0.0,public,normal] ['fianza,
+    --- uint256,1.0,0.0,public,normal] ['llave,uint256,4.4e+1,0.0,private,normal] ['mensualidad,uint256,3.0e+1,0.0,public,normal] [
+    --- 'pagada,bool,true,0.0,private,normal] ['tiempo,uint256,1.2e+1,0.0,public,normal] ['tiempo_contrato,uint256,1.0e+6,0.0,public,
+    --- normal] ['tiempo_mensual,uint256,0.0,0.0,public,normal] ['Clave,event,['clave_,uint256,0.0,0.0,private,normal] ['emisor,
+    --- address,0.0,0.0,private,indexed] ['receptor,address,0.0,0.0,private,indexed],0.0,private,normal] ['Transaccion,event,[
+    --- 'emisor,address,0.0,0.0,private,indexed] ['receptor,address,0.0,0.0,private,indexed] ['valor,uint256,0.0,0.0,private,
+    --- normal],0.0,private,normal], stackE),noneV,mv > .
+***Contract 1000000
+	--- rew exec (Contract(ListS(De('Transaccion, ListS(Di('receptor, address, "indexed"), ListS(Di('emisor,
+    --- address, "indexed"), D('valor, uint256)))), ListS(De('Clave, ListS(Di('receptor, address, "indexed"),
+    --- ListS(Di('emisor, address, "indexed"), D('clave_, uint256)))), ListS(Ds('Caja, ListS(D('propietario,
+    --- address), ListS(D('tdisfrute, uint256), ListS(D('ttope, uint256), ListS(D('pagada, bool), ListS(D('llave,
+    --- uint256), ListS(D('dejar, bool), D('primera, bool)))))))), ListS(Dp('tienda, address, "public"), ListS(Dp(
+    --- 'cajas, uint256, "public"), ListS(Dp('mensualidad, uint256, "public"), ListS(Dp('tiempo_disfrute, uint256,
+    --- "public"), ListS(DhmP('clientes, uint256, 'Caja, "public"), ListS(D('indice, uint256), ListS(Dp('fianza,
+    --- uint256, "public"), ListS(Dp('tiempo_pagar, uint256, "public"), ListS(D('cajas_totales, uint256), ListS(D(
+    --- 'indice_libres, uint256), ListS(Dhm('cajaslibres, uint256, uint256), DhmP('uso, uint256, bool,
+    --- "public"))))))))))))))), ListF(Fun(init(@external, LParam(P('_cajas, uint256), LParam(P('_mensualidad,
+    --- uint256), LParam(P('_tiempo_disfrute, uint256), LParam(P('_tiempo_pagar, uint256), P('_fianza, uint256)))))),
+    --- BodyF(Assert('_cajas >. 0.0), BodyF(Assert('_mensualidad >. 0.0), BodyF(Assert('_tiempo_disfrute >. 0.0),
+    --- BodyF(Assert('_tiempo_pagar >. 0.0), BodyF(=('tienda, msg.sender), BodyF(=('cajas, '_cajas), BodyF(=(
+    --- 'cajas_totales, '_cajas), BodyF(=('mensualidad, '_mensualidad), BodyF(=('tiempo_disfrute,
+    --- '_tiempo_disfrute), BodyF(=('tiempo_pagar, '_tiempo_pagar), =('fianza, '_fianza)))))))))))), ListF(Fun(
+    --- headerDD(@payable, @external, 'alquilar, PaV), BodyF(Assert('cajas >. 0.0, "Suficientes cajas"), BodyF(
+    --- Assert(msg.value ==. 'fianza +. 'mensualidad, "Valor exacto"), BodyF(IfElse('indice <=. 'cajas_totales,
+    --- BodyF(=St(->('clientes, 'indice), 'Caja, LParam(P('propietario, msg.sender), LParam(P('tdisfrute,
+    --- 'tiempo_disfrute +. block.timestamp), LParam(P('ttope, 'tiempo_disfrute +. 'tiempo_pagar +. block.timestamp),
+    --- LParam(P('pagada, True), LParam(P('llave, 1.0), LParam(P('dejar, False), P('primera, True)))))))), BodyF(=(
+    --- ->('uso, 'indice), True), +=('indice, 1.0))), BodyF(Dv('index, uint256, ->('cajaslibres, 'indice_libres -.
+    --- 1.0)), BodyF(=St(->('clientes, 'index), 'Caja, LParam(P('propietario, msg.sender), LParam(P('tdisfrute,
+    --- 'tiempo_disfrute +. block.timestamp), LParam(P('ttope, 'tiempo_disfrute +. 'tiempo_pagar +. block.timestamp),
+    --- LParam(P('pagada, True), LParam(P('llave, 1.0), LParam(P('dejar, False), P('primera, True)))))))), BodyF(=(
+    --- ->('uso, 'index), True), -=('indice_libres, 1.0))))), -=('cajas, 1.0))))), ListF(Fun(headerD(@external,
+    --- 'asignarllave, LParam(P('clave, uint256), P('ncaja, uint256))), BodyF(Assert(->('uso, 'ncaja),
+    --- "Caja asignada"), BodyF(Assert(block.timestamp <=. .(->('clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"),
+    --- BodyF(Assert(msg.sender ==. 'tienda, "Tienda"), BodyF(Assert('clave >. 1.0, "Clave valida"), =(.(->(
+    --- 'clientes, 'ncaja), 'llave), 'clave)))))), ListF(Fun(headerD(@internal, '_moroso, P('ncaja, uint256)),
+    --- BodyF(=(->('uso, 'ncaja), False), BodyF(=(->('clientes, 'ncaja), CallP('empty, 'Caja)), BodyF(+=('cajas,
+    --- 1.0), BodyF(=(->('cajaslibres, 'indice_libres), 'ncaja), +=('indice_libres, 1.0)))))), ListF(Fun(headerDDR(
+    --- @view, @internal, '_tqpagar, bool, P('ncaja, uint256)), Return(not. .(->('clientes, 'ncaja), 'pagada))),
+    --- ListF(Fun(headerDDR(@view, @external, 'tqpagar, bool, P('ncaja, uint256)), BodyF(Assert(->('uso, 'ncaja),
+    --- "Caja asignada"), BodyF(Assert(PA msg.sender ==. 'tienda or. .(->('clientes, 'ncaja), 'propietario) ==.
+    --- msg.sender PC, "Propietario o tienda"), Return(CallP('_tqpagar, 'ncaja))))), ListF(Fun(headerDDR(@view,
+    --- @internal, '_tiempoqueda, uint256, P('ncaja, uint256)), Return(.(->('clientes, 'ncaja), 'tdisfrute) -.
+    --- block.timestamp)), ListF(Fun(headerDDR(@view, @external, 'tiempoqueda, uint256, P('ncaja, uint256)), BodyF(
+    --- Assert(->('uso, 'ncaja), "Caja asignada"), BodyF(Assert(PA .(->('clientes, 'ncaja), 'propietario) ==.
+    --- msg.sender or. 'tienda ==. msg.sender PC, "Propietario o tienda"), BodyF(Assert(block.timestamp <=. .(->(
+    --- 'clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"), Return(CallP('_tiempoqueda, 'ncaja)))))), ListF(Fun(
+    --- headerD(@external, 'cambio, P('ncaja, uint256)), BodyF(Assert(->('uso, 'ncaja), "Caja asignada"), BodyF(
+    --- Assert(PA .(->('clientes, 'ncaja), 'propietario) ==. msg.sender or. 'tienda ==. msg.sender PC,
+    --- "Propietario o tienda"), BodyF(Assert(PA PA .(->('clientes, 'ncaja), 'tdisfrute) <. block.timestamp PC or. PA
+    --- .(->('clientes, 'ncaja), 'primera) PC or. PA .(->('clientes, 'ncaja), 'dejar) PC PC,
+    --- "Posibilidades de llamada"), IfElse(.(->('clientes, 'ncaja), 'ttope) <. block.timestamp, IfElse(.(->(
+    --- 'clientes, 'ncaja), 'pagada), CallP('send, ArgL(.(->('clientes, 'ncaja), 'propietario), 'fianza +.
+    --- 'mensualidad)), CallP('_moroso, 'ncaja)), IfElif(.(->('clientes, 'ncaja), 'dejar), BodyF(CallP('send, ArgL(
+    --- 'tienda, 'mensualidad)), BodyF(CallP('send, ArgL(.(->('clientes, 'ncaja), 'propietario), 'fianza)), BodyF(
+    --- logE('Transaccion, ArgL('tienda, .(->('clientes, 'ncaja), 'propietario), 'mensualidad)), BodyF(=(.(->(
+    --- 'clientes, 'ncaja), 'pagada), False), CallP('_moroso, 'ncaja))))), Elif(.(->('clientes, 'ncaja), 'llave) ==.
+    --- 0.0, BodyF(CallP('send, ArgL(.(->('clientes, 'ncaja), 'propietario), 'fianza +. 'mensualidad)), BodyF(logE(
+    --- 'Transaccion, ArgL('tienda, .(->('clientes, 'ncaja), 'propietario), 'mensualidad)), BodyF(=(.(->('clientes,
+    --- 'ncaja), 'pagada), False), BodyF(=(.(->('clientes, 'ncaja), 'dejar), True), CallP('_moroso, 'ncaja)))))),
+    --- BodyF(=(.(->('clientes, 'ncaja), 'pagada), False), BodyF(CallP('send, ArgL('tienda, 'mensualidad)), BodyF(
+    --- logE('Transaccion, ArgL('tienda, .(->('clientes, 'ncaja), 'propietario), 'mensualidad)), BodyF(logE('Clave,
+    --- ArgL(.(->('clientes, 'ncaja), 'propietario), 'tienda, .(->('clientes, 'ncaja), 'llave))), BodyF(=(.(->(
+    --- 'clientes, 'ncaja), 'llave), 0.0), IfElse(.(->('clientes, 'ncaja), 'primera), =(.(->('clientes, 'ncaja),
+    --- 'primera), False), BodyF(+=(.(->('clientes, 'ncaja), 'tdisfrute), 'tiempo_disfrute), =(.(->('clientes,
+    --- 'ncaja), 'ttope), 'tiempo_pagar +. .(->('clientes, 'ncaja), 'tdisfrute))))))))))))))), ListF(Fun(headerDD(
+    --- @payable, @external, 'pagar, P('ncaja, uint256)), BodyF(Assert(->('uso, 'ncaja), "Caja asignada"), BodyF(
+    --- Assert(.(->('clientes, 'ncaja), 'propietario) ==. msg.sender, "Propietario"), BodyF(Assert(not. .(->(
+    --- 'clientes, 'ncaja), 'pagada), "No pagada"), BodyF(Assert(msg.value ==. 'mensualidad, "Valor exacto"), BodyF(
+    --- Assert(block.timestamp <=. .(->('clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"), =(.(->('clientes,
+    --- 'ncaja), 'pagada), True))))))), Fun(headerD(@external, 'dejarcaja, P('ncaja, uint256)), BodyF(Assert(->('uso,
+    --- 'ncaja), "Caja asignada"), BodyF(Assert(msg.sender ==. .(->('clientes, 'ncaja), 'propietario),
+    --- "Propietario"), BodyF(Assert(block.timestamp <=. .(->('clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"),
+    --- =(.(->('clientes, 'ncaja), 'dejar), True)))))))))))))))), CallP('__init__ , ArgL(4.0 , ArgL(2.0 , ArgL(3.0 , ArgL(4.0 ,5.0)))))) .
+*** CallP('__init__ , ArgL(1.0 , ArgL(2.0 , ArgL(3.0 , ArgL(4.0 ,5.0))))) b ,  Call('alquilar) b .  CallP('asignarllave , ArgL(4.0 ,0.0)) b , CallP('_moroso , 0.0) b ,CallP('_tqpagar , 1.0) b
+***	CallP('tqpagar , 0.0) , CallP('_tiempoqueda , 0.0) , CallP('tiempoqueda , 0.0) b , CallP('cambio , 0.0) Function para todos los ifs ,   CallP('pagar , 0.0) b , CallP('dejarcaja , 0.0)
+*** CallP('dejarcaja , 0.0) b
+	--- rew < Call('alquilar), InitD[@external,('_cajas,uint256,0.0) ('_mensualidad,uint256,0.0) ('_tiempo_disfrute,uint256,0.0) (
+    --- '_tiempo_pagar,uint256,0.0) ('_fianza,uint256,0.0),BodyF(Assert('_cajas >. 0.0), BodyF(Assert('_mensualidad >. 0.0),
+    --- BodyF(Assert('_tiempo_disfrute >. 0.0), BodyF(Assert('_tiempo_pagar >. 0.0), BodyF(=('tienda, msg.sender), BodyF(=(
+    --- 'cajas, '_cajas), BodyF(=('cajas_totales, '_cajas), BodyF(=('mensualidad, '_mensualidad), BodyF(=('tiempo_disfrute,
+    --- '_tiempo_disfrute), BodyF(=('tiempo_pagar, '_tiempo_pagar), =('fianza, '_fianza)))))))))))] FD['_moroso,@internal,('ncaja,
+    --- uint256,0.0),BodyF(=(->('uso, 'ncaja), False), BodyF(=(->('clientes, 'ncaja), CallP('empty, 'Caja)), BodyF(+=('cajas,
+    --- 1.0), BodyF(=(->('cajaslibres, 'indice_libres), 'ncaja), +=('indice_libres, 1.0)))))] FD['asignarllave,@external,('clave,
+    --- uint256,0.0) ('ncaja,uint256,0.0),BodyF(Assert(->('uso, 'ncaja), "Caja asignada"), BodyF(Assert(block.timestamp <=. .(->(
+    --- 'clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"), BodyF(Assert(msg.sender ==. 'tienda, "Tienda"), BodyF(Assert('clave
+    --- >. 1.0, "Clave valida"), =(.(->('clientes, 'ncaja), 'llave), 'clave)))))] FD['cambio,@external,('ncaja,uint256,0.0),BodyF(
+    --- Assert(->('uso, 'ncaja), "Caja asignada"), BodyF(Assert(PA .(->('clientes, 'ncaja), 'propietario) ==. msg.sender or.
+    --- 'tienda ==. msg.sender PC, "Propietario o tienda"), BodyF(Assert(PA PA .(->('clientes, 'ncaja), 'tdisfrute) <.
+    --- block.timestamp PC or. PA .(->('clientes, 'ncaja), 'primera) PC or. PA .(->('clientes, 'ncaja), 'dejar) PC PC,
+    --- "Posibilidades de llamada"), IfElse(.(->('clientes, 'ncaja), 'ttope) <. block.timestamp, IfElse(.(->('clientes, 'ncaja),
+    --- 'pagada), CallP('send, ArgL(.(->('clientes, 'ncaja), 'propietario), 'fianza +. 'mensualidad)), CallP('_moroso, 'ncaja)),
+    --- IfElif(.(->('clientes, 'ncaja), 'dejar), BodyF(CallP('send, ArgL('tienda, 'mensualidad)), BodyF(CallP('send, ArgL(.(->(
+    --- 'clientes, 'ncaja), 'propietario), 'fianza)), BodyF(logE('Transaccion, ArgL('tienda, .(->('clientes, 'ncaja),
+    --- 'propietario), 'mensualidad)), BodyF(=(.(->('clientes, 'ncaja), 'pagada), False), CallP('_moroso, 'ncaja))))), Elif(.(->(
+    --- 'clientes, 'ncaja), 'llave) ==. 0.0, BodyF(CallP('send, ArgL(.(->('clientes, 'ncaja), 'propietario), 'fianza +.
+    --- 'mensualidad)), BodyF(logE('Transaccion, ArgL('tienda, .(->('clientes, 'ncaja), 'propietario), 'mensualidad)), BodyF(=(.(
+    --- ->('clientes, 'ncaja), 'pagada), False), BodyF(=(.(->('clientes, 'ncaja), 'dejar), True), CallP('_moroso, 'ncaja)))))),
+    --- BodyF(=(.(->('clientes, 'ncaja), 'pagada), False), BodyF(CallP('send, ArgL('tienda, 'mensualidad)), BodyF(logE(
+    --- 'Transaccion, ArgL('tienda, .(->('clientes, 'ncaja), 'propietario), 'mensualidad)), BodyF(logE('Clave, ArgL(.(->('clientes,
+    --- 'ncaja), 'propietario), 'tienda, .(->('clientes, 'ncaja), 'llave))), BodyF(=(.(->('clientes, 'ncaja), 'llave), 0.0),
+    --- IfElse(.(->('clientes, 'ncaja), 'primera), =(.(->('clientes, 'ncaja), 'primera), False), BodyF(+=(.(->('clientes, 'ncaja),
+    --- 'tdisfrute), 'tiempo_disfrute), =(.(->('clientes, 'ncaja), 'ttope), 'tiempo_pagar +. .(->('clientes, 'ncaja),
+    --- 'tdisfrute))))))))))))))] FD['dejarcaja,@external,('ncaja,uint256,0.0),BodyF(Assert(->('uso, 'ncaja), "Caja asignada"),
+    --- BodyF(Assert(msg.sender ==. .(->('clientes, 'ncaja), 'propietario), "Propietario"), BodyF(Assert(block.timestamp <=. .(->(
+    --- 'clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"), =(.(->('clientes, 'ncaja), 'dejar), True))))] FD['send,@external,(
+    --- '_receiver,address,0.0) ('value,uint256,0.0),bv] FDD['alquilar,@payable,@external,pV,BodyF(Assert('cajas >. 0.0,
+    --- "Suficientes cajas"), BodyF(Assert(msg.value ==. 'fianza +. 'mensualidad, "Valor exacto"), BodyF(IfElse('indice <=.
+    --- 'cajas_totales, BodyF(=St(->('clientes, 'indice), 'Caja, LParam(P('propietario, msg.sender), LParam(P('tdisfrute,
+    --- 'tiempo_disfrute +. block.timestamp), LParam(P('ttope, 'tiempo_disfrute +. 'tiempo_pagar +. block.timestamp), LParam(P(
+    --- 'pagada, True), LParam(P('llave, 1.0), LParam(P('dejar, False), P('primera, True)))))))), BodyF(=(->('uso, 'indice), True),
+    --- +=('indice, 1.0))), BodyF(Dv('index, uint256, ->('cajaslibres, 'indice_libres -. 1.0)), BodyF(=St(->('clientes, 'index),
+    --- 'Caja, LParam(P('propietario, msg.sender), LParam(P('tdisfrute, 'tiempo_disfrute +. block.timestamp), LParam(P('ttope,
+    --- 'tiempo_disfrute +. 'tiempo_pagar +. block.timestamp), LParam(P('pagada, True), LParam(P('llave, 1.0), LParam(P('dejar,
+    --- False), P('primera, True)))))))), BodyF(=(->('uso, 'index), True), -=('indice_libres, 1.0))))), -=('cajas, 1.0))))] FDD[
+    --- 'pagar,@payable,@external,('ncaja,uint256,0.0),BodyF(Assert(->('uso, 'ncaja), "Caja asignada"), BodyF(Assert(.(->(
+    --- 'clientes, 'ncaja), 'propietario) ==. msg.sender, "Propietario"), BodyF(Assert(not. .(->('clientes, 'ncaja), 'pagada),
+    --- "No pagada"), BodyF(Assert(msg.value ==. 'mensualidad, "Valor exacto"), BodyF(Assert(block.timestamp <=. .(->('clientes,
+    --- 'ncaja), 'tdisfrute), "Dentro de tiempo"), =(.(->('clientes, 'ncaja), 'pagada), True))))))] FDD['selfdestruct,@external,
+    --- @payable,('to,address,0.0),bv] FDDR['_tiempoqueda,@view,@internal,('ncaja,uint256,0.0),uint256,Return(.(->('clientes,
+    --- 'ncaja), 'tdisfrute) -. block.timestamp)] FDDR['_tqpagar,@view,@internal,('ncaja,uint256,0.0),bool,Return(not. .(->(
+    --- 'clientes, 'ncaja), 'pagada))] FDDR['tiempoqueda,@view,@external,('ncaja,uint256,0.0),uint256,BodyF(Assert(->('uso,
+    --- 'ncaja), "Caja asignada"), BodyF(Assert(PA .(->('clientes, 'ncaja), 'propietario) ==. msg.sender or. 'tienda ==. msg.sender
+    --- PC, "Propietario o tienda"), BodyF(Assert(block.timestamp <=. .(->('clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"),
+    --- Return(CallP('_tiempoqueda, 'ncaja)))))] FDDR['tqpagar,@view,@external,('ncaja,uint256,0.0),bool,BodyF(Assert(->('uso,
+    --- 'ncaja), "Caja asignada"), BodyF(Assert(PA msg.sender ==. 'tienda or. .(->('clientes, 'ncaja), 'propietario) ==. msg.sender
+    --- PC, "Propietario o tienda"), Return(CallP('_tqpagar, 'ncaja))))],push(['balance,uint256,1.0e+2,0.0,public,normal] ['cajas,
+    --- uint256,4.0,0.0,public,normal] ['cajas_totales,uint256,4.0,0.0,private,normal] ['fianza,uint256,5.0,0.0,public,normal] [
+    --- 'indice,uint256,5.0,0.0,private,normal] ['indice_libres,uint256,0.0,0.0,private,normal] ['mensualidad,uint256,2.0,0.0,
+    --- public,normal] ['tiempo_disfrute,uint256,3.0,0.0,public,normal] ['tiempo_pagar,uint256,4.0,0.0,public,normal] ['tienda,
+    --- address,3.0,0.0,public,normal] ['Caja,struct,['dejar,bool,0.0,0.0,private,normal] ['llave,uint256,0.0,0.0,private,normal] [
+    --- 'pagada,bool,0.0,0.0,private,normal] ['primera,bool,0.0,0.0,private,normal] ['propietario,address,0.0,0.0,private,normal] [
+    --- 'tdisfrute,uint256,0.0,0.0,private,normal] ['ttope,uint256,0.0,0.0,private,normal],0.0,private,normal] ['Clave,event,[
+    --- 'clave_,uint256,0.0,0.0,private,normal] ['emisor,address,0.0,0.0,private,indexed] ['receptor,address,0.0,0.0,private,
+    --- indexed],0.0,private,normal] ['Transaccion,event,['emisor,address,0.0,0.0,private,indexed] ['receptor,address,0.0,0.0,
+    --- private,indexed] ['valor,uint256,0.0,0.0,private,normal],0.0,private,normal] ['cajaslibres,HashMap,M| [uint256,uint256,0.0],
+    --- mapv |,0.0,private,normal] ['clientes,HashMap,M| [uint256,'Caja,0.0],mapv |,0.0,public,normal] ['uso,HashMap,M| [uint256,
+    --- bool,0.0],mapv |,0.0,public,normal], stackE),noneV,mv > .
+	--- rew < CallP('cambio , 0.0) ,InitD[@external,('_cajas,uint256,0.0) ('_mensualidad,uint256,0.0) (
+    --- '_tiempo_disfrute,uint256,0.0) ('_tiempo_pagar,uint256,0.0) ('_fianza,uint256,0.0),BodyF(Assert(
+    --- '_cajas >. 0.0), BodyF(Assert('_mensualidad >. 0.0), BodyF(Assert('_tiempo_disfrute >. 0.0),
+    --- BodyF(Assert('_tiempo_pagar >. 0.0), BodyF(=('tienda, msg.sender), BodyF(=('cajas, '_cajas),
+    --- BodyF(=('cajas_totales, '_cajas), BodyF(=('mensualidad, '_mensualidad), BodyF(=(
+    --- 'tiempo_disfrute, '_tiempo_disfrute), BodyF(=('tiempo_pagar, '_tiempo_pagar), =('fianza,
+    --- '_fianza)))))))))))] FD['_moroso,@internal,('ncaja,uint256,0.0),BodyF(=(->('uso, 'ncaja),
+    --- False), BodyF(=(->('clientes, 'ncaja), CallP('empty, 'Caja)), BodyF(+=('cajas, 1.0), BodyF(=(
+    --- ->('cajaslibres, 'indice_libres), 'ncaja), +=('indice_libres, 1.0)))))] FD['asignarllave,
+    --- @external,('clave,uint256,0.0) ('ncaja,uint256,0.0),BodyF(Assert(->('uso, 'ncaja),
+    --- "Caja asignada"), BodyF(Assert(block.timestamp <=. .(->('clientes, 'ncaja), 'tdisfrute),
+    --- "Dentro de tiempo"), BodyF(Assert(msg.sender ==. 'tienda, "Tienda"), BodyF(Assert('clave >.
+    --- 1.0, "Clave valida"), =(.(->('clientes, 'ncaja), 'llave), 'clave)))))] FD['cambio,@external,(
+    --- 'ncaja,uint256,0.0),BodyF(Assert(->('uso, 'ncaja), "Caja asignada"), BodyF(Assert(PA .(->(
+    --- 'clientes, 'ncaja), 'propietario) ==. msg.sender or. 'tienda ==. msg.sender PC,
+    --- "Propietario o tienda"), BodyF(Assert(PA PA .(->('clientes, 'ncaja), 'tdisfrute) <.
+    --- block.timestamp PC or. PA .(->('clientes, 'ncaja), 'primera) PC or. PA .(->('clientes, 'ncaja),
+    --- 'dejar) PC PC, "Posibilidades de llamada"), IfElse(.(->('clientes, 'ncaja), 'ttope) <.
+    --- block.timestamp, IfElse(.(->('clientes, 'ncaja), 'pagada), CallP('send, ArgL(.(->('clientes,
+    --- 'ncaja), 'propietario), 'fianza +. 'mensualidad)), CallP('_moroso, 'ncaja)), IfElif(.(->(
+    --- 'clientes, 'ncaja), 'dejar), BodyF(CallP('send, ArgL('tienda, 'mensualidad)), BodyF(CallP(
+    --- 'send, ArgL(.(->('clientes, 'ncaja), 'propietario), 'fianza)), BodyF(logE('Transaccion, ArgL(
+    --- 'tienda, .(->('clientes, 'ncaja), 'propietario), 'mensualidad)), BodyF(=(.(->('clientes,
+    --- 'ncaja), 'pagada), False), CallP('_moroso, 'ncaja))))), Elif(.(->('clientes, 'ncaja), 'llave) ==.
+    --- 0.0, BodyF(CallP('send, ArgL(.(->('clientes, 'ncaja), 'propietario), 'fianza +. 'mensualidad)),
+    --- BodyF(logE('Transaccion, ArgL('tienda, .(->('clientes, 'ncaja), 'propietario), 'mensualidad)),
+    --- BodyF(=(.(->('clientes, 'ncaja), 'pagada), False), BodyF(=(.(->('clientes, 'ncaja), 'dejar),
+    --- True), CallP('_moroso, 'ncaja)))))), BodyF(=(.(->('clientes, 'ncaja), 'pagada), False), BodyF(
+    --- CallP('send, ArgL('tienda, 'mensualidad)), BodyF(logE('Transaccion, ArgL('tienda, .(->(
+    --- 'clientes, 'ncaja), 'propietario), 'mensualidad)), BodyF(logE('Clave, ArgL(.(->('clientes,
+    --- 'ncaja), 'propietario), 'tienda, .(->('clientes, 'ncaja), 'llave))), BodyF(=(.(->('clientes,
+    --- 'ncaja), 'llave), 0.0), IfElse(.(->('clientes, 'ncaja), 'primera), =(.(->('clientes, 'ncaja),
+    --- 'primera), False), BodyF(+=(.(->('clientes, 'ncaja), 'tdisfrute), 'tiempo_disfrute), =(.(->(
+    --- 'clientes, 'ncaja), 'ttope), 'tiempo_pagar +. .(->('clientes, 'ncaja), 'tdisfrute))))))))))))))]
+    --- FD['dejarcaja,@external,('ncaja,uint256,0.0),BodyF(Assert(->('uso, 'ncaja), "Caja asignada"),
+    --- BodyF(Assert(msg.sender ==. .(->('clientes, 'ncaja), 'propietario), "Propietario"), BodyF(
+    --- Assert(block.timestamp <=. .(->('clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"), =(.(->(
+    --- 'clientes, 'ncaja), 'dejar), True))))] FD['send,@external,('_receiver,address,0.0) ('value,
+    --- uint256,0.0),bv] FDD['alquilar,@payable,@external,pV,BodyF(Assert('cajas >. 0.0,
+    --- "Suficientes cajas"), BodyF(Assert(msg.value ==. 'fianza +. 'mensualidad, "Valor exacto"),
+    --- BodyF(IfElse('indice <=. 'cajas_totales, BodyF(=St(->('clientes, 'indice), 'Caja, LParam(P(
+    --- 'propietario, msg.sender), LParam(P('tdisfrute, 'tiempo_disfrute +. block.timestamp), LParam(P(
+    --- 'ttope, 'tiempo_disfrute +. 'tiempo_pagar +. block.timestamp), LParam(P('pagada, True), LParam(P(
+    --- 'llave, 1.0), LParam(P('dejar, False), P('primera, True)))))))), BodyF(=(->('uso, 'indice),
+    --- True), +=('indice, 1.0))), BodyF(Dv('index, uint256, ->('cajaslibres, 'indice_libres -. 1.0)),
+    --- BodyF(=St(->('clientes, 'index), 'Caja, LParam(P('propietario, msg.sender), LParam(P('tdisfrute,
+    --- 'tiempo_disfrute +. block.timestamp), LParam(P('ttope, 'tiempo_disfrute +. 'tiempo_pagar +.
+    --- block.timestamp), LParam(P('pagada, True), LParam(P('llave, 1.0), LParam(P('dejar, False), P(
+    --- 'primera, True)))))))), BodyF(=(->('uso, 'index), True), -=('indice_libres, 1.0))))), -=('cajas,
+    --- 1.0))))] FDD['pagar,@payable,@external,('ncaja,uint256,0.0),BodyF(Assert(->('uso, 'ncaja),
+    --- "Caja asignada"), BodyF(Assert(.(->('clientes, 'ncaja), 'propietario) ==. msg.sender,
+    --- "Propietario"), BodyF(Assert(not. .(->('clientes, 'ncaja), 'pagada), "No pagada"), BodyF(
+    --- Assert(msg.value ==. 'mensualidad, "Valor exacto"), BodyF(Assert(block.timestamp <=. .(->(
+    --- 'clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"), =(.(->('clientes, 'ncaja), 'pagada),
+    --- True))))))] FDD['selfdestruct,@external,@payable,('to,address,0.0),bv] FDDR['_tiempoqueda,@view,
+    --- @internal,('ncaja,uint256,0.0),uint256,Return(.(->('clientes, 'ncaja), 'tdisfrute) -.
+    --- block.timestamp)] FDDR['_tqpagar,@view,@internal,('ncaja,uint256,0.0),bool,Return(not. .(->(
+    --- 'clientes, 'ncaja), 'pagada))] FDDR['tiempoqueda,@view,@external,('ncaja,uint256,0.0),uint256,
+    --- BodyF(Assert(->('uso, 'ncaja), "Caja asignada"), BodyF(Assert(PA .(->('clientes, 'ncaja),
+    --- 'propietario) ==. msg.sender or. 'tienda ==. msg.sender PC, "Propietario o tienda"), BodyF(
+    --- Assert(block.timestamp <=. .(->('clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"), Return(
+    --- CallP('_tiempoqueda, 'ncaja)))))] FDDR['tqpagar,@view,@external,('ncaja,uint256,0.0),bool,BodyF(
+    --- Assert(->('uso, 'ncaja), "Caja asignada"), BodyF(Assert(PA msg.sender ==. 'tienda or. .(->(
+    --- 'clientes, 'ncaja), 'propietario) ==. msg.sender PC, "Propietario o tienda"), Return(CallP(
+    --- '_tqpagar, 'ncaja))))],push(['balance,uint256,1.0e+2,0.0,public,normal] ['cajas,uint256,3.0,0.0,
+    --- public,normal] ['cajas_totales,uint256,4.0,0.0,private,normal] ['fianza,uint256,5.0,0.0,public,
+    --- normal] ['indice,uint256,5.0,0.0,private,normal] ['indice_libres,uint256,-1.0,0.0,private,normal]
+    --- ['mensualidad,uint256,2.0,0.0,public,normal] ['tiempo_disfrute,uint256,3.0,0.0,public,normal] [
+    --- 'tiempo_pagar,uint256,4.0,0.0,public,normal] ['tienda,address,3.0,0.0,public,normal] ['Caja,
+    --- struct,['dejar,bool,0.0,0.0,private,normal] ['llave,uint256,0.0,0.0,private,normal] ['pagada,
+    --- bool,0.0,0.0,private,normal] ['primera,bool,0.0,0.0,private,normal] ['propietario,address,0.0,
+    --- 0.0,private,normal] ['tdisfrute,uint256,0.0,0.0,private,normal] ['ttope,uint256,0.0,0.0,private,
+    --- normal],0.0,private,normal] ['Clave,event,['clave_,uint256,0.0,0.0,private,normal] ['emisor,
+    --- address,0.0,0.0,private,indexed] ['receptor,address,0.0,0.0,private,indexed],0.0,private,normal]
+    --- ['Transaccion,event,['emisor,address,0.0,0.0,private,indexed] ['receptor,address,0.0,0.0,private,
+    --- indexed] ['valor,uint256,0.0,0.0,private,normal],0.0,private,normal] ['cajaslibres,HashMap,M| [
+    --- uint256,uint256,0.0],mapv |,0.0,private,normal] ['clientes,HashMap,M| [uint256,'Caja,0.0],D(
+    --- 0.0 -> ['dejar,bool,false,0.0,private,normal] ['llave,uint256,1.0,0.0,private,normal] [
+    --- 'pagada,bool,false,0.0,private,normal] ['primera,bool,false,0.0,private,normal] ['propietario,
+    --- address,3.0,0.0,private,normal] ['tdisfrute,uint256,1.00003e+3,0.0,private,normal] ['ttope,
+    --- uint256,1.00007e+5,0.0,private,normal]) |,0.0,public,normal] ['uso,HashMap,M| [uint256,bool,0.0],
+    --- D(5.0e-1 -> true) |,0.0,public,normal], stackE),noneV,mv > .
+*** CONTRATO11
+--- rew exec(Contract(ListS(Ds('Comprador, ListS(D('cliente, address), D('cantidad, uint256))), ListS(De('Aviso,
+---     ListS(Di('receptor, address, "indexed"), ListS(D('lote, ->(String, 1.0e+1)), D('frase, ->(String, 1.5e+2))))), ListS(
+---     Dp('empresa, address, "public"), ListS(Dp('lote, ->(String, 1.0e+1), "public"), ListS(D('fechacaducidad, uint256),
+---     ListS(Dp('precio, uint256, "public"), ListS(Dp('cantidad, uint256, "public"), ListS(Dhm('registro, uint256,
+---     'Comprador), ListS(Dhm('hacomprado, address, bool), ListS(D('indice, uint256), ListS(D('sigindice, uint256), ListS(D(
+---     'aviso, bool), D('devuelto, bool))))))))))))), ListF(Fun(init(@external, LParam(P('_lote, ->(String, 1.0e+1)), LParam(P(
+---     '_duracion, uint256), LParam(P('_precio, uint256), P('_cantidad, uint256))))), BodyF(=('empresa, msg.sender), BodyF(=(
+---     'lote, '_lote), BodyF(=('fechacaducidad, '_duracion +. block.timestamp), BodyF(=('precio, '_precio), =('cantidad,
+---     '_cantidad)))))), ListF(Fun(headerDD(@payable, @external, 'comprar, P('_cantidad, uint256)), BodyF(Assert(msg.value ==.
+---     'cantidad *. 'precio, "Precio exacto"), BodyF(Assert(block.timestamp <. 'fechacaducidad, "Antes de caducarse"), BodyF(
+---     Assert('_cantidad <=. 'cantidad, "Hay suficientes"), BodyF(-=('cantidad, '_cantidad), BodyF(=(->('hacomprado,
+---     msg.sender), True), BodyF(=St(->('registro, 'indice), 'Comprador, LParam(P('cliente, msg.sender), P('cantidad,
+---     '_cantidad))), +=('indice, 1.0)))))))), ListF(Fun(headerD(@external, 'mensaje_aviso, P('descripcion, ->(String,
+---     1.5e+2))), BodyF(Assert(->('hacomprado, msg.sender), "Ha comprado"), BodyF(Assert(block.timestamp <. 'fechacaducidad,
+---     "Antes de caducarse"), BodyF(logE('Aviso, ArgL('empresa, 'lote, 'descripcion)), =('aviso, True))))), ListF(Fun(headerD(
+---     @external, 'retirar_del_mercado, P('descripcion, ->(String, 1.5e+2))), BodyF(Assert(msg.sender ==. 'empresa, "Empresa"),
+---     BodyF(Assert('aviso, "Avisado"), BodyF(Dv('nive, uint256, 'sigindice), BodyF(ForR('i, ArgL('nive, 'nive +. 2.0e+1),
+---     IfElse('i >=. 'indice, BodyF(=('nive, 'indice), BodyF(=('devuelto, True), return)), BodyF(logE('Aviso, ArgL(.(->(
+---     'registro, 'i), 'cliente), 'lote, 'descripcion)), CallP('send, ArgL(.(->('registro, 'i), 'cliente), 'precio *. .(->(
+---     'registro, 'i), 'cantidad)))))), =('sigindice, 'nive +. 2.0e+1)))))), ListF(Fun(headerD(@external, 'aviso_a_clientes, P(
+---     'descripcion, ->(String, 1.5e+2))), BodyF(Assert(msg.sender ==. 'empresa, "Empresa"), BodyF(Assert('aviso, "Avisado"),
+---     BodyF(=('aviso, False), BodyF(Dv('nive, uint256, 'sigindice), ForR('i, ArgL('nive, 'nive +. 2.0e+1), BodyF(IfElse('i
+---     >=. 'indice, BodyF(=('nive, 'indice), return), logE('Aviso, ArgL(.(->('registro, 'i), 'cliente), 'lote, 'descripcion))),
+---     =('sigindice, 'nive +. 2.0e+1)))))))), Fun(headerD(@external, 'fin, PaV), BodyF(Assert(msg.sender ==. 'empresa,
+---     "Empresa"), BodyF(Assert(PA 'aviso and. 'devuelto PC or. block.timestamp >. 'fechacaducidad, "Avisado o caducado"),
+---     CallP('selfdestruct, 'empresa)))))))))), CallP('__init__ , ArgL(["lote_premium"], ArgL(5.0 , ArgL(30.0 ,15.0))))) .
+*** CallP('comprar , 3.0) CallP('mensaje_aviso , ["poca broma"]) , CallP('retirar_del_mercado CallP('aviso_a_clientes , ["poca broma"]),  Call('fin)
+--- rew < Call('fin), InitD[@external,('_lote,String,1.0e+1) ('_duracion,uint256,0.0) (
+---     '_precio,uint256,0.0) ('_cantidad,uint256,0.0),BodyF(=('empresa, msg.sender), BodyF(=('lote,
+---     '_lote), BodyF(=('fechacaducidad, '_duracion +. block.timestamp), BodyF(=('precio, '_precio),
+---     =('cantidad, '_cantidad)))))] FD['aviso_a_clientes,@external,('descripcion,String,1.5e+2),BodyF(
+---     Assert(msg.sender ==. 'empresa, "Empresa"), BodyF(Assert('aviso, "Avisado"), BodyF(=('aviso,
+---     False), BodyF(Dv('nive, uint256, 'sigindice), ForR('i, ArgL('nive, 2.0e+1 +. 'nive), BodyF(
+---     IfElse('i >=. 'indice, BodyF(=('nive, 'indice), return), logE('Aviso, ArgL(.(->('registro, 'i),
+---     'cliente), 'lote, 'descripcion))), =('sigindice, 2.0e+1 +. 'nive)))))))] FD['fin,@external,pV,
+---     BodyF(Assert(msg.sender ==. 'empresa, "Empresa"), BodyF(Assert(PA 'aviso and. 'devuelto PC or.
+---     block.timestamp >. 'fechacaducidad, "Avisado o caducado"), CallP('selfdestruct, 'empresa)))] FD[
+---     'mensaje_aviso,@external,('descripcion,String,1.5e+2),BodyF(Assert(->('hacomprado, msg.sender),
+---     "Ha comprado"), BodyF(Assert(block.timestamp <. 'fechacaducidad, "Antes de caducarse"), BodyF(
+---     logE('Aviso, ArgL('empresa, 'lote, 'descripcion)), =('aviso, True))))] FD['retirar_del_mercado,
+---     @external,('descripcion,String,1.5e+2),BodyF(Assert(msg.sender ==. 'empresa, "Empresa"), BodyF(
+---     Assert('aviso, "Avisado"), BodyF(Dv('nive, uint256, 'sigindice), BodyF(ForR('i, ArgL('nive,
+---     2.0e+1 +. 'nive), IfElse('i >=. 'indice, BodyF(=('nive, 'indice), BodyF(=('devuelto, True),
+---     return)), BodyF(logE('Aviso, ArgL(.(->('registro, 'i), 'cliente), 'lote, 'descripcion)), CallP(
+---     'send, ArgL(.(->('registro, 'i), 'cliente), 'precio *. .(->('registro, 'i), 'cantidad)))))), =(
+---     'sigindice, 2.0e+1 +. 'nive)))))] FD['send,@external,('_receiver,address,0.0) ('value,uint256,
+---     0.0),bv] FDD['comprar,@payable,@external,('_cantidad,uint256,0.0),BodyF(Assert(msg.value ==.
+---     'cantidad *. 'precio, "Precio exacto"), BodyF(Assert(block.timestamp <. 'fechacaducidad,
+---     "Antes de caducarse"), BodyF(Assert('_cantidad <=. 'cantidad, "Hay suficientes"), BodyF(-=(
+---     'cantidad, '_cantidad), BodyF(=(->('hacomprado, msg.sender), True), BodyF(=St(->('registro,
+---     'indice), 'Comprador, LParam(P('cliente, msg.sender), P('cantidad, '_cantidad))), +=('indice,
+---     1.0)))))))] FDD['selfdestruct,@external,@payable,('to,address,0.0),bv],push(['aviso,bool,0.0,0.0,
+---     private,normal] ['balance,uint256,1.0e+2,0.0,public,normal] ['cantidad,uint256,1.5e+1,0.0,public,
+---     normal] ['devuelto,bool,0.0,0.0,private,normal] ['empresa,address,3.0,0.0,public,normal] [
+---     'fechacaducidad,uint256,1.00005e+5,0.0,private,normal] ['indice,uint256,12.0,0.0,private,normal] [
+---     'lote,String,["lote_premium"],1.0e+1,public,normal] ['precio,uint256,3.0e+1,0.0,public,normal] [
+---     'sigindice,uint256,0.0,0.0,private,normal] ['Aviso,event,['frase,String,0.0,1.5e+2,private,
+---     normal] ['lote,String,0.0,1.0e+1,private,normal] ['receptor,address,0.0,0.0,private,indexed],0.0,
+---     private,normal] ['Comprador,struct,['cantidad,uint256,0.0,0.0,private,normal] ['cliente,address,
+---     0.0,0.0,private,normal],0.0,private,normal] ['hacomprado,HashMap,M| [address,bool,0.0],mapv |,
+---     0.0,private,normal] ['registro,HashMap,M| [uint256,'Comprador,0.0],mapv |,0.0,private,normal],
+---     stackE),noneV,mv > .
+
+***rl exec(C, E) => < E, initMemory(C), initMemoryFunction(C) > . E ES LA CABEZA DEL BODY Y REST EL RESTO DEL BodyF 
+***crl < E REST, M, MF > => < REST, M', MF > if < E, M > => V .
+--- sort ExecutionTuple .
+
+--- op exec : Contract Exp -> ExecutionTuple [ctor] .
+--- op <_,_,_> : Body Memory MemoryFunction -> ExecutionTuple [ctor] .
+
+--- rl [exec] :
+---    exec(C, E)
+--- => < Call E, initMemory(C), initMemoryFunction(C) > .
+
+--- crl [assgn] : 
+---     < X = E REST, M,  MF >
+---  => <       REST, M', MF >
+---  if < E, M, MF > => V /\
+---     M' := update(M, X, V) .
+
+---  crl [add] :
+---      < E1 +. E2, M, MF >
+---   => V
+---   if < E1, M, MF > => V1 /\
+---      < E2, M, MF > => V2 /\
+---      V := V1 + V2 .
+
+---  crl [sub] :
+---      < E1 -. E2, M, MF >
+---   => V
+---   if < E1, M, MF > => V1 /\
+---      < E2, M, MF > => V2 /\
+---      V := V1 - V2 .
+
+--- crl [call] :
+---     < (Call Q(VL)) REST, M, MF >
+---  => < BODY         REST, M', MF >
+---  if H(AL) BODY := MF[Q]
+---     M' := asigna(M, AL VL) .
+
+
+--- rew exec(contrato1..........., __init__(0,0,0)) .
+
+--- Result Tupla:
+--- < Call __init__(0,0,0), mem, memFun >

@@ -1,13 +1,26 @@
-vacunado:bool
-@payable
+
+struct Bid:
+  blindedBid: bytes32
+  deposit: uint256
+end
+MAX_BIDS: constant(int128) = 128
+
+pendingReturns: HashMap[address, uint256]
+def reveal(_numBids: int128, _values: uint256[128], _fakes: bool[128], _secrets: bytes32[128]):
+    assert block.timestamp > self.biddingEnd
+    assert block.timestamp < self.revealEnd
+    assert _numBids == self.bidCounts[msg.sender]
+    refund: uint256 = 0
+    if (i >= _numBids):
+            break
+        end ;
+    assert _numBids == self.bidCounts[msg.sender]
+end
 @external
-def adoptar(_direccion: String[20],_telefono: String[9],_nombre: String[20],_apellidos: String [40]):
-    assert not self.adoptado, "No adoptado"
-    assert msg.value == self.tasas, "Tasas exactas"
-    self.dueno = msg.sender
-    self.adoptado = True
-    self.tope = block.timestamp + self.tiempo_revision
-    self.datos = Datos({nombre : _nombre, apellidos : _apellidos, direccion : _direccion, telefono : _telefono})
-    send(self.protectora,self.tasas)
-    self.vacunado = True
+def withdraw():
+    pendingAmount: uint256 = self.pendingReturns[msg.sender]
+    if (pendingAmount > 0):
+        self.pendingReturns[msg.sender] = 0
+        send(msg.sender, pendingAmount)
+    end ;
 end

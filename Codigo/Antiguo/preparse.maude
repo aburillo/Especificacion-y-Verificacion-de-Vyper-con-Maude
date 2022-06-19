@@ -31,7 +31,21 @@ op PrePreparse : QidList -> QidList .
 ***eq PrePreparse(S 'assert S1 ) = PrePreparse(S 'asserta S1 ) .
 --- eq PrePreparse(S 'assert S1 '`, Q ';) = PrePreparse(S 'assert S1 '| Q '; ) . 
 --- eq PrePreparse( 'assert S1 '`, Q ';) = PrePreparse('assert S1 '| Q '; ) .
-eq PrePreparse( S 'assert S1 '`, Q '; S2) = PrePreparse( S 'assert S1 '| Q '; S2 ) . 
+eq PrePreparse( S 'assert S1 '`, Q '; S2) = PrePreparse( S 'assert S1 '| Q '; S2 ) .
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' S1)
+ if St := string(Q) /\
+    isContinue(St)  /\
+    St' := substr(St, 0, length(St) - 1) /\
+    Q' := qid(St') [print "preparseadoContinue" Q'] .
+ceq PrePreparse(S Q S1) = PrePreparse(S Q' S1)
+ if St := string(Q) /\
+    isConstant(St)  /\
+    N := find(St, "_", 0) /\
+    St' := substr(St, 0, N) /\
+    St1 := substr(St, N + 1, length(St) ) /\
+    St2 := St' + "-" + St1 /\
+    Q' := qid(St2) [print "preparseado" Q'] .
+    --- Q1 := qid(St1)  . 
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= ': /\
     St := string(Q) /\
@@ -329,6 +343,11 @@ ceq preparseFinal(S Q S1) = preparseFinal(S Q' S1)
     St' := substr(St, N + 5, length(St)) /\
     Q' := qid(St') .
 eq preparseFinal(S) = S [owise] .
+
+op isConstant : String -> Bool .
+eq isConstant(St) = (St == "ZERO_ADDRESS") or (St == "EMPTY_BYTES32") or (St == "MAX_INT128") or (St == "MIN_INT128") or (St == "MAX_DECIMAL") or (St == "MIN_DECIMAL") or (St == "MAX_UINT256") .
+op isContinue : String -> Bool .
+eq isContinue(St) = (St == "continue")  .
 endfm
 *** quitar self.
 --- vars QIL QIL' : QidList .

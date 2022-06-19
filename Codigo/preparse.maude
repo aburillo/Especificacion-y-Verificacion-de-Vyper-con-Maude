@@ -7,36 +7,30 @@ fmod PREPARSE is
  var N N1 : Nat .
  vars St St' St1 St2 : String .
  op preparse : QidList -> QidList .
----  ***añadir PAV en los parentesis vacios que vengan con un def
----  eq preparse(S1 'def S '`( '`) S2) = preparse(S1) 'def preparse(S) '`( 'PaV '`) preparse(S2) .
---- *** eliminar self.
---- ceq preparse(S Q S1) = preparse(S Q' S1)
----  if St := string(Q) /\
----     N := find(St, "self.", 0) /\
----     St' := substr(St, N + 5, length(St)) /\
----     Q' := qid(St') .
-***op preparse : QidList -> QidList .
-ceq preparse(S) = preparseFinal(S3 S5)
+
+***preparse -> clean code .
+ceq preparse(S) = lastPreparse(S3 S5)
  if S1 := PrePreparse(S) /\ 
-    S2 := hastaPrimerDef(S1) /\
-    S3 := preparseAntes(S2) /\
-    S4 := despuesPrimerDef(S1) /\ 
-    S5 := preparseDespues(S4) .
+    S2 := untilFirstDef(S1) /\
+    S3 := preparseBefore(S2) /\
+    S4 := afterFirstDef(S1) /\ 
+    S5 := preparseAfter(S4) .
 eq preparse(S) = S [owise] .
 
-***prepreparse separa los dos puntos de la las palabras menos else
+***first preparse
 op PrePreparse : QidList -> QidList .
-*** EN CASO DE TENER ALGO COMO X:
-***eq PrePreparse(S 'assert 'S1 ', St) = PrePreparse(S 'assert 'S1 '| St) .w
-***eq PrePreparse(S 'assert S1 ) = PrePreparse(S 'asserta S1 ) .
---- eq PrePreparse(S 'assert S1 '`, Q ';) = PrePreparse(S 'assert S1 '| Q '; ) . 
---- eq PrePreparse( 'assert S1 '`, Q ';) = PrePreparse('assert S1 '| Q '; ) .
+
+*** replace assert , -> assert |
 eq PrePreparse( S 'assert S1 '`, Q '; S2) = PrePreparse( S 'assert S1 '| Q '; S2 ) .
+
+*** replace continue -> continu
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' S1)
  if St := string(Q) /\
     isContinue(St)  /\
     St' := substr(St, 0, length(St) - 1) /\
-    Q' := qid(St') [print "preparseadoContinue" Q'] .
+    Q' := qid(St') [print "eq continue" Q'] .
+
+***replace _ -
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' S1)
  if St := string(Q) /\
     isConstant(St)  /\
@@ -44,8 +38,9 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' S1)
     St' := substr(St, 0, N) /\
     St1 := substr(St, N + 1, length(St) ) /\
     St2 := St' + "-" + St1 /\
-    Q' := qid(St2) [print "preparseado" Q'] .
-    --- Q1 := qid(St1)  . 
+    Q' := qid(St2) [print "eq - -> _" Q'] .
+
+***replace else: -> else :
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= ': /\
     St := string(Q) /\
@@ -56,7 +51,8 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St1 := substr(St, N , length(St) ) /\
     Q' := qid(St') /\
     Q1 := qid(St1)  .
-*** EN CASO DE TENER ALGO COMO X:Y O X :Y
+
+*** replace x:y x : y
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= ': /\
     St := string(Q) /\
@@ -67,7 +63,8 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St1 := substr(St, 1 , length(St) ) /\
     Q' := qid(St') /\
     Q1 := qid(St1) .
-*** en caso de ->x
+
+*** replace x-> z ->
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '-> /\
     St := string(Q) /\
@@ -76,7 +73,8 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St1 := substr(St, 2 , length(St) ) /\
     Q' := qid(St') /\
     Q1 := qid(St1) .
-*** si es xxx=
+
+*** replace x= -> x =
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '= /\
     St := string(Q) /\
@@ -91,8 +89,9 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St' := substr(St, 0, N) /\
     St1 := substr(St, N , length(St) ) /\
     Q' := qid(St') /\
-    Q1 := qid(St1) [print "klk1" St] .
-*** si es =xxx
+    Q1 := qid(St1) [print "x= -> x = " St] .
+
+*** replace =x -> = x
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '= /\
     St := string(Q) /\
@@ -102,8 +101,9 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St' := substr(St, 0, 1) /\
     St1 := substr(St, 1 , length(St) ) /\
     Q' := qid(St') /\
-    Q1 := qid(St1) [print "klk2" Q]  .
-*** si es xxx==
+    Q1 := qid(St1) [print "=x -> = x" Q]  .
+
+*** replace x== -> x ==
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '== /\
     St := string(Q) /\
@@ -112,10 +112,10 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St' := substr(St, 0, N) /\
     St1 := substr(St, N , length(St) ) /\
     Q' := qid(St') /\
-    Q1 := qid(St1) [print "klk==" St] .
-*** si es ==xxx
+    Q1 := qid(St1) [print "x== -> x == " St] .
+
+*** replace ==x -> == x
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
- ***if ((Q =/= '+=) or (Q =/= '-= )) /\
  if Q =/= '==  /\
     St := string(Q) /\
     N := find(St, "==", 0) /\
@@ -123,8 +123,9 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St' := substr(St, 0, 2) /\
     St1 := substr(St, 2 , length(St) ) /\
     Q' := qid(St') /\
-    Q1 := qid(St1) [print "klk4 " Q  Q1]  .
-*** si es xxx+=
+    Q1 := qid(St1) [print "==x -> ==x " Q  Q1] .
+
+*** replace x+= -> x +=
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '+= /\
     St := string(Q) /\
@@ -133,8 +134,9 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St' := substr(St, 0, N) /\
     St1 := substr(St, N , length(St) ) /\
     Q' := qid(St') /\
-    Q1 := qid(St1) [print Q' Q1 "klk 3 "] .
-*** si es +=xxx
+    Q1 := qid(St1) [print Q' Q1 "x+= -> x += "] .
+
+*** replace +=x -> += x
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  ***if ((Q =/= '+=) or (Q =/= '-= )) /\
  if Q =/= '+=  /\
@@ -144,9 +146,9 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St' := substr(St, 0, 2) /\
     St1 := substr(St, 2 , length(St) ) /\
     Q' := qid(St') /\
-    Q1 := qid(St1) [print "klk4 " Q  Q1]  .
+    Q1 := qid(St1) [print "+=x -> +=x " Q  Q1]  .
 
-*** si es xxx<=
+*** replace x<= -> x <=
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '<= /\
     St := string(Q) /\
@@ -155,8 +157,9 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St' := substr(St, 0, N) /\
     St1 := substr(St, N , length(St) ) /\
     Q' := qid(St') /\
-    Q1 := qid(St1) [print Q' Q1 "klk 3 "] .
-*** si es <=xxx
+    Q1 := qid(St1) [print Q' Q1 " x<= -> x <= "] .
+
+*** replace <=x -> <= x
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '<=  /\
     St := string(Q) /\
@@ -165,8 +168,9 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St' := substr(St, 0, 2) /\
     St1 := substr(St, 2 , length(St) ) /\
     Q' := qid(St') /\
-    Q1 := qid(St1) [print "klk4 " Q  Q1]  .
-*** si es xxx>=
+    Q1 := qid(St1) [print "<=x -> <= x " Q  Q1] .
+
+*** replace x>= -> x >=
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '>= /\
     St := string(Q) /\
@@ -175,8 +179,9 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St' := substr(St, 0, N) /\
     St1 := substr(St, N , length(St) ) /\
     Q' := qid(St') /\
-    Q1 := qid(St1) [print Q' Q1 "klk 3 "] .
-*** si es >=xxx
+    Q1 := qid(St1) [print Q' Q1 "x>= -> x >= "] .
+
+*** replace >=x -> >= x
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '>=  /\
     St := string(Q) /\
@@ -185,8 +190,9 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St' := substr(St, 0, 2) /\
     St1 := substr(St, 2 , length(St) ) /\
     Q' := qid(St') /\
-    Q1 := qid(St1) [print "klk4 " Q  Q1]  .
-*** si es xxx!=
+    Q1 := qid(St1) [print ">=x -> >= x " Q  Q1]  .
+
+*** replace x!= -> x !=
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '!= /\
     St := string(Q) /\
@@ -195,8 +201,9 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St' := substr(St, 0, N) /\
     St1 := substr(St, N , length(St) ) /\
     Q' := qid(St') /\
-    Q1 := qid(St1) [print Q' Q1 "klk 3 "] .
-*** si es !=xxx
+    Q1 := qid(St1) [print Q' Q1 "replace !=x -> != x"] .
+
+*** replace !=x -> != x
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '!=  /\
     St := string(Q) /\
@@ -205,8 +212,9 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St' := substr(St, 0, 2) /\
     St1 := substr(St, 2 , length(St) ) /\
     Q' := qid(St') /\
-    Q1 := qid(St1) [print "klk4 " Q  Q1]  .
-*** si es xxx+
+    Q1 := qid(St1) [print "!=x -> != x " Q  Q1]  .
+
+*** replace x+ -> x +
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '+ /\
     St := string(Q) /\
@@ -216,8 +224,9 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St' := substr(St, 0, N) /\
     St1 := substr(St, N , length(St) ) /\ 
     Q' := qid(St') /\
-    Q1 := qid(St1)  [print "KLK5" N Q' Q1  "hola" ] .
-**** si es +xxxx 
+    Q1 := qid(St1)  [print "x+ -> x +" N ] .
+
+*** replace +x -> + x 
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '+ /\
     St := string(Q) /\
@@ -227,8 +236,9 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St' := substr(St, 0, 1) /\
     St1 := substr(St, 1 , length(St) ) /\
     Q' := qid(St') /\
-    Q1 := qid(St1) [print "KLK6"] .
-*** si es xxx<
+    Q1 := qid(St1) [print "+x -> + x "] .
+
+*** replace x< -> x <
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '< /\
     St := string(Q) /\
@@ -239,7 +249,8 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St1 := substr(St, N , length(St) ) /\
     Q' := qid(St') /\
     Q1 := qid(St1)  .
-**** si es <xxxx
+
+*** replace <x -> < x
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '< /\
     St := string(Q) /\
@@ -250,6 +261,8 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St1 := substr(St, 1 , length(St) ) /\
     Q' := qid(St') /\
     Q1 := qid(St1) .
+
+***replace >x -> > x
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '> /\
     St := string(Q) /\
@@ -261,7 +274,8 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St1 := substr(St, N , length(St) ) /\
     Q' := qid(St') /\
     Q1 := qid(St1) .
-**** si es <xxxx
+
+*** replace <x -> < x
 ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
  if Q =/= '< /\
     St := string(Q) /\
@@ -272,109 +286,73 @@ ceq PrePreparse(S Q S1) = PrePreparse(S Q' Q1 S1)
     St1 := substr(St, 1 , length(St) ) /\
     Q' := qid(St') /\
     Q1 := qid(St1) .
+
+***preprearse owise
 eq PrePreparse(S) = S [owise] .
-*** codigo antes del primer def
-op hastaPrimerDef : QidList -> QidList .
-eq hastaPrimerDef('def S) = nil .
-eq hastaPrimerDef(nil) = nil .
-eq hastaPrimerDef(Q S) = Q hastaPrimerDef(S) [owise] .
 
-*** codigo despues del primer def
-op despuesPrimerDef : QidList -> QidList .
-eq despuesPrimerDef('def S) = 'def S .
-eq despuesPrimerDef(nil) = nil .
-eq despuesPrimerDef(Q S) = despuesPrimerDef(S) [owise] .
+*** code before first def
+op untilFirstDef : QidList -> QidList .
+eq untilFirstDef('def S) = nil .
+eq untilFirstDef(nil) = nil .
+eq untilFirstDef(Q S) = Q untilFirstDef(S) [owise] .
 
-*** Preparse antes del primer def .
-op preparseAntes : QidList -> QidList .
-eq preparseAntes(S ': S1) = preparseAntes(S ':: S1) .
-eq preparseAntes(S '; S1) = preparseAntes(S S1) .
-eq preparseAntes(S) = S [owise] .
-*** Preparse despues del primer def .
-op preparseDespues : QidList -> QidList .
-*** para los else y else if
-eq preparseDespues(S '; 'else: S1) = preparseDespues(S 'else: S1) .
-eq preparseDespues(S '; 'elif ) = preparseDespues(S 'elif) .
-eq preparseDespues(S '; 'elif S1) = preparseDespues(S 'elif S1) .
+*** code after first def
+op afterFirstDef : QidList -> QidList .
+eq afterFirstDef('def S) = 'def S .
+eq afterFirstDef(nil) = nil .
+eq afterFirstDef(Q S) = afterFirstDef(S) [owise] .
 
-eq preparseDespues(S ': '; S1) = preparseDespues(S ': S1) .
-eq preparseDespues(S 'else: '; S1) = preparseDespues(S 'else: S1) .
-eq preparseDespues(S '; 'end ) = preparseDespues(S 'end) .
-eq preparseDespues(S '; 'end S1) = preparseDespues(S 'end S1) .
-eq preparseDespues(S 'end ';) = preparseDespues(S 'end) . 
-eq preparseDespues(S 'end '; '; ) = preparseDespues(S) 'end '; .
-***eq preparseDespues(S 'end '; S1 ) = preparseDespues(S 'end S1) .
-ceq preparseDespues(S 'end '; Q S1 ) = preparseDespues(S 'end Q S1) 
+*** Preparse before first def .
+op preparseBefore : QidList -> QidList .
+eq preparseBefore(S ': S1) = preparseBefore(S ':: S1) .
+eq preparseBefore(S '; S1) = preparseBefore(S S1) .
+eq preparseBefore(S) = S [owise] .
+
+*** preparse after first def .
+op preparseAfter : QidList -> QidList .
+
+eq preparseAfter(S '; 'else: S1) = preparseAfter(S 'else: S1) .
+eq preparseAfter(S '; 'elif ) = preparseAfter(S 'elif) .
+eq preparseAfter(S '; 'elif S1) = preparseAfter(S 'elif S1) .
+
+eq preparseAfter(S ': '; S1) = preparseAfter(S ': S1) .
+eq preparseAfter(S 'else: '; S1) = preparseAfter(S 'else: S1) .
+eq preparseAfter(S '; 'end ) = preparseAfter(S 'end) .
+eq preparseAfter(S '; 'end S1) = preparseAfter(S 'end S1) .
+eq preparseAfter(S 'end ';) = preparseAfter(S 'end) . 
+eq preparseAfter(S 'end '; '; ) = preparseAfter(S) 'end '; .
+ceq preparseAfter(S 'end '; Q S1 ) = preparseAfter(S 'end Q S1) 
     if Q =/= '; .
-eq preparseDespues(S 'end '; '; S1 ) = preparseDespues(S 'end ) '; preparseDespues(S1) .  
-ceq preparseDespues(S Q '; S1) = preparseDespues(S Q S1 ) 
+eq preparseAfter(S 'end '; '; S1 ) = preparseAfter(S 'end ) '; preparseAfter(S1) .  
+ceq preparseAfter(S Q '; S1) = preparseAfter(S Q S1 ) 
 if    St := string(Q) /\
       N := find(St, "@", 0) .
-*** para los else y else if
-***eq preparseDespues(S '; 'else: ) = preparseDespues(S 'else:) .
-***eq preparseDespues(S '; 'else: S1) = preparseDespues(S 'else: S1) .
-***eq preparseDespues(S '; '; 'else: S1) = preparseDespues(S 'else: S1) .
-***eq preparseDespues(S '; 'elif ) = preparseDespues(S 'elif) .
-***eq preparseDespues(S '; 'elif S1) = preparseDespues(S 'elif S1) .
-***eq preparseDespues(S 'assert 'S1 ', S2) = preparseDespues(S 'assert 'S1 '| S2) .
-***eq preparseDespues(S 'assert 'S1 '`, S2) = preparseDespues(S 'assert 'S1 '| S2) .
-***eq preparseDespues(S 'assert S1 '`, Q S2) = preparseDespues(S 'assert S1 '| Q S2) . 
-*** separar el punto
-ceq preparseDespues(S Q S1) = preparseDespues(S Q' Q1  S1)
+ceq preparseAfter(S Q S1) = preparseAfter(S Q' Q1  S1)
  if Q =/= '. /\
     St := string(Q) /\
     N := find(St, ".", 0) /\
     N == 0 /\
     St' := substr(St, 0, 1) /\
     St1 := substr(St, 1 , length(St) ) /\
-    ***St2 := substr(St, N + 1 , length(St) ) /\
     Q' := qid(St') /\
     Q1 := qid(St1) .
-    ***Q2 := qid(St2) .
 
-eq preparseDespues(S) = S [owise] .
-*** preparse final
-op preparseFinal : QidList -> QidList .
- eq preparseFinal(S1 'def S '`( '`) S2) = preparseFinal(S1) 'def preparseFinal(S) '`( 'PaV '`) preparseFinal(S2) .
-*** eliminar self.
-ceq preparseFinal(S Q S1) = preparseFinal(S Q' S1)
+eq preparseAfter(S) = S [owise] .
+
+*** last preparse
+op lastPreparse : QidList -> QidList .
+ eq lastPreparse(S1 'def S '`( '`) S2) = lastPreparse(S1) 'def lastPreparse(S) '`( 'PaV '`) lastPreparse(S2) .
+
+*** drop self.
+ceq lastPreparse(S Q S1) = lastPreparse(S Q' S1)
  if St := string(Q) /\
     N := find(St, "self.", 0) /\
     St' := substr(St, N + 5, length(St)) /\
     Q' := qid(St') .
-eq preparseFinal(S) = S [owise] .
+eq lastPreparse(S) = S [owise] .
 
 op isConstant : String -> Bool .
 eq isConstant(St) = (St == "ZERO_ADDRESS") or (St == "EMPTY_BYTES32") or (St == "MAX_INT128") or (St == "MIN_INT128") or (St == "MAX_DECIMAL") or (St == "MIN_DECIMAL") or (St == "MAX_UINT256") .
 op isContinue : String -> Bool .
 eq isContinue(St) = (St == "continue")  .
 endfm
-*** quitar self.
---- vars QIL QIL' : QidList .
---- var  Q : Qid .
---- vars S S' : String .
-
---- ceq preparse(QIL Q QIL') = preparse(QIL Q' QIL')
----  if S := string(Q) /\
----     N := find(S, "self.", 0) /\
----     S' := substr(S, N, len(S)) /\
----     Q' := qid(S') .
-*** sustituir  : por ::
---- vars QIL QIL' : QidList .
---- var  Q : Qid .
---- vars S S' : String .
-
---- ceq preparse(QIL Q QIL') = preparse(QIL Q' QIL')
----  if S := string(Q) /\
----     N := find(S, "self.", 0) /\
----     S' := substr(S, N, len(S)) /\
----     Q' := qid(S') .
-
---- op preparse : QidList -> QidList .
---- ceq preparse(QIL) = preparseFinal(QIL'' QIL''')
----  if QIL' := hastaPrimerDef(QIL) /\
----     QIL'' := preparseAntes(QIL') /\
----     QIL''' := despuesPrimerDef(QIL)  .
-
---- op hastaPrimerDef : QidList -> QidList .
---- ceq hastaPrimerDef(Q QIL) = Q hastaPrimerDef

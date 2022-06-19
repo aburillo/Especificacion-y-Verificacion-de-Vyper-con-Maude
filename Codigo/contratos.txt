@@ -545,3 +545,1067 @@
 				--- 'tiempo_disfrute +. block.timestamp), LParam(P('ttope, 'tiempo_disfrute +. 'tiempo_pagar +. block.timestamp),
 				--- LParam(P('pagada, True), LParam(P('llave, 1.0), LParam(P('dejar, False), P('primera, True)))))))), Cuerpo(=(
 				--- ->('uso, 'index), True), -=('indice_libres, 1.0))))), -=('cajas, 1.0)))))) .
+
+
+*********************************************************************************************************************
+
+
+*** Contrato1
+--- red downTerm('Contrato['ListaD['Dp[''beneficiary.Qid,'address.tipo,'"public".String],
+---     'ListaD['Dp[''auctionStart.Qid,'uint256.tipo,'"public".String],'ListaD['Dp[''auctionEnd.Qid,'uint256.tipo,'"public".String],'ListaD['Dp[''highestBidder.Qid,'address.tipo,'"public".String],
+---     'ListaD['Dp[''highestBid.Qid,'uint256.tipo,'"public".String],'ListaD['Dp[''ended.Qid,'bool.tipo,'"public".String],'DhmP[''pendingReturns.Qid,'address.tipo,'uint256.tipo,
+---     '"public".String]]]]]]],'ListaF['Fun['init['@external.Decorator,'LParam['P[''_beneficiary.Qid,'address.tipo],'LParam['P[''_auction_start.Qid,'uint256.tipo],'P[''_bidding_time.Qid,
+---     'uint256.tipo]]]],'Cuerpo['=[''beneficiary.Qid,''_beneficiary.Qid],'Cuerpo['=[''auctionStart.Qid,''_auction_start.Qid],'Cuerpo['=[''auctionEnd.Qid,'_+._[''auctionStart.Qid,
+---     ''_bidding_time.Qid]],'Assert['_<._['block.timestamp.VarEnt,''auctionEnd.Qid]]]]]],'ListaF['Fun['headerDD['@external.Decorator,'@payable.Decorator,''bid.Qid,'PaV.Parametros],'Cuerpo[
+---     'Assert['_>=._['block.timestamp.VarEnt,''auctionStart.Qid]],'Cuerpo['Assert['_<._['block.timestamp.VarEnt,''auctionEnd.Qid]],'Cuerpo['Assert['_>._['msg.value.VarEnt,''highestBid.Qid]],
+---     'Cuerpo['+=['->[''pendingReturns.Qid,''highestBidder.Qid],''highestBid.Qid],'Cuerpo['=[''highestBidder.Qid,'msg.sender.VarEnt],'=[''highestBid.Qid,'msg.value.VarEnt]]]]]]],'ListaF['Fun[
+---     'headerD['@external.Decorator,''withdraw.Qid,'PaV.Parametros],'Cuerpo['Dv[''pending_amount.Qid,'uint256.tipo,'->[''pendingReturns.Qid,'msg.sender.VarEnt]],'Cuerpo['=['->[
+---     ''pendingReturns.Qid,'msg.sender.VarEnt],'0.0.FiniteFloat],'CallP[''send.Qid,'ArgL['msg.sender.VarEnt,''pending_amount.Qid]]]]],'Fun['headerD['@external.Decorator,''endAuction.Qid,
+---     'PaV.Parametros],'Cuerpo['Assert['_>=._['block.timestamp.VarEnt,''auctionEnd.Qid]],'Cuerpo['Assert['not._[''ended.Qid]],'Cuerpo['=[''ended.Qid,'True.bool],'CallP[''send.Qid,'ArgL[
+---     ''beneficiary.Qid,''highestBid.Qid]]]]]]]]]], errorC) .
+	--- Contrato(ListaD(Dp('beneficiary, address, "public"), ListaD(Dp('auctionStart, uint256, "public"),
+    --- ListaD(Dp('auctionEnd, uint256, "public"), ListaD(Dp('highestBidder, address, "public"), ListaD(Dp('highestBid,
+    --- uint256, "public"), ListaD(Dp('ended, bool, "public"), DhmP('pendingReturns, address, uint256, "public"))))))),
+    --- ListaF(Fun(init(@external, LParam(P('_beneficiary, address), LParam(P('_auction_start, uint256), P('_bidding_time,
+    --- uint256)))), Cuerpo(=('beneficiary, '_beneficiary), Cuerpo(=('auctionStart, '_auction_start), Cuerpo(=('auctionEnd,
+    --- '_bidding_time +. 'auctionStart), Assert(block.timestamp <. 'auctionEnd))))), ListaF(Fun(headerDD(@external,
+    --- @payable, 'bid, PaV), Cuerpo(Assert(block.timestamp >=. 'auctionStart), Cuerpo(Assert(block.timestamp <.
+    --- 'auctionEnd), Cuerpo(Assert(msg.value >. 'highestBid), Cuerpo(+=(->('pendingReturns, 'highestBidder), 'highestBid),
+    --- Cuerpo(=('highestBidder, msg.sender), =('highestBid, msg.value))))))), ListaF(Fun(headerD(@external, 'withdraw,
+    --- PaV), Cuerpo(Dv('pending_amount, uint256, ->('pendingReturns, msg.sender)), Cuerpo(=(->('pendingReturns,
+    --- msg.sender), 0.0), CallP('send, ArgL(msg.sender, 'pending_amount))))), Fun(headerD(@external, 'endAuction, PaV),
+    --- Cuerpo(Assert(block.timestamp >=. 'auctionEnd), Cuerpo(Assert(not. 'ended), Cuerpo(=('ended, True), CallP('send,
+    --- ArgL('beneficiary, 'highestBid))))))))))
+	---CONTRATO 2
+	--- red downTerm('Contrato[
+    --- 'ListaD['Ds[''Bid.Qid,'ListaD['D[''blindedBid.Qid,'bytes32.tipo],'D[''deposit.Qid,'uint256.tipo]]],'ListaD['Dc[
+    --- ''MAX_BIDS.Qid,'int128.tipo,'1.28e+2.FiniteFloat,'"constant".String],'ListaD['De[''AuctionEnded.Qid,'ListaD['D[
+    --- ''highestBidder.Qid,'address.tipo],'D[''highestBid.Qid,'uint256.tipo]]],'ListaD['Dp[''beneficiary.Qid,'address.tipo,
+    --- '"public".String],'ListaD['Dp[''biddingEnd.Qid,'uint256.tipo,'"public".String],'ListaD['Dp[''revealEnd.Qid,'uint256.tipo,
+    --- '"public".String],'ListaD['Dp[''ended.Qid,'bool.tipo,'"public".String],'ListaD['Dp[''highestBid.Qid,'uint256.tipo,
+    --- '"public".String],'ListaD['Dp[''highestBidder.Qid,'address.tipo,'"public".String],'ListaD['Dhm[''bids.Qid,'address.tipo,'->[
+    --- ''Bid.Qid,'1.28e+2.FiniteFloat]],'ListaD['Dhm[''bidCounts.Qid,'address.tipo,'int128.tipo],'Dhm[''pendingReturns.Qid,
+    --- 'address.tipo,'uint256.tipo]]]]]]]]]]]],'ListaF['Fun['init['@external.Decorator,'LParam['P[''_beneficiary.Qid,'address.tipo],
+    --- 'LParam['P[''_biddingTime.Qid,'uint256.tipo],'P[''_revealTime.Qid,'uint256.tipo]]]],'Cuerpo['=[''beneficiary.Qid,
+    --- ''_beneficiary.Qid],'Cuerpo['=[''biddingEnd.Qid,'_+._['block.timestamp.VarEnt,''_biddingTime.Qid]],'=[''revealEnd.Qid,'_+._[
+    --- ''biddingEnd.Qid,''_revealTime.Qid]]]]],'ListaF['Fun['headerDD['@external.Decorator,'@payable.Decorator,''bid.Qid,'P[
+    --- ''_blindedBid.Qid,'bytes32.tipo]],'Cuerpo['Assert['_<._['block.timestamp.VarEnt,''biddingEnd.Qid]],'Cuerpo['Dv[''numBids.Qid,
+    --- 'int128.tipo,'->[''bidCounts.Qid,'msg.sender.VarEnt]],'Cuerpo['Assert['_<._[''numBids.Qid,''MAX_BIDS.Qid]],'Cuerpo['=St['->[
+    --- '->[''bids.Qid,'msg.sender.VarEnt],''numBids.Qid],''Bid.Qid,'LParam['P[''blindedBid.Qid,''_blindedBid.Qid],'P[''deposit.Qid,
+    --- 'msg.value.VarEnt]]],'+=['->[''bidCounts.Qid,'msg.sender.VarEnt],'1.0.FiniteFloat]]]]]],'ListaF['Fun['headerR[''placeBid.Qid,
+    --- 'bool.tipo,'LParam['P[''bidder.Qid,'address.tipo],'P[''_value.Qid,'uint256.tipo]]],'Cuerpo['If['PA_PC['_<=._[''_value.Qid,
+    --- ''highestBid.Qid]],'Return['False.bool]],'Cuerpo['If['PA_PC['_!=._[''highestBidder.Qid,'ZERO-ADDRESS.constant]],'+=['->[
+    --- ''pendingReturns.Qid,''highestBidder.Qid],''highestBid.Qid]],'Cuerpo['=[''highestBid.Qid,''_value.Qid],'Cuerpo['=[
+    --- ''highestBidder.Qid,''bidder.Qid],'Return['True.bool]]]]]],'ListaF['Fun['headerD['@external.Decorator,''reveal.Qid,'LParam[
+    --- 'P[''_numBids.Qid,'int128.tipo],'LParam['P[''_values.Qid,'->['uint256.tipo,'1.28e+2.FiniteFloat]],'LParam['P[''_fakes.Qid,
+    --- '->['bool.tipo,'1.28e+2.FiniteFloat]],'P[''_secrets.Qid,'->['bytes32.tipo,'1.28e+2.FiniteFloat]]]]]],'Cuerpo['Assert['_>._[
+    --- 'block.timestamp.VarEnt,''biddingEnd.Qid]],'Cuerpo['Assert['_<._['block.timestamp.VarEnt,''revealEnd.Qid]],'Cuerpo['Assert[
+    --- '_==._[''_numBids.Qid,'->[''bidCounts.Qid,'msg.sender.VarEnt]]],'Cuerpo['Dv[''refund.Qid,'uint256.tipo,'0.0.FiniteFloat],
+    --- 'Cuerpo['ForR[''i.Qid,''MAX_BIDS.Qid,'Cuerpo['If['PA_PC['_>=._[''i.Qid,''_numBids.Qid]],'break.controlFlow],'Cuerpo['Dv[
+    --- ''bidToCheck.Qid,''Bid.Qid,'->['->[''bids.Qid,'msg.sender.VarEnt],''i.Qid]],'Cuerpo['Dv[''value.Qid,'uint256.tipo,'->[
+    --- ''_values.Qid,''i.Qid]],'Cuerpo['Dv[''fake.Qid,'bool.tipo,'->[''_fakes.Qid,''i.Qid]],'Cuerpo['Dv[''secret.Qid,'bytes32.tipo,
+    --- '->[''_secrets.Qid,''i.Qid]],'Cuerpo['Dv[''blindedBid.Qid,'bytes32.tipo,'CallP[''keccak256.Qid,'CallP[''concat.Qid,'ArgL[
+    --- 'CallP[''convert.Qid,'ArgL[''value.Qid,'bytes32.tipo]],'ArgL['CallP[''convert.Qid,'ArgL[''fake.Qid,'bytes32.tipo]],
+    --- ''secret.Qid]]]]],'Cuerpo['If['PA_PC['_!=._[''blindedBid.Qid,''bidToCheck.blindedBid.Qid]],'Cuerpo['Assert['_==._[
+    --- '1.0.FiniteFloat,'0.0.FiniteFloat]],'continu.controlFlow]],'Cuerpo['+=[''refund.Qid,''bidToCheck.deposit.Qid],'Cuerpo['If[
+    --- 'PA_PC['_and._['not._[''fake.Qid],'_>=._[''bidToCheck.deposit.Qid,''value.Qid]]],'If['PA_PC['CallP[''placeBid.Qid,'ArgL[
+    --- 'msg.sender.VarEnt,''value.Qid]]],'-=[''refund.Qid,''value.Qid]]],'Cuerpo['Dv[''zeroBytes32.Qid,'bytes32.tipo,
+    --- 'EMPTY-BYTES32.constant],'=[''bidToCheck.blindedBid.Qid,''zeroBytes32.Qid]]]]]]]]]]]],'If['PA_PC['_!=._[''refund.Qid,
+    --- '0.0.FiniteFloat]],'CallP[''send.Qid,'ArgL['msg.sender.VarEnt,''refund.Qid]]]]]]]]],'ListaF['Fun['headerD[
+    --- '@external.Decorator,''withdraw.Qid,'PaV.Parametros],'Cuerpo['Dv[''pendingAmount.Qid,'uint256.tipo,'->[''pendingReturns.Qid,
+    --- 'msg.sender.VarEnt]],'If['PA_PC['_>._[''pendingAmount.Qid,'0.0.FiniteFloat]],'Cuerpo['=['->[''pendingReturns.Qid,
+    --- 'msg.sender.VarEnt],'0.0.FiniteFloat],'CallP[''send.Qid,'ArgL['msg.sender.VarEnt,''pendingAmount.Qid]]]]]],'Fun['headerD[
+    --- '@external.Decorator,''auctionEnd.Qid,'PaV.Parametros],'Cuerpo['Assert['_>._['block.timestamp.VarEnt,''revealEnd.Qid]],
+    --- 'Cuerpo['Assert['not._[''ended.Qid]],'Cuerpo['logE[''AuctionEnded.Qid,'ArgL[''highestBidder.Qid,''highestBid.Qid]],'Cuerpo[
+    --- '=[''ended.Qid,'True.bool],'CallP[''send.Qid,'ArgL[''beneficiary.Qid,''highestBid.Qid]]]]]]]]]]]]], errorC) .
+
+	--- Contrato(ListaD(Ds('Bid, ListaD(D('blindedBid, bytes32), D('deposit, uint256))), ListaD(Dc('MAX_BIDS, int128,
+    --- 1.28e+2, "constant"), ListaD(De('AuctionEnded, ListaD(D('highestBidder, address), D('highestBid, uint256))), ListaD(Dp(
+    --- 'beneficiary, address, "public"), ListaD(Dp('biddingEnd, uint256, "public"), ListaD(Dp('revealEnd, uint256, "public"),
+    --- ListaD(Dp('ended, bool, "public"), ListaD(Dp('highestBid, uint256, "public"), ListaD(Dp('highestBidder, address, "public"),
+    --- ListaD(Dhm('bids, address, ->('Bid, 1.28e+2)), ListaD(Dhm('bidCounts, address, int128), Dhm('pendingReturns, address,
+    --- uint256)))))))))))), ListaF(Fun(init(@external, LParam(P('_beneficiary, address), LParam(P('_biddingTime, uint256), P(
+    --- '_revealTime, uint256)))), Cuerpo(=('beneficiary, '_beneficiary), Cuerpo(=('biddingEnd, '_biddingTime +. block.timestamp), =(
+    --- 'revealEnd, '_revealTime +. 'biddingEnd)))), ListaF(Fun(headerDD(@external, @payable, 'bid, P('_blindedBid, bytes32)),
+    --- Cuerpo(Assert(block.timestamp <. 'biddingEnd), Cuerpo(Dv('numBids, int128, ->('bidCounts, msg.sender)), Cuerpo(Assert(
+    --- 'numBids <. 'MAX_BIDS), Cuerpo(=St(->(->('bids, msg.sender), 'numBids), 'Bid, LParam(P('blindedBid, '_blindedBid), P(
+    --- 'deposit, msg.value))), +=(->('bidCounts, msg.sender), 1.0)))))), ListaF(Fun(headerR('placeBid, bool, LParam(P('bidder,
+    --- address), P('_value, uint256))), Cuerpo(If(PA '_value <=. 'highestBid PC, Return(False)), Cuerpo(If(PA 'highestBidder !=.
+    --- ZERO-ADDRESS PC, +=(->('pendingReturns, 'highestBidder), 'highestBid)), Cuerpo(=('highestBid, '_value), Cuerpo(=(
+    --- 'highestBidder, 'bidder), Return(True)))))), ListaF(Fun(headerD(@external, 'reveal, LParam(P('_numBids, int128), LParam(P(
+    --- '_values, ->(uint256, 1.28e+2)), LParam(P('_fakes, ->(bool, 1.28e+2)), P('_secrets, ->(bytes32, 1.28e+2)))))), Cuerpo(Assert(
+    --- block.timestamp >. 'biddingEnd), Cuerpo(Assert(block.timestamp <. 'revealEnd), Cuerpo(Assert('_numBids ==. ->('bidCounts,
+    --- msg.sender)), Cuerpo(Dv('refund, uint256, 0.0), Cuerpo(ForR('i, 'MAX_BIDS, Cuerpo(If(PA 'i >=. '_numBids PC, break), Cuerpo(
+    --- Dv('bidToCheck, 'Bid, ->(->('bids, msg.sender), 'i)), Cuerpo(Dv('value, uint256, ->('_values, 'i)), Cuerpo(Dv('fake, bool,
+    --- ->('_fakes, 'i)), Cuerpo(Dv('secret, bytes32, ->('_secrets, 'i)), Cuerpo(Dv('blindedBid, bytes32, CallP('keccak256, CallP(
+    --- 'concat, ArgL(CallP('convert, ArgL('value, bytes32)), CallP('convert, ArgL('fake, bytes32)), 'secret)))), Cuerpo(If(PA
+    --- 'blindedBid !=. 'bidToCheck.blindedBid PC, Cuerpo(Assert(1.0 ==. 0.0), continu)), Cuerpo(+=('refund, 'bidToCheck.deposit),
+    --- Cuerpo(If(PA not. 'fake and. 'bidToCheck.deposit >=. 'value PC, If(PA CallP('placeBid, ArgL(msg.sender, 'value)) PC, -=(
+    --- 'refund, 'value))), Cuerpo(Dv('zeroBytes32, bytes32, EMPTY-BYTES32), =('bidToCheck.blindedBid, 'zeroBytes32)))))))))))), If(
+    --- PA 'refund !=. 0.0 PC, CallP('send, ArgL(msg.sender, 'refund))))))))), ListaF(Fun(headerD(@external, 'withdraw, PaV), Cuerpo(
+    --- Dv('pendingAmount, uint256, ->('pendingReturns, msg.sender)), If(PA 'pendingAmount >. 0.0 PC, Cuerpo(=(->('pendingReturns,
+    --- msg.sender), 0.0), CallP('send, ArgL(msg.sender, 'pendingAmount)))))), Fun(headerD(@external, 'auctionEnd, PaV), Cuerpo(
+    --- Assert(block.timestamp >. 'revealEnd), Cuerpo(Assert(not. 'ended), Cuerpo(logE('AuctionEnded, ArgL('highestBidder,
+    --- 'highestBid)), Cuerpo(=('ended, True), CallP('send, ArgL('beneficiary, 'highestBid)))))))))))))
+--- contrato21 
+	--- rew downTerm('Contrato['ListaD['Ds[''Bid.Qid,'ListaD['D[''blindedBid.Qid,'bytes32.tipo],'D[
+    --- ''deposit.Qid,'uint256.tipo]]],'ListaD['Dc[''MAX_BIDS.Qid,'int128.tipo,'2.0.FiniteFloat,
+    --- '"constant".String],'ListaD['De[''AuctionEnded.Qid,'ListaD['D[''highestBidder.Qid,'address.tipo],'D[
+    --- ''highestBid.Qid,'uint256.tipo]]],'ListaD['Dp[''beneficiary.Qid,'address.tipo,'"public".String],'ListaD[
+    --- 'Dp[''biddingEnd.Qid,'uint256.tipo,'"public".String],'ListaD['Dp[''revealEnd.Qid,'uint256.tipo,
+    --- '"public".String],'ListaD['Dp[''ended.Qid,'bool.tipo,'"public".String],'ListaD['Dp[''highestBid.Qid,
+    --- 'uint256.tipo,'"public".String],'ListaD['Dp[''highestBidder.Qid,'address.tipo,'"public".String],'ListaD[
+    --- 'Dhm[''bids.Qid,'address.tipo,'->[''Bid.Qid,'1.28e+2.FiniteFloat]],'ListaD['Dhm[''bidCounts.Qid,
+    --- 'address.tipo,'int128.tipo],'Dhm[''pendingReturns.Qid,'address.tipo,'uint256.tipo]]]]]]]]]]]],'ListaF[
+    --- 'Fun['init['@external.Decorator,'LParam['P[''_beneficiary.Qid,'address.tipo],'LParam['P[
+    --- ''_biddingTime.Qid,'uint256.tipo],'P[''_revealTime.Qid,'uint256.tipo]]]],'Cuerpo['=[''beneficiary.Qid,
+    --- ''_beneficiary.Qid],'Cuerpo['=[''biddingEnd.Qid,'_+._['block.timestamp.VarEnt,''_biddingTime.Qid]],'=[
+    --- ''revealEnd.Qid,'_+._[''biddingEnd.Qid,''_revealTime.Qid]]]]],'ListaF['Fun['headerDD[
+    --- '@external.Decorator,'@payable.Decorator,''bid.Qid,'P[''_blindedBid.Qid,'bytes32.tipo]],'Cuerpo['Assert[
+    --- '_<._['block.timestamp.VarEnt,''biddingEnd.Qid]],'Cuerpo['Dv[''numBids.Qid,'int128.tipo,'->[
+    --- ''bidCounts.Qid,'msg.sender.VarEnt]],'Cuerpo['Assert['_<._[''numBids.Qid,''MAX_BIDS.Qid]],'Cuerpo['=St[
+    --- '->['->[''bids.Qid,'msg.sender.VarEnt],''numBids.Qid],''Bid.Qid,'LParam['P[''blindedBid.Qid,
+    --- ''_blindedBid.Qid],'P[''deposit.Qid,'msg.value.VarEnt]]],'+=['->[''bidCounts.Qid,'msg.sender.VarEnt],
+    --- '1.0.FiniteFloat]]]]]],'ListaF['Fun['headerR[''placeBid.Qid,'bool.tipo,'LParam['P[''bidder.Qid,
+    --- 'address.tipo],'P[''_value.Qid,'uint256.tipo]]],'Cuerpo['If['PA_PC['_<=._[''_value.Qid,
+    --- ''highestBid.Qid]],'Return['False.bool]],'Cuerpo['If['PA_PC['_!=._[''highestBidder.Qid,
+    --- 'ZERO-ADDRESS.constant]],'+=['->[''pendingReturns.Qid,''highestBidder.Qid],''highestBid.Qid]],'Cuerpo['=[
+    --- ''highestBid.Qid,''_value.Qid],'Cuerpo['=[''highestBidder.Qid,''bidder.Qid],'Return['True.bool]]]]]],
+    --- 'ListaF['Fun['headerD['@external.Decorator,''reveal.Qid,'LParam['P[''_numBids.Qid,'int128.tipo],'LParam[
+    --- 'P[''_values.Qid,'->['uint256.tipo,'2.0.FiniteFloat]],'LParam['P[''_fakes.Qid,'->['bool.tipo,
+    --- '2.0.FiniteFloat]],'P[''_secrets.Qid,'->['bytes32.tipo,'2.0.FiniteFloat]]]]]],'Cuerpo['Assert['_>._[
+    --- 'block.timestamp.VarEnt,''biddingEnd.Qid]],'Cuerpo['Assert['_<._['block.timestamp.VarEnt,
+    --- ''revealEnd.Qid]],'Cuerpo['Assert['_==._[''_numBids.Qid,'->[''bidCounts.Qid,'msg.sender.VarEnt]]],
+    --- 'Cuerpo['Dv[''refund.Qid,'uint256.tipo,'0.0.FiniteFloat],'Cuerpo['ForR[''i.Qid,''MAX_BIDS.Qid,'Cuerpo[
+    --- 'If['PA_PC['_>=._[''i.Qid,''_numBids.Qid]],'break.controlFlow],'Cuerpo['Dv[''bidToCheck.Qid,''Bid.Qid,
+    --- '->['->[''bids.Qid,'msg.sender.VarEnt],''i.Qid]],'Cuerpo['Dv[''value.Qid,'uint256.tipo,'->[''_values.Qid,
+    --- ''i.Qid]],'Cuerpo['Dv[''fake.Qid,'bool.tipo,'->[''_fakes.Qid,''i.Qid]],'Cuerpo['Dv[''secret.Qid,
+    --- 'bytes32.tipo,'->[''_secrets.Qid,''i.Qid]],'Cuerpo['Dv[''conver1.Qid,'bytes32.tipo,'CallP[''convert.Qid,
+    --- 'ArgL[''value.Qid,'bytes32.tipo]]],'Cuerpo['Dv[''conver2.Qid,'bytes32.tipo,'CallP[''convert.Qid,'ArgL[
+    --- ''fake.Qid,'bytes32.tipo]]],'Cuerpo['Dv[''concat1.Qid,'int128.tipo,'CallP[''concat.Qid,'ArgL[
+    --- ''conver1.Qid,'ArgL[''conver2.Qid,''secret.Qid]]]],'Cuerpo['Dv[''blindedBid.Qid,'bytes32.tipo,'CallP[
+    --- ''keccak256.Qid,''concat1.Qid]],'Cuerpo['If['PA_PC['_!=._[''blindedBid.Qid,''bidToCheck.blindedBid.Qid]],
+    --- 'Cuerpo['Assert['_==._['1.0.FiniteFloat,'0.0.FiniteFloat]],'continu.controlFlow]],'Cuerpo['+=[
+    --- ''refund.Qid,''bidToCheck.deposit.Qid],'Cuerpo['If['PA_PC['_and._['not._[''fake.Qid],'_>=._[
+    --- ''bidToCheck.deposit.Qid,''value.Qid]]],'If['PA_PC['CallP[''placeBid.Qid,'ArgL['msg.sender.VarEnt,
+    --- ''value.Qid]]],'-=[''refund.Qid,''value.Qid]]],'Cuerpo['Dv[''zeroBytes32.Qid,'bytes32.tipo,
+    --- 'EMPTY-BYTES32.constant],'=[''bidToCheck.blindedBid.Qid,''zeroBytes32.Qid]]]]]]]]]]]]]]],'If['PA_PC[
+    --- '_!=._[''refund.Qid,'0.0.FiniteFloat]],'CallP[''send.Qid,'ArgL['msg.sender.VarEnt,''refund.Qid]]]]]]]]],
+    --- 'ListaF['Fun['headerD['@external.Decorator,''withdraw.Qid,'PaV.Parametros],'Cuerpo['Dv[
+    --- ''pendingAmount.Qid,'uint256.tipo,'->[''pendingReturns.Qid,'msg.sender.VarEnt]],'If['PA_PC['_>._[
+    --- ''pendingAmount.Qid,'0.0.FiniteFloat]],'Cuerpo['=['->[''pendingReturns.Qid,'msg.sender.VarEnt],
+    --- '0.0.FiniteFloat],'CallP[''send.Qid,'ArgL['msg.sender.VarEnt,''pendingAmount.Qid]]]]]],'Fun['headerD[
+    --- '@external.Decorator,''auctionEnd.Qid,'PaV.Parametros],'Cuerpo['Assert['_>._['block.timestamp.VarEnt,
+    --- ''revealEnd.Qid]],'Cuerpo['Assert['not._[''ended.Qid]],'Cuerpo['logE[''AuctionEnded.Qid,'ArgL[
+    --- ''highestBidder.Qid,''highestBid.Qid]],'Cuerpo['=[''ended.Qid,'True.bool],'CallP[''send.Qid,'ArgL[
+    --- ''beneficiary.Qid,''highestBid.Qid]]]]]]]]]]]]], errorC) .
+	
+--- Contrato(ListaD(Ds('Bid, ListaD(D('blindedBid, bytes32), D('deposit, uint256))), ListaD(Dc(
+---     'MAX_BIDS, int128, 2.0, "constant"), ListaD(De('AuctionEnded, ListaD(D('highestBidder, address), D(
+---     'highestBid, uint256))), ListaD(Dp('beneficiary, address, "public"), ListaD(Dp('biddingEnd, uint256,
+---     "public"), ListaD(Dp('revealEnd, uint256, "public"), ListaD(Dp('ended, bool, "public"), ListaD(Dp(
+---     'highestBid, uint256, "public"), ListaD(Dp('highestBidder, address, "public"), ListaD(Dhm('bids, address,
+---     ->('Bid, 1.28e+2)), ListaD(Dhm('bidCounts, address, int128), Dhm('pendingReturns, address,
+---     uint256)))))))))))), ListaF(Fun(init(@external, LParam(P('_beneficiary, address), LParam(P('_biddingTime,
+---     uint256), P('_revealTime, uint256)))), Cuerpo(=('beneficiary, '_beneficiary), Cuerpo(=('biddingEnd,
+---     '_biddingTime +. block.timestamp), =('revealEnd, '_revealTime +. 'biddingEnd)))), ListaF(Fun(headerDD(
+---     @external, @payable, 'bid, P('_blindedBid, bytes32)), Cuerpo(Assert(block.timestamp <. 'biddingEnd),
+---     Cuerpo(Dv('numBids, int128, ->('bidCounts, msg.sender)), Cuerpo(Assert('numBids <. 'MAX_BIDS), Cuerpo(
+---     =St(->(->('bids, msg.sender), 'numBids), 'Bid, LParam(P('blindedBid, '_blindedBid), P('deposit,
+---     msg.value))), +=(->('bidCounts, msg.sender), 1.0)))))), ListaF(Fun(headerR('placeBid, bool, LParam(P(
+---     'bidder, address), P('_value, uint256))), Cuerpo(If(PA '_value <=. 'highestBid PC, Return(False)),
+---     Cuerpo(If(PA 'highestBidder !=. ZERO-ADDRESS PC, +=(->('pendingReturns, 'highestBidder), 'highestBid)),
+---     Cuerpo(=('highestBid, '_value), Cuerpo(=('highestBidder, 'bidder), Return(True)))))), ListaF(Fun(headerD(
+---     @external, 'reveal, LParam(P('_numBids, int128), LParam(P('_values, ->(uint256, 2.0)), LParam(P('_fakes,
+---     ->(bool, 2.0)), P('_secrets, ->(bytes32, 2.0)))))), Cuerpo(Assert(block.timestamp >. 'biddingEnd),
+---     Cuerpo(Assert(block.timestamp <. 'revealEnd), Cuerpo(Assert('_numBids ==. ->('bidCounts, msg.sender)),
+---     Cuerpo(Dv('refund, uint256, 0.0), Cuerpo(ForR('i, 'MAX_BIDS, Cuerpo(If(PA 'i >=. '_numBids PC, break),
+---     Cuerpo(Dv('bidToCheck, 'Bid, ->(->('bids, msg.sender), 'i)), Cuerpo(Dv('value, uint256, ->('_values,
+---     'i)), Cuerpo(Dv('fake, bool, ->('_fakes, 'i)), Cuerpo(Dv('secret, bytes32, ->('_secrets, 'i)), Cuerpo(Dv(
+---     'conver1, bytes32, CallP('convert, ArgL('value, bytes32))), Cuerpo(Dv('conver2, bytes32, CallP('convert,
+---     ArgL('fake, bytes32))), Cuerpo(Dv('concat1, int128, CallP('concat, ArgL('conver1, 'conver2, 'secret))),
+---     Cuerpo(Dv('blindedBid, bytes32, CallP('keccak256, 'concat1)), Cuerpo(If(PA 'blindedBid !=.
+---     'bidToCheck.blindedBid PC, Cuerpo(Assert(1.0 ==. 0.0), continu)), Cuerpo(+=('refund,
+---     'bidToCheck.deposit), Cuerpo(If(PA not. 'fake and. 'bidToCheck.deposit >=. 'value PC, If(PA CallP(
+---     'placeBid, ArgL(msg.sender, 'value)) PC, -=('refund, 'value))), Cuerpo(Dv('zeroBytes32, bytes32,
+---     EMPTY-BYTES32), =('bidToCheck.blindedBid, 'zeroBytes32))))))))))))))), If(PA 'refund !=. 0.0 PC, CallP(
+---     'send, ArgL(msg.sender, 'refund))))))))), ListaF(Fun(headerD(@external, 'withdraw, PaV), Cuerpo(Dv(
+---     'pendingAmount, uint256, ->('pendingReturns, msg.sender)), If(PA 'pendingAmount >. 0.0 PC, Cuerpo(=(->(
+---     'pendingReturns, msg.sender), 0.0), CallP('send, ArgL(msg.sender, 'pendingAmount)))))), Fun(headerD(
+---     @external, 'auctionEnd, PaV), Cuerpo(Assert(block.timestamp >. 'revealEnd), Cuerpo(Assert(not. 'ended),
+---     Cuerpo(logE('AuctionEnded, ArgL('highestBidder, 'highestBid)), Cuerpo(=('ended, True), CallP('send, ArgL(
+---     'beneficiary, 'highestBid)))))))))))))
+---Contrato 3 
+	--- red downTerm('Contrato['ListaD['Dp[''value.Qid,'uint256.tipo,'"public".String],'ListaD['Dp[
+	---     ''seller.Qid,'address.tipo,'"public".String],'ListaD['Dp[''buyer.Qid,'address.tipo,'"public".String],
+	---     'ListaD['Dp[''unlocked.Qid,'bool.tipo,'"public".String],'Dp[''ended.Qid,'bool.tipo,
+	---     '"public".String]]]]],'ListaF['Fun['init['@external.Decorator,'@payable.Decorator,'PaV.Parametros],
+	---     'Cuerpo['Assert['_==._['PA_PC['_%._['msg.value.VarEnt,'2.0.FiniteFloat]],'0.0.FiniteFloat]],'Cuerpo['=[
+	---     ''value.Qid,'_/._['msg.value.VarEnt,'2.0.FiniteFloat]],'Cuerpo['=[''seller.Qid,'msg.sender.VarEnt],'=[
+	---     ''unlocked.Qid,'True.bool]]]]],'ListaF['Fun['headerD['@external.Decorator,''abort.Qid,'PaV.Parametros],
+	---     'Cuerpo['Assert[''unlocked.Qid],'Cuerpo['Assert['_==._['msg.sender.VarEnt,''seller.Qid]],'CallP[
+	---     ''selfdestruct.Qid,''seller.Qid]]]],'ListaF['Fun['headerDD['@external.Decorator,'@payable.Decorator,
+	---     ''purchase.Qid,'PaV.Parametros],'Cuerpo['Assert[''unlocked.Qid],'Cuerpo['Assert['_==._[
+	---     'msg.value.VarEnt,'PA_PC['_*._['2.0.FiniteFloat,''value.Qid]]]],'Cuerpo['=[''buyer.Qid,
+	---     'msg.sender.VarEnt],'=[''unlocked.Qid,'False.bool]]]]],'Fun['headerD['@external.Decorator,
+	---     ''received.Qid,'PaV.Parametros],'Cuerpo['Assert['not._[''unlocked.Qid]],'Cuerpo['Assert['_==._[
+	---     'msg.sender.VarEnt,''buyer.Qid]],'Cuerpo['Assert['not._[''ended.Qid]],'Cuerpo['=[''ended.Qid,
+	---     'True.bool],'Cuerpo['CallP[''send.Qid,'ArgL[''buyer.Qid,''value.Qid]],'CallP[''selfdestruct.Qid,
+	---     ''seller.Qid]]]]]]]]]]], errorC) .
+
+		--- Contrato(ListaD(Dp('value, uint256, "public"), ListaD(Dp('seller, address, "public"),
+	    --- ListaD(Dp('buyer, address, "public"), ListaD(Dp('unlocked, bool, "public"), Dp('ended, bool,
+	    --- "public"))))), ListaF(Fun(init(@external, @payable, PaV), Cuerpo(Assert(PA msg.value %. 2.0 PC ==. 0.0),
+	    --- Cuerpo(=('value, msg.value /. 2.0), Cuerpo(=('seller, msg.sender), =('unlocked, True))))), ListaF(Fun(
+	    --- headerD(@external, 'abort, PaV), Cuerpo(Assert('unlocked), Cuerpo(Assert(msg.sender ==. 'seller), CallP(
+	    --- 'selfdestruct, 'seller)))), ListaF(Fun(headerDD(@external, @payable, 'purchase, PaV), Cuerpo(Assert(
+	    --- 'unlocked), Cuerpo(Assert(msg.value ==. PA 'value *. 2.0 PC), Cuerpo(=('buyer, msg.sender), =('unlocked,
+	    --- False))))), Fun(headerD(@external, 'received, PaV), Cuerpo(Assert(not. 'unlocked), Cuerpo(Assert(
+	    --- msg.sender ==. 'buyer), Cuerpo(Assert(not. 'ended), Cuerpo(=('ended, True), Cuerpo(CallP('send, ArgL(
+	    --- 'buyer, 'value)), CallP('selfdestruct, 'seller)))))))))))
+
+---CONTRATO4 
+	--- red downTerm('Contrato['ListaD['Ds[''Funder.Qid,'ListaD['D[''sender.Qid,'address.tipo],'D[''value.Qid,
+    --- 'uint256.tipo]]],'ListaD['Dhm[''funders.Qid,'int128.tipo,''Funder.Qid],'ListaD['D[''nextFunderIndex.Qid,
+    --- 'int128.tipo],'ListaD['D[''beneficiary.Qid,'address.tipo],'ListaD['Dp[''deadline.Qid,'uint256.tipo,
+    --- '"public".String],'ListaD['Dp[''goal.Qid,'uint256.tipo,'"public".String],'ListaD['D[''refundIndex.Qid,
+    --- 'int128.tipo],'Dp[''timelimit.Qid,'uint256.tipo,'"public".String]]]]]]]],'ListaF['Fun['init[
+    --- '@external.Decorator,'LParam['P[''_beneficiary.Qid,'address.tipo],'LParam['P[''_goal.Qid,'uint256.tipo],
+    --- 'P[''_timelimit.Qid,'uint256.tipo]]]],'Cuerpo['=[''beneficiary.Qid,''_beneficiary.Qid],'Cuerpo['=[
+    --- ''deadline.Qid,'_+._['block.timestamp.VarEnt,''_timelimit.Qid]],'Cuerpo['=[''timelimit.Qid,
+    --- ''_timelimit.Qid],'=[''goal.Qid,''_goal.Qid]]]]],'ListaF['Fun['headerDD['@external.Decorator,
+    --- '@payable.Decorator,''participate.Qid,'PaV.Parametros],'Cuerpo['Assert['_<._['block.timestamp.VarEnt,
+    --- ''deadline.Qid],'"deadline not met (yet)".String],'Cuerpo['Dv[''nfi.Qid,'int128.tipo,
+    --- ''nextFunderIndex.Qid],'Cuerpo['=St['->[''funders.Qid,''nfi.Qid],''Funder.Qid,'LParam['P[''sender.Qid,
+    --- 'msg.sender.VarEnt],'P[''value.Qid,'msg.value.VarEnt]]],'=[''nextFunderIndex.Qid,'_+._[''nfi.Qid,
+    --- '1.0.FiniteFloat]]]]]],'ListaF['Fun['headerD['@external.Decorator,''finalize.Qid,'PaV.Parametros],
+    --- 'Cuerpo['Assert['_>=._['block.timestamp.VarEnt,''deadline.Qid],'"deadline has passed".String],'Cuerpo[
+    --- 'Assert['_>=._[''balance.Qid,''goal.Qid],'"the goal has been reached".String],'CallP[''selfdestruct.Qid,
+    --- ''beneficiary.Qid]]]],'Fun['headerD['@external.Decorator,''refund.Qid,'PaV.Parametros],'Cuerpo['Assert[
+    --- '_and._['_>=._['block.timestamp.VarEnt,''deadline.Qid],'_<._[''balance.Qid,''goal.Qid]]],'Cuerpo['Dv[
+    --- ''ind.Qid,'int128.tipo,''refundIndex.Qid],'Cuerpo['ForR[''i.Qid,'ArgL[''ind.Qid,'_+._[''ind.Qid,
+    --- '3.0e+1.FiniteFloat]],'Cuerpo['If['_>=._[''i.Qid,''nextFunderIndex.Qid],'Cuerpo['=[''refundIndex.Qid,
+    --- ''nextFunderIndex.Qid],'return.controlFlow]],'Cuerpo['CallP[''send.Qid,'ArgL['.['->[''funders.Qid,
+    --- ''i.Qid],''sender.Qid],'.['->[''funders.Qid,''i.Qid],''value.Qid]]],'=['->[''funders.Qid,''i.Qid],
+    --- 'CallP[''empty.Qid,''Funder.Qid]]]]],'=[''refundIndex.Qid,'_+._[''ind.Qid,'3.0e+1.FiniteFloat]]]]]]]]]], errorC) .
+
+	--- Contrato(ListaD(Ds('Funder, ListaD(D('sender, address), D('value, uint256))), ListaD(Dhm(
+	--- 	'funders, int128, 'Funder), ListaD(D('nextFunderIndex, int128), ListaD(D('beneficiary, address), ListaD(
+	--- 	Dp('deadline, uint256, "public"), ListaD(Dp('goal, uint256, "public"), ListaD(D('refundIndex, int128),
+	--- 	Dp('timelimit, uint256, "public")))))))), ListaF(Fun(init(@external, LParam(P('_beneficiary, address),
+	--- 	LParam(P('_goal, uint256), P('_timelimit, uint256)))), Cuerpo(=('beneficiary, '_beneficiary), Cuerpo(=(
+	--- 	'deadline, '_timelimit +. block.timestamp), Cuerpo(=('timelimit, '_timelimit), =('goal, '_goal))))),
+	--- 	ListaF(Fun(headerDD(@external, @payable, 'participate, PaV), Cuerpo(Assert(block.timestamp <. 'deadline,
+	--- 	"deadline not met (yet)"), Cuerpo(Dv('nfi, int128, 'nextFunderIndex), Cuerpo(=St(->('funders, 'nfi),
+	--- 	'Funder, LParam(P('sender, msg.sender), P('value, msg.value))), =('nextFunderIndex, 'nfi +. 1.0))))),
+	--- 	ListaF(Fun(headerD(@external, 'finalize, PaV), Cuerpo(Assert(block.timestamp >=. 'deadline,
+	--- 	"deadline has passed"), Cuerpo(Assert('balance >=. 'goal, "the goal has been reached"), CallP(
+	--- 	'selfdestruct, 'beneficiary)))), Fun(headerD(@external, 'refund, PaV), Cuerpo(Assert(block.timestamp >=.
+	--- 	'deadline and. 'balance <. 'goal), Cuerpo(Dv('ind, int128, 'refundIndex), Cuerpo(ForR('i, ArgL('ind,
+	--- 	'ind +. 3.0e+1), Cuerpo(If('i >=. 'nextFunderIndex, Cuerpo(=('refundIndex, 'nextFunderIndex), return)),
+	--- 	Cuerpo(CallP('send, ArgL(.(->('funders, 'i), 'sender), .(->('funders, 'i), 'value))), =(->('funders,
+	--- 	'i), CallP('empty, 'Funder))))), =('refundIndex, 'ind +. 3.0e+1)))))))))
+	---CONTRATO 5 
+	--- red downTerm( 'Contrato['ListaD['Ds[''Voter.Qid,'ListaD['D[''weight.Qid,'int128.tipo],'ListaD['D[
+    --- ''voted.Qid,'bool.tipo],'ListaD['D[''delegate.Qid,'address.tipo],'D[''vote.Qid,'int128.tipo]]]]],
+    --- 'ListaD['Ds[''Proposal.Qid,'ListaD['D[''name.Qid,'bytes32.tipo],'D[''voteCount.Qid,'int128.tipo]]],
+    --- 'ListaD['DhmP[''voters.Qid,'address.tipo,''Voter.Qid,'"public".String],'ListaD['DhmP[''proposals.Qid,
+    --- 'int128.tipo,''Proposal.Qid,'"public".String],'ListaD['Dp[''voterCount.Qid,'int128.tipo,
+    --- '"public".String],'ListaD['Dp[''chairperson.Qid,'address.tipo,'"public".String],'Dp[
+    --- ''int128Proposals.Qid,'int128.tipo,'"public".String]]]]]]],'ListaF['Fun['headerDDR['@view.Decorator,
+    --- '@internal.Decorator,''_delegated.Qid,'bool.tipo,'P[''addr.Qid,'address.tipo]],'Return['_!=._['.['->[
+    --- ''voters.Qid,''addr.Qid],''delegate.Qid],'ZERO-ADDRESS.constant]]],'ListaF['Fun['headerDDR[
+    --- '@view.Decorator,'@external.Decorator,''delegated.Qid,'bool.tipo,'P[''addr.Qid,'address.tipo]],'Return[
+    --- 'CallP[''_delegated.Qid,''addr.Qid]]],'ListaF['Fun['headerDDR['@view.Decorator,'@internal.Decorator,
+    --- ''_directlyVoted.Qid,'bool.tipo,'P[''addr.Qid,'address.tipo]],'Return['_and._['.['->[''voters.Qid,
+    --- ''addr.Qid],''voted.Qid],'PA_PC['_==._['.['->[''voters.Qid,''addr.Qid],''delegate.Qid],
+    --- 'ZERO-ADDRESS.constant]]]]],'ListaF['Fun['headerDDR['@view.Decorator,'@external.Decorator,
+    --- ''directlyVoted.Qid,'bool.tipo,'P[''addr.Qid,'address.tipo]],'Return['CallP[''_directlyVoted.Qid,
+    --- ''addr.Qid]]],'ListaF['Fun['init['@external.Decorator,'P[''_proposalNames.Qid,'->['bytes32.tipo,
+    --- '2.0.FiniteFloat]]],'Cuerpo['=[''chairperson.Qid,'msg.sender.VarEnt],'Cuerpo['=[''voterCount.Qid,
+    --- '0.0.FiniteFloat],'ForR[''i.Qid,'2.0.FiniteFloat,'Cuerpo['=St['->[''proposals.Qid,''i.Qid],
+    --- ''Proposal.Qid,'LParam['P[''name.Qid,'->[''_proposalNames.Qid,''i.Qid]],'P[''voteCount.Qid,
+    --- '0.0.FiniteFloat]]],'+=[''int128Proposals.Qid,'1.0.FiniteFloat]]]]]],'ListaF['Fun['headerD[
+    --- '@external.Decorator,''giveRightToVote.Qid,'P[''voter.Qid,'address.tipo]],'Cuerpo['Assert['_==._[
+    --- 'msg.sender.VarEnt,''chairperson.Qid]],'Cuerpo['Assert['not._['.['->[''voters.Qid,''voter.Qid],
+    --- ''voted.Qid]]],'Cuerpo['Assert['_==._['.['->[''voters.Qid,''voter.Qid],''weight.Qid],'0.0.FiniteFloat]],
+    --- 'Cuerpo['=['.['->[''voters.Qid,''voter.Qid],''weight.Qid],'1.0.FiniteFloat],'+=[''voterCount.Qid,
+    --- '1.0.FiniteFloat]]]]]],'ListaF['Fun['headerD['@internal.Decorator,''_forwardWeight.Qid,'P[
+    --- ''delegate_with_weight_to_forward.Qid,'address.tipo]],'Cuerpo['Assert['CallP[''_delegated.Qid,
+    --- ''delegate_with_weight_to_forward.Qid]],'Cuerpo['Assert['_>._['.['->[''voters.Qid,
+    --- ''delegate_with_weight_to_forward.Qid],''weight.Qid],'0.0.FiniteFloat]],'Cuerpo['Dv[''target.Qid,
+    --- 'address.tipo,'.['->[''voters.Qid,''delegate_with_weight_to_forward.Qid],''delegate.Qid]],'Cuerpo['ForR[
+    --- ''i.Qid,'4.0.FiniteFloat,'IfElse['CallP[''_delegated.Qid,''target.Qid],'Cuerpo['=[''target.Qid,'.['->[
+    --- ''voters.Qid,''target.Qid],''delegate.Qid]],'Assert['_!=._[''target.Qid,
+    --- ''delegate_with_weight_to_forward.Qid]]],'break.controlFlow]],'Cuerpo['Dv[''weight_to_forward.Qid,
+    --- 'int128.tipo,'.['->[''voters.Qid,''delegate_with_weight_to_forward.Qid],''weight.Qid]],'Cuerpo['=['.[
+    --- '->[''voters.Qid,''delegate_with_weight_to_forward.Qid],''weight.Qid],'0.0.FiniteFloat],'Cuerpo['+=['.[
+    --- '->[''voters.Qid,''target.Qid],''weight.Qid],''weight_to_forward.Qid],'If['CallP[''_directlyVoted.Qid,
+    --- ''target.Qid],'Cuerpo['+=['.['->[''proposals.Qid,'.['->[''voters.Qid,''target.Qid],''vote.Qid]],
+    --- ''voteCount.Qid],''weight_to_forward.Qid],'=['.['->[''voters.Qid,''target.Qid],''weight.Qid],
+    --- '0.0.FiniteFloat]]]]]]]]]]],'ListaF['Fun['headerD['@external.Decorator,''forwardWeight.Qid,'P[
+    --- ''delegate_with_weight_to_forward.Qid,'address.tipo]],'CallP[''_forwardWeight.Qid,
+    --- ''delegate_with_weight_to_forward.Qid]],'ListaF['Fun['headerD['@external.Decorator,''delegate.Qid,'P[
+    --- ''to.Qid,'address.tipo]],'Cuerpo['Assert['not._['.['->[''voters.Qid,'msg.sender.VarEnt],''voted.Qid]]],
+    --- 'Cuerpo['Assert['_!=._[''to.Qid,'msg.sender.VarEnt]],'Cuerpo['Assert['_!=._[''to.Qid,
+    --- 'ZERO-ADDRESS.constant]],'Cuerpo['=['.['->[''voters.Qid,'msg.sender.VarEnt],''voted.Qid],'True.bool],
+    --- 'Cuerpo['=['.['->[''voters.Qid,'msg.sender.VarEnt],''delegate.Qid],''to.Qid],'CallP[
+    --- ''_forwardWeight.Qid,'msg.sender.VarEnt]]]]]]],'ListaF['Fun['headerD['@external.Decorator,''vote.Qid,'P[
+    --- ''proposal.Qid,'int128.tipo]],'Cuerpo['Assert['not._['.['->[''voters.Qid,'msg.sender.VarEnt],
+    --- ''voted.Qid]]],'Cuerpo['Assert['_<._[''proposal.Qid,''int128Proposals.Qid]],'Cuerpo['=['.['->[
+    --- ''voters.Qid,'msg.sender.VarEnt],''vote.Qid],''proposal.Qid],'Cuerpo['=['.['->[''voters.Qid,
+    --- 'msg.sender.VarEnt],''voted.Qid],'True.bool],'Cuerpo['+=['.['->[''proposals.Qid,''proposal.Qid],
+    --- ''voteCount.Qid],'.['->[''voters.Qid,'msg.sender.VarEnt],''weight.Qid]],'=['.['->[''voters.Qid,
+    --- 'msg.sender.VarEnt],''weight.Qid],'0.0.FiniteFloat]]]]]]],'ListaF['Fun['headerDDR['@view.Decorator,
+    --- '@internal.Decorator,''_winningProposal.Qid,'int128.tipo,'PaV.Parametros],'Cuerpo['Dv[
+    --- ''winning_vote_count.Qid,'int128.tipo,'0.0.FiniteFloat],'Cuerpo['Dv[''winning_proposal.Qid,'int128.tipo,
+    --- '0.0.FiniteFloat],'Cuerpo['ForR[''i.Qid,'2.0.FiniteFloat,'If['_>._['.['->[''proposals.Qid,''i.Qid],
+    --- ''voteCount.Qid],''winning_vote_count.Qid],'Cuerpo['=[''winning_vote_count.Qid,'.['->[''proposals.Qid,
+    --- ''i.Qid],''voteCount.Qid]],'=[''winning_proposal.Qid,''i.Qid]]]],'Return[''winning_proposal.Qid]]]]],
+    --- 'ListaF['Fun['headerDDR['@view.Decorator,'@external.Decorator,''winningProposal.Qid,'int128.tipo,
+    --- 'PaV.Parametros],'Return['Call[''_winningProposal.Qid]]],'Fun['headerDDR['@view.Decorator,
+    --- '@external.Decorator,''winnerName.Qid,'bytes32.tipo,'PaV.Parametros],'Return['.['->[''proposals.Qid,
+    --- 'Call[''_winningProposal.Qid]],''name.Qid]]]]]]]]]]]]]]]], errorC) .
+
+	--- Contrato(ListaD(Ds('Voter, ListaD(D('weight, int128), ListaD(D('voted, bool), ListaD(D(
+	--- 	'delegate, address), D('vote, int128))))), ListaD(Ds('Proposal, ListaD(D('name, bytes32), D('voteCount,
+	--- 	int128))), ListaD(DhmP('voters, address, 'Voter, "public"), ListaD(DhmP('proposals, int128, 'Proposal,
+	--- 	"public"), ListaD(Dp('voterCount, int128, "public"), ListaD(Dp('chairperson, address, "public"), Dp(
+	--- 	'int128Proposals, int128, "public"))))))), ListaF(Fun(headerDDR(@view, @internal, '_delegated, bool, P(
+	--- 	'addr, address)), Return(.(->('voters, 'addr), 'delegate) !=. ZERO-ADDRESS)), ListaF(Fun(headerDDR(
+	--- 	@view, @external, 'delegated, bool, P('addr, address)), Return(CallP('_delegated, 'addr))), ListaF(Fun(
+	--- 	headerDDR(@view, @internal, '_directlyVoted, bool, P('addr, address)), Return(.(->('voters, 'addr),
+	--- 	'voted) and. PA .(->('voters, 'addr), 'delegate) ==. ZERO-ADDRESS PC)), ListaF(Fun(headerDDR(@view,
+	--- 	@external, 'directlyVoted, bool, P('addr, address)), Return(CallP('_directlyVoted, 'addr))), ListaF(Fun(
+	--- 	init(@external, P('_proposalNames, ->(bytes32, 2.0))), Cuerpo(=('chairperson, msg.sender), Cuerpo(=(
+	--- 	'voterCount, 0.0), ForR('i, 2.0, Cuerpo(=St(->('proposals, 'i), 'Proposal, LParam(P('name, ->(
+	--- 	'_proposalNames, 'i)), P('voteCount, 0.0))), +=('int128Proposals, 1.0)))))), ListaF(Fun(headerD(
+	--- 	@external, 'giveRightToVote, P('voter, address)), Cuerpo(Assert(msg.sender ==. 'chairperson), Cuerpo(
+	--- 	Assert(not. .(->('voters, 'voter), 'voted)), Cuerpo(Assert(.(->('voters, 'voter), 'weight) ==. 0.0),
+	--- 	Cuerpo(=(.(->('voters, 'voter), 'weight), 1.0), +=('voterCount, 1.0)))))), ListaF(Fun(headerD(@internal,
+	--- 	'_forwardWeight, P('delegate_with_weight_to_forward, address)), Cuerpo(Assert(CallP('_delegated,
+	--- 	'delegate_with_weight_to_forward)), Cuerpo(Assert(.(->('voters, 'delegate_with_weight_to_forward),
+	--- 	'weight) >. 0.0), Cuerpo(Dv('target, address, .(->('voters, 'delegate_with_weight_to_forward),
+	--- 	'delegate)), Cuerpo(ForR('i, 4.0, IfElse(CallP('_delegated, 'target), Cuerpo(=('target, .(->('voters,
+	--- 	'target), 'delegate)), Assert('target !=. 'delegate_with_weight_to_forward)), break)), Cuerpo(Dv(
+	--- 	'weight_to_forward, int128, .(->('voters, 'delegate_with_weight_to_forward), 'weight)), Cuerpo(=(.(->(
+	--- 	'voters, 'delegate_with_weight_to_forward), 'weight), 0.0), Cuerpo(+=(.(->('voters, 'target), 'weight),
+	--- 	'weight_to_forward), If(CallP('_directlyVoted, 'target), Cuerpo(+=(.(->('proposals, .(->('voters,
+	--- 	'target), 'vote)), 'voteCount), 'weight_to_forward), =(.(->('voters, 'target), 'weight), 0.0))))))))))),
+	--- 	ListaF(Fun(headerD(@external, 'forwardWeight, P('delegate_with_weight_to_forward, address)), CallP(
+	--- 	'_forwardWeight, 'delegate_with_weight_to_forward)), ListaF(Fun(headerD(@external, 'delegate, P('to,
+	--- 	address)), Cuerpo(Assert(not. .(->('voters, msg.sender), 'voted)), Cuerpo(Assert('to !=. msg.sender),
+	--- 	Cuerpo(Assert('to !=. ZERO-ADDRESS), Cuerpo(=(.(->('voters, msg.sender), 'voted), True), Cuerpo(=(.(->(
+	--- 	'voters, msg.sender), 'delegate), 'to), CallP('_forwardWeight, msg.sender))))))), ListaF(Fun(headerD(
+	--- 	@external, 'vote, P('proposal, int128)), Cuerpo(Assert(not. .(->('voters, msg.sender), 'voted)), Cuerpo(
+	--- 	Assert('proposal <. 'int128Proposals), Cuerpo(=(.(->('voters, msg.sender), 'vote), 'proposal), Cuerpo(=(
+	--- 	.(->('voters, msg.sender), 'voted), True), Cuerpo(+=(.(->('proposals, 'proposal), 'voteCount), .(->(
+	--- 	'voters, msg.sender), 'weight)), =(.(->('voters, msg.sender), 'weight), 0.0))))))), ListaF(Fun(
+	--- 	headerDDR(@view, @internal, '_winningProposal, int128, PaV), Cuerpo(Dv('winning_vote_count, int128,
+	--- 	0.0), Cuerpo(Dv('winning_proposal, int128, 0.0), Cuerpo(ForR('i, 2.0, If(.(->('proposals, 'i),
+	--- 	'voteCount) >. 'winning_vote_count, Cuerpo(=('winning_vote_count, .(->('proposals, 'i), 'voteCount)), =(
+	--- 	'winning_proposal, 'i)))), Return('winning_proposal))))), ListaF(Fun(headerDDR(@view, @external,
+	--- 	'winningProposal, int128, PaV), Return(Call('_winningProposal))), Fun(headerDDR(@view, @external,
+	--- 	'winnerName, bytes32, PaV), Return(.(->('proposals, Call('_winningProposal)), 'name))))))))))))))))
+	--- CONTRATO6 
+		--- 		red downTerm('Contrato['ListaD['De[''Transfer.Qid,'ListaD['Di[''sender.Qid,'address.tipo,
+		--- '"indexed".String],'ListaD['Di[''receiver.Qid,'address.tipo,'"indexed".String],'D[''value.Qid,
+		--- 'uint256.tipo]]]],'ListaD['De[''Buy.Qid,'ListaD['Di[''buyer.Qid,'address.tipo,'"indexed".String],'D[
+		--- ''buy_order.Qid,'uint256.tipo]]],'ListaD['De[''Sell.Qid,'ListaD['Di[''seller.Qid,'address.tipo,
+		--- '"indexed".String],'D[''sell_order.Qid,'uint256.tipo]]],'ListaD['De[''Pay.Qid,'ListaD['Di[''vendor.Qid,
+		--- 'address.tipo,'"indexed".String],'D[''amount.Qid,'uint256.tipo]]],'ListaD['Dp[''company.Qid,
+		--- 'address.tipo,'"public".String],'ListaD['Dp[''totalShares.Qid,'uint256.tipo,'"public".String],'ListaD[
+		--- 'Dp[''price.Qid,'uint256.tipo,'"public".String],'Dhm[''holdings.Qid,'address.tipo,'uint256.tipo]]]]]]]],
+		--- 'ListaF['Fun['init['@external.Decorator,'LParam['P[''_company.Qid,'address.tipo],'LParam['P[
+		--- ''_total_shares.Qid,'uint256.tipo],'P[''initial_price.Qid,'uint256.tipo]]]],'Cuerpo['Assert['_>._[
+		--- ''_total_shares.Qid,'0.0.FiniteFloat]],'Cuerpo['Assert['_>._[''initial_price.Qid,'0.0.FiniteFloat]],
+		--- 'Cuerpo['=[''company.Qid,''_company.Qid],'Cuerpo['=[''totalShares.Qid,''_total_shares.Qid],'Cuerpo['=[
+		--- ''price.Qid,''initial_price.Qid],'=['->[''holdings.Qid,''company.Qid],''_total_shares.Qid]]]]]]],
+		--- 'ListaF['Fun['headerDDR['@view.Decorator,'@internal.Decorator,''_stockAvailable.Qid,'uint256.tipo,
+		--- 'PaV.Parametros],'Return['->[''holdings.Qid,''company.Qid]]],'ListaF['Fun['headerDDR['@view.Decorator,
+		--- '@external.Decorator,''stockAvailable.Qid,'uint256.tipo,'PaV.Parametros],'Return['Call[
+		--- ''_stockAvailable.Qid]]],'ListaF['Fun['headerDD['@external.Decorator,'@payable.Decorator,''buyStock.Qid,
+		--- 'PaV.Parametros],'Cuerpo['Dv[''buy_order.Qid,'uint256.tipo,'_/._['msg.value.VarEnt,''price.Qid]],
+		--- 'Cuerpo['Assert['_>=._['Call[''_stockAvailable.Qid],''buy_order.Qid]],'Cuerpo['-=['->[''holdings.Qid,
+		--- ''company.Qid],''buy_order.Qid],'Cuerpo['+=['->[''holdings.Qid,'msg.sender.VarEnt],''buy_order.Qid],
+		--- 'logE[''Buy.Qid,'ArgL['msg.sender.VarEnt,''buy_order.Qid]]]]]]],'ListaF['Fun['headerDDR[
+		--- '@view.Decorator,'@internal.Decorator,''_getHolding.Qid,'uint256.tipo,'P[''_stockholder.Qid,
+		--- 'address.tipo]],'Return['->[''holdings.Qid,''_stockholder.Qid]]],'ListaF['Fun['headerDDR[
+		--- '@view.Decorator,'@external.Decorator,''getHolding.Qid,'uint256.tipo,'P[''_stockholder.Qid,
+		--- 'address.tipo]],'Return['CallP[''_getHolding.Qid,''_stockholder.Qid]]],'ListaF['Fun['headerDDR[
+		--- '@view.Decorator,'@external.Decorator,''cash.Qid,'uint256.tipo,'PaV.Parametros],'Return[''balance.Qid]],
+		--- 'ListaF['Fun['headerD['@external.Decorator,''sellStock.Qid,'P[''sell_order.Qid,'uint256.tipo]],'Cuerpo[
+		--- 'Assert['_>._[''sell_order.Qid,'0.0.FiniteFloat]],'Cuerpo['Assert['_>=._['CallP[''_getHolding.Qid,
+		--- 'msg.sender.VarEnt],''sell_order.Qid]],'Cuerpo['Assert['_>=._[''balance.Qid,'PA_PC['_*._[
+		--- ''sell_order.Qid,''price.Qid]]]],'Cuerpo['-=['->[''holdings.Qid,'msg.sender.VarEnt],''sell_order.Qid],
+		--- 'Cuerpo['+=['->[''holdings.Qid,''company.Qid],''sell_order.Qid],'Cuerpo['CallP[''send.Qid,'ArgL[
+		--- 'msg.sender.VarEnt,'_*._[''sell_order.Qid,''price.Qid]]],'logE[''Sell.Qid,'ArgL['msg.sender.VarEnt,
+		--- ''sell_order.Qid]]]]]]]]],'ListaF['Fun['headerD['@external.Decorator,''transferStock.Qid,'LParam['P[
+		--- ''receiver.Qid,'address.tipo],'P[''transfer_order.Qid,'uint256.tipo]]],'Cuerpo['Assert['_>._[
+		--- ''transfer_order.Qid,'0.0.FiniteFloat]],'Cuerpo['Assert['_>=._['CallP[''_getHolding.Qid,
+		--- 'msg.sender.VarEnt],''transfer_order.Qid]],'Cuerpo['-=['->[''holdings.Qid,'msg.sender.VarEnt],
+		--- ''transfer_order.Qid],'Cuerpo['+=['->[''holdings.Qid,''receiver.Qid],''transfer_order.Qid],'logE[
+		--- ''Transfer.Qid,'ArgL['msg.sender.VarEnt,'ArgL[''receiver.Qid,''transfer_order.Qid]]]]]]]],'ListaF['Fun[
+		--- 'headerD['@external.Decorator,''payBill.Qid,'LParam['P[''vendor.Qid,'address.tipo],'P[''amount.Qid,
+		--- 'uint256.tipo]]],'Cuerpo['Assert['_==._['msg.sender.VarEnt,''company.Qid]],'Cuerpo['Assert['_>=._[
+		--- ''balance.Qid,''amount.Qid]],'Cuerpo['CallP[''send.Qid,'ArgL[''vendor.Qid,''amount.Qid]],'logE[
+		--- ''Pay.Qid,'ArgL[''vendor.Qid,''amount.Qid]]]]]],'ListaF['Fun['headerDDR['@view.Decorator,
+		--- '@internal.Decorator,''_debt.Qid,'uint256.tipo,'PaV.Parametros],'Return['_*._['PA_PC['_-._[
+		--- ''totalShares.Qid,'Call[''_stockAvailable.Qid]]],''price.Qid]]],'ListaF['Fun['headerDDR[
+		--- '@view.Decorator,'@external.Decorator,''debt.Qid,'uint256.tipo,'PaV.Parametros],'Return['Call[
+		--- ''_debt.Qid]]],'Fun['headerDDR['@view.Decorator,'@external.Decorator,''worth.Qid,'uint256.tipo,
+		--- 'PaV.Parametros],'Return['_-._[''balance.Qid,'Call[''_debt.Qid]]]]]]]]]]]]]]]]], errorC) .
+
+	--- Contrato(ListaD(De('Transfer, ListaD(Di('sender, address, "indexed"), ListaD(Di('receiver,
+	---     address, "indexed"), D('value, uint256)))), ListaD(De('Buy, ListaD(Di('buyer, address, "indexed"), D(
+	---     'buy_order, uint256))), ListaD(De('Sell, ListaD(Di('seller, address, "indexed"), D('sell_order,
+	---     uint256))), ListaD(De('Pay, ListaD(Di('vendor, address, "indexed"), D('amount, uint256))), ListaD(Dp(
+	---     'company, address, "public"), ListaD(Dp('totalShares, uint256, "public"), ListaD(Dp('price, uint256,
+	---     "public"), Dhm('holdings, address, uint256)))))))), ListaF(Fun(init(@external, LParam(P('_company,
+	---     address), LParam(P('_total_shares, uint256), P('initial_price, uint256)))), Cuerpo(Assert('_total_shares
+	---     >. 0.0), Cuerpo(Assert('initial_price >. 0.0), Cuerpo(=('company, '_company), Cuerpo(=('totalShares,
+	---     '_total_shares), Cuerpo(=('price, 'initial_price), =(->('holdings, 'company), '_total_shares))))))),
+	---     ListaF(Fun(headerDDR(@view, @internal, '_stockAvailable, uint256, PaV), Return(->('holdings,
+	---     'company))), ListaF(Fun(headerDDR(@view, @external, 'stockAvailable, uint256, PaV), Return(Call(
+	---     '_stockAvailable))), ListaF(Fun(headerDD(@external, @payable, 'buyStock, PaV), Cuerpo(Dv('buy_order,
+	---     uint256, msg.value /. 'price), Cuerpo(Assert(Call('_stockAvailable) >=. 'buy_order), Cuerpo(-=(->(
+	---     'holdings, 'company), 'buy_order), Cuerpo(+=(->('holdings, msg.sender), 'buy_order), logE('Buy, ArgL(
+	---     msg.sender, 'buy_order))))))), ListaF(Fun(headerDDR(@view, @internal, '_getHolding, uint256, P(
+	---     '_stockholder, address)), Return(->('holdings, '_stockholder))), ListaF(Fun(headerDDR(@view, @external,
+	---     'getHolding, uint256, P('_stockholder, address)), Return(CallP('_getHolding, '_stockholder))), ListaF(
+	---     Fun(headerDDR(@view, @external, 'cash, uint256, PaV), Return('balance)), ListaF(Fun(headerD(@external,
+	---     'sellStock, P('sell_order, uint256)), Cuerpo(Assert('sell_order >. 0.0), Cuerpo(Assert(CallP(
+	---     '_getHolding, msg.sender) >=. 'sell_order), Cuerpo(Assert('balance >=. PA 'price *. 'sell_order PC),
+	---     Cuerpo(-=(->('holdings, msg.sender), 'sell_order), Cuerpo(+=(->('holdings, 'company), 'sell_order),
+	---     Cuerpo(CallP('send, ArgL(msg.sender, 'price *. 'sell_order)), logE('Sell, ArgL(msg.sender,
+	---     'sell_order))))))))), ListaF(Fun(headerD(@external, 'transferStock, LParam(P('receiver, address), P(
+	---     'transfer_order, uint256))), Cuerpo(Assert('transfer_order >. 0.0), Cuerpo(Assert(CallP('_getHolding,
+	---     msg.sender) >=. 'transfer_order), Cuerpo(-=(->('holdings, msg.sender), 'transfer_order), Cuerpo(+=(->(
+	---     'holdings, 'receiver), 'transfer_order), logE('Transfer, ArgL(msg.sender, 'receiver,
+	---     'transfer_order))))))), ListaF(Fun(headerD(@external, 'payBill, LParam(P('vendor, address), P('amount,
+	---     uint256))), Cuerpo(Assert(msg.sender ==. 'company), Cuerpo(Assert('balance >=. 'amount), Cuerpo(CallP(
+	---     'send, ArgL('vendor, 'amount)), logE('Pay, ArgL('vendor, 'amount)))))), ListaF(Fun(headerDDR(@view,
+	---     @internal, '_debt, uint256, PaV), Return('price *. PA 'totalShares -. Call('_stockAvailable) PC)),
+	---     ListaF(Fun(headerDDR(@view, @external, 'debt, uint256, PaV), Return(Call('_debt))), Fun(headerDDR(@view,
+	---     @external, 'worth, uint256, PaV), Return('balance -. Call('_debt))))))))))))))))
+---CONTRATO7 
+	--- 		rew downTerm( 'Contrato['ListaD['Ds[''Juego.Qid,'ListaD['D[''apostador.Qid,'address.tipo],'ListaD['D[''equipo1.Qid,
+    --- 'uint256.tipo],'ListaD['D[''equipo2.Qid,'uint256.tipo],'D[''apuesta.Qid,'uint256.tipo]]]]],'ListaD['Dp[
+    --- ''casa.Qid,'address.tipo,'"public".String],'ListaD['Dp[''inicial.Qid,'uint256.tipo,'"public".String],'ListaD[
+    --- 'Dp[''empieza.Qid,'uint256.tipo,'"public".String],'ListaD['Dp[''termina.Qid,'uint256.tipo,'"public".String],
+    --- 'ListaD['D[''pequipo1.Qid,'uint256.tipo],'ListaD['D[''pequipo2.Qid,'uint256.tipo],'ListaD['D[''indice.Qid,
+    --- 'uint256.tipo],'ListaD['Dhm[''apostadores.Qid,'uint256.tipo,''Juego.Qid],'ListaD['D[''sigindice.Qid,
+    --- 'uint256.tipo],'ListaD['D[''invertido.Qid,'bool.tipo],'D[''apuntados.Qid,'bool.tipo]]]]]]]]]]]],'ListaF['Fun[
+    --- 'init['@payable.Decorator,'@external.Decorator,'LParam['P[''tiempo_inicio.Qid,'uint256.tipo],'P[
+    --- ''duracion.Qid,'uint256.tipo]]],'Cuerpo['Assert['_>._[''tiempo_inicio.Qid,'0.0.FiniteFloat]],'Cuerpo['Assert[
+    --- '_>._[''duracion.Qid,'0.0.FiniteFloat]],'Cuerpo['=[''inicial.Qid,'msg.value.VarEnt],'Cuerpo['=[''casa.Qid,
+    --- 'msg.sender.VarEnt],'Cuerpo['=[''empieza.Qid,'_+._['block.timestamp.VarEnt,''tiempo_inicio.Qid]],'=[
+    --- ''termina.Qid,'_+._[''empieza.Qid,''duracion.Qid]]]]]]]],'ListaF['Fun['headerDD['@external.Decorator,
+    --- '@payable.Decorator,''apostar.Qid,'LParam['P[''eq1.Qid,'uint256.tipo],'P[''eq2.Qid,'uint256.tipo]]],'Cuerpo[
+    --- 'Assert['_<=._['block.timestamp.VarEnt,''empieza.Qid],'"Antes de empezar".String],'Cuerpo['Assert['_!=._[
+    --- 'msg.sender.VarEnt,''casa.Qid],'"Jugador".String],'Cuerpo['Assert['_>._['msg.value.VarEnt,'0.0.FiniteFloat],
+    --- '"Apuesta positiva".String],'Cuerpo['Dv[''nfi.Qid,'uint256.tipo,''indice.Qid],'Cuerpo['=St['->[
+    --- ''apostadores.Qid,''nfi.Qid],''Juego.Qid,'LParam['P[''apostador.Qid,'msg.sender.VarEnt],'LParam['P[
+    --- ''equipo1.Qid,''eq1.Qid],'LParam['P[''equipo2.Qid,''eq2.Qid],'P[''apuesta.Qid,'msg.value.VarEnt]]]]],'=[
+    --- ''indice.Qid,'_+._[''nfi.Qid,'1.0.FiniteFloat]]]]]]]],'ListaF['Fun['headerDDR['@view.Decorator,
+    --- '@external.Decorator,''necesario.Qid,'uint256.tipo,'PaV.Parametros],'Cuerpo['Assert['_==._[
+    --- 'msg.sender.VarEnt,''casa.Qid],'"Casa".String],'Cuerpo['Assert['_>._['block.timestamp.VarEnt,''empieza.Qid],
+    --- '"Despues de empezar".String],'Return['_/._['PA_PC['_-._[''balance.Qid,''inicial.Qid]],'2.0.FiniteFloat]]]]],
+    --- 'ListaF['Fun['headerDD['@payable.Decorator,'@external.Decorator,''mitad.Qid,'PaV.Parametros],'Cuerpo['Assert[
+    --- '_>._['block.timestamp.VarEnt,''empieza.Qid],'"Despues de empezar".String],'Cuerpo['Assert['_==._[''casa.Qid,
+    --- 'msg.sender.VarEnt],'"Casa".String],'Cuerpo['Assert['_>=._['_+._['msg.value.VarEnt,''inicial.Qid],'PA_PC[
+    --- '_/._['PA_PC['_-._[''balance.Qid,'_-._[''inicial.Qid,'msg.value.VarEnt]]],'2.0.FiniteFloat]]],
+    --- '"Valor suficiente".String],'=[''invertido.Qid,'True.bool]]]]],'ListaF['Fun['headerD['@external.Decorator,
+    --- ''ganadores.Qid,'LParam['P[''_eq1.Qid,'uint256.tipo],'P[''_eq2.Qid,'uint256.tipo]]],'Cuerpo['Assert['_==._[
+    --- 'msg.sender.VarEnt,''casa.Qid]],'Cuerpo['Assert['_>._['block.timestamp.VarEnt,''termina.Qid]],'Cuerpo[
+    --- 'Assert['not._[''apuntados.Qid]],'Cuerpo['=[''apuntados.Qid,'True.bool],'Cuerpo['=[''pequipo1.Qid,
+    --- ''_eq1.Qid],'=[''pequipo2.Qid,''_eq2.Qid]]]]]]],'ListaF['Fun['headerD['@external.Decorator,''devolver.Qid,
+    --- 'PaV.Parametros],'Cuerpo['Assert[''apuntados.Qid,'"Apuntados".String],'Cuerpo['Assert['_==._[''casa.Qid,
+    --- 'msg.sender.VarEnt],'"Casa".String],'Cuerpo['Assert[''invertido.Qid,'"Ha invertido".String],'Cuerpo['Dv[
+    --- ''nive.Qid,'uint256.tipo,''sigindice.Qid],'ForR[''i.Qid,'ArgL[''nive.Qid,'_+._[''nive.Qid,
+    --- '3.0e+1.FiniteFloat]],'IfElse['_>._[''i.Qid,''indice.Qid],'CallP[''selfdestruct.Qid,''casa.Qid],'If['PA_PC[
+    --- '_and._['PA_PC['_==._['.['->[''apostadores.Qid,''i.Qid],''equipo1.Qid],''pequipo1.Qid]],'PA_PC['_==._['.['->[
+    --- ''apostadores.Qid,''i.Qid],''equipo2.Qid],''pequipo2.Qid]]]],'Cuerpo['CallP[''send.Qid,'ArgL['.['->[
+    --- ''apostadores.Qid,''i.Qid],''apostador.Qid],'_+._['.['->[''apostadores.Qid,''i.Qid],''apuesta.Qid],'PA_PC[
+    --- '_/._['.['->[''apostadores.Qid,''i.Qid],''apuesta.Qid],'2.0.FiniteFloat]]]]],'=[''sigindice.Qid,'_+._[
+    --- ''nive.Qid,'3.0e+1.FiniteFloat]]]]]]]]]]],'ListaF['Fun['headerD['@external.Decorator,''ganadores.Qid,'LParam[
+    --- 'P[''_eq1.Qid,'uint256.tipo],'P[''_eq2.Qid,'uint256.tipo]]],'Cuerpo['Assert['_==._['msg.sender.VarEnt,
+    --- ''casa.Qid],'"Casa".String],'Cuerpo['Assert['_>._['block.timestamp.VarEnt,''termina.Qid],
+    --- '"Despues de terminar".String],'Cuerpo['Assert['not._[''apuntados.Qid],'"No apuntados".String],'Cuerpo['=[
+    --- ''apuntados.Qid,'True.bool],'Cuerpo['=[''pequipo1.Qid,''_eq1.Qid],'=[''pequipo2.Qid,''_eq2.Qid]]]]]]],
+    --- 'ListaF['Fun['headerDDR['@view.Decorator,'@external.Decorator,''terminado.Qid,'bool.tipo,'PaV.Parametros],
+    --- 'Return['_>._['block.timestamp.VarEnt,''termina.Qid]]],'ListaF['Fun['headerDDR['@view.Decorator,
+    --- '@external.Decorator,''empezado.Qid,'bool.tipo,'PaV.Parametros],'Return['_>._['block.timestamp.VarEnt,
+    --- ''empieza.Qid]]],'ListaF['Fun['headerDDR['@view.Decorator,'@external.Decorator,''ganar.Qid,'uint256.tipo,'P[
+    --- ''apos.Qid,''Juego.Qid]],'Return['_+._[''apos.apuesta.Qid,'PA_PC['_/._[''apos.apuesta.Qid,
+    --- '2.0.FiniteFloat]]]]],'Fun['headerDDR['@view.Decorator,'@external.Decorator,''ganado.Qid,'bool.tipo,'P[
+    --- ''apos.Qid,''Juego.Qid]],'Cuerpo['Assert[''apuntados.Qid],'Return['_and._['PA_PC['_==._[''apos.equipo1.Qid,
+    --- ''pequipo1.Qid]],'PA_PC['_==._[''apos.equipo2.Qid,''pequipo2.Qid]]]]]]]]]]]]]]]]], errorC) .
+
+--- Contrato(ListaD(Ds('Juego, ListaD(D('apostador, address), ListaD(D('equipo1, uint256), ListaD(D(
+---     'equipo2, uint256), D('apuesta, uint256))))), ListaD(Dp('casa, address, "public"), ListaD(Dp('inicial,
+---     uint256, "public"), ListaD(Dp('empieza, uint256, "public"), ListaD(Dp('termina, uint256, "public"), ListaD(D(
+---     'pequipo1, uint256), ListaD(D('pequipo2, uint256), ListaD(D('indice, uint256), ListaD(Dhm('apostadores,
+---     uint256, 'Juego), ListaD(D('sigindice, uint256), ListaD(D('invertido, bool), D('apuntados, bool)))))))))))),
+---     ListaF(Fun(init(@payable, @external, LParam(P('tiempo_inicio, uint256), P('duracion, uint256))), Cuerpo(
+---     Assert('tiempo_inicio >. 0.0), Cuerpo(Assert('duracion >. 0.0), Cuerpo(=('inicial, msg.value), Cuerpo(=(
+---     'casa, msg.sender), Cuerpo(=('empieza, 'tiempo_inicio +. block.timestamp), =('termina, 'duracion +.
+---     'empieza))))))), ListaF(Fun(headerDD(@external, @payable, 'apostar, LParam(P('eq1, uint256), P('eq2,
+---     uint256))), Cuerpo(Assert(block.timestamp <=. 'empieza, "Antes de empezar"), Cuerpo(Assert(msg.sender !=.
+---     'casa, "Jugador"), Cuerpo(Assert(msg.value >. 0.0, "Apuesta positiva"), Cuerpo(Dv('nfi, uint256, 'indice),
+---     Cuerpo(=St(->('apostadores, 'nfi), 'Juego, LParam(P('apostador, msg.sender), LParam(P('equipo1, 'eq1),
+---     LParam(P('equipo2, 'eq2), P('apuesta, msg.value))))), =('indice, 'nfi +. 1.0))))))), ListaF(Fun(headerDDR(
+---     @view, @external, 'necesario, uint256, PaV), Cuerpo(Assert(msg.sender ==. 'casa, "Casa"), Cuerpo(Assert(
+---     block.timestamp >. 'empieza, "Despues de empezar"), Return(PA 'balance -. 'inicial PC /. 2.0)))), ListaF(Fun(
+---     headerDD(@payable, @external, 'mitad, PaV), Cuerpo(Assert(block.timestamp >. 'empieza, "Despues de empezar"),
+---     Cuerpo(Assert('casa ==. msg.sender, "Casa"), Cuerpo(Assert('inicial +. msg.value >=. PA PA 'balance -.
+---     'inicial -. msg.value PC /. 2.0 PC, "Valor suficiente"), =('invertido, True))))), ListaF(Fun(headerD(
+---     @external, 'ganadores, LParam(P('_eq1, uint256), P('_eq2, uint256))), Cuerpo(Assert(msg.sender ==. 'casa),
+---     Cuerpo(Assert(block.timestamp >. 'termina), Cuerpo(Assert(not. 'apuntados), Cuerpo(=('apuntados, True),
+---     Cuerpo(=('pequipo1, '_eq1), =('pequipo2, '_eq2))))))), ListaF(Fun(headerD(@external, 'devolver, PaV), Cuerpo(
+---     Assert('apuntados, "Apuntados"), Cuerpo(Assert('casa ==. msg.sender, "Casa"), Cuerpo(Assert('invertido,
+---     "Ha invertido"), Cuerpo(Dv('nive, uint256, 'sigindice), ForR('i, ArgL('nive, 'nive +. 3.0e+1), IfElse('i >.
+---     'indice, CallP('selfdestruct, 'casa), If(PA PA .(->('apostadores, 'i), 'equipo1) ==. 'pequipo1 PC and. PA .(
+---     ->('apostadores, 'i), 'equipo2) ==. 'pequipo2 PC PC, Cuerpo(CallP('send, ArgL(.(->('apostadores, 'i),
+---     'apostador), PA .(->('apostadores, 'i), 'apuesta) /. 2.0 PC +. .(->('apostadores, 'i), 'apuesta))), =(
+---     'sigindice, 'nive +. 3.0e+1)))))))))), ListaF(Fun(headerD(@external, 'ganadores, LParam(P('_eq1, uint256), P(
+---     '_eq2, uint256))), Cuerpo(Assert(msg.sender ==. 'casa, "Casa"), Cuerpo(Assert(block.timestamp >. 'termina,
+---     "Despues de terminar"), Cuerpo(Assert(not. 'apuntados, "No apuntados"), Cuerpo(=('apuntados, True), Cuerpo(=(
+---     'pequipo1, '_eq1), =('pequipo2, '_eq2))))))), ListaF(Fun(headerDDR(@view, @external, 'terminado, bool, PaV),
+---     Return(block.timestamp >. 'termina)), ListaF(Fun(headerDDR(@view, @external, 'empezado, bool, PaV), Return(
+---     block.timestamp >. 'empieza)), ListaF(Fun(headerDDR(@view, @external, 'ganar, uint256, P('apos, 'Juego)),
+---     Return('apos.apuesta +. PA 'apos.apuesta /. 2.0 PC)), Fun(headerDDR(@view, @external, 'ganado, bool, P('apos,
+---     'Juego)), Cuerpo(Assert('apuntados), Return(PA 'apos.equipo1 ==. 'pequipo1 PC and. PA 'apos.equipo2 ==.
+---     'pequipo2 PC))))))))))))))
+	---CONTRATO 8
+	--- rew downTerm( 'Contrato['ListaD['Ds[''Datos.Qid,'ListaD['D[''nombre.Qid,'->['String.tipo,'2.0e+1.FiniteFloat]],
+    --- 'ListaD['D[''apellidos.Qid,'->['String.tipo,'4.0e+1.FiniteFloat]],'ListaD['D[''direccion.Qid,'->['String.tipo,
+    --- '2.0e+1.FiniteFloat]],'D[''telefono.Qid,'->['String.tipo,'9.0.FiniteFloat]]]]]],'ListaD['Dp[
+    --- ''tiempo_revision.Qid,'uint256.tipo,'"public".String],'ListaD['Dp[''protectora.Qid,'address.tipo,
+    --- '"public".String],'ListaD['Dp[''microchip.Qid,'->['String.tipo,'1.5e+1.FiniteFloat],'"public".String],'ListaD[
+    --- 'Dp[''veterinario.Qid,'address.tipo,'"public".String],'ListaD['Dp[''tasas.Qid,'uint256.tipo,'"public".String],
+    --- 'ListaD['Dp[''dueno.Qid,'address.tipo,'"public".String],'ListaD['Dp[''adoptado.Qid,'bool.tipo,
+    --- '"public".String],'ListaD['D[''tope.Qid,'uint256.tipo],'ListaD['Dp[''datos.Qid,''Datos.Qid,'"public".String],
+    --- 'D[''vacunado.Qid,'bool.tipo]]]]]]]]]]],'ListaF['Fun['init['@external.Decorator,'LParam['P[''_revision.Qid,
+    --- 'uint256.tipo],'LParam['P[''_numerochip.Qid,'->['String.tipo,'1.5e+1.FiniteFloat]],'LParam['P[
+    --- ''_veterinario.Qid,'address.tipo],'P[''_tasas.Qid,'uint256.tipo]]]]],'Cuerpo['=[''protectora.Qid,
+    --- 'msg.sender.VarEnt],'Cuerpo['=[''tiempo_revision.Qid,''_revision.Qid],'Cuerpo['=[''microchip.Qid,
+    --- ''_numerochip.Qid],'Cuerpo['=[''veterinario.Qid,''_veterinario.Qid],'=[''tasas.Qid,''_tasas.Qid]]]]]],'ListaF[
+    --- 'Fun['headerDD['@payable.Decorator,'@external.Decorator,''adoptar.Qid,'LParam['P[''_direccion.Qid,'->[
+    --- 'String.tipo,'2.0e+1.FiniteFloat]],'LParam['P[''_telefono.Qid,'->['String.tipo,'9.0.FiniteFloat]],'LParam['P[
+    --- ''_nombre.Qid,'->['String.tipo,'2.0e+1.FiniteFloat]],'P[''_apellidos.Qid,'->['String.tipo,
+    --- '4.0e+1.FiniteFloat]]]]]],'Cuerpo['Assert['not._[''adoptado.Qid],'"No adoptado".String],'Cuerpo['Assert[
+    --- '_==._['msg.value.VarEnt,''tasas.Qid],'"Tasas exactas".String],'Cuerpo['=[''dueno.Qid,'msg.sender.VarEnt],
+    --- 'Cuerpo['=[''adoptado.Qid,'True.bool],'Cuerpo['=[''tope.Qid,'_+._['block.timestamp.VarEnt,
+    --- ''tiempo_revision.Qid]],'Cuerpo['=St[''datos.Qid,''Datos.Qid,'LParam['P[''nombre.Qid,''_nombre.Qid],'LParam[
+    --- 'P[''apellidos.Qid,''_apellidos.Qid],'LParam['P[''direccion.Qid,''_direccion.Qid],'P[''telefono.Qid,
+    --- ''_telefono.Qid]]]]],'Cuerpo['CallP[''send.Qid,'ArgL[''protectora.Qid,''tasas.Qid]],'=[''vacunado.Qid,
+    --- 'True.bool]]]]]]]]],'ListaF['Fun['headerD['@external.Decorator,''vacunar.Qid,'LParam['P[''maltrato.Qid,
+    --- 'bool.tipo],'LParam['P[''operaciones.Qid,'bool.tipo],'P[''_chip.Qid,'->['String.tipo,'1.5e+1.FiniteFloat]]]]],
+    --- 'Cuerpo['Assert[''adoptado.Qid,'"Adoptado".String],'Cuerpo['Assert['_==._['msg.sender.VarEnt,
+    --- ''veterinario.Qid],'"Veterinario".String],'Cuerpo['Assert['_<._['block.timestamp.VarEnt,''tope.Qid],
+    --- '"Dentro de tiempo".String],'Cuerpo['Assert['_==._[''microchip.Qid,''_chip.Qid],'"Microchip correcto".String],
+    --- 'Cuerpo['=[''vacunado.Qid,'True.bool],'If['_or._[''maltrato.Qid,''operaciones.Qid],'Cuerpo['=[''adoptado.Qid,
+    --- 'False.bool],'Cuerpo['=[''dueno.Qid,''protectora.Qid],'=[''datos.Qid,'CallP[''empty.Qid,
+    --- ''Datos.Qid]]]]]]]]]]],'ListaF['Fun['headerD['@external.Decorator,''revision.Qid,'LParam['P[''apto.Qid,
+    --- 'bool.tipo],'P[''_chip.Qid,'->['String.tipo,'1.5e+1.FiniteFloat]]]],'Cuerpo['Assert[''adoptado.Qid,
+    --- '"Adoptado".String],'Cuerpo['Assert['_==._['msg.sender.VarEnt,''protectora.Qid],'"Protectora".String],'Cuerpo[
+    --- 'Assert['_>._['block.timestamp.VarEnt,''tope.Qid],'"Superior al tope".String],'Cuerpo['Assert['_==._[
+    --- ''microchip.Qid,''_chip.Qid],'"Microchip correcto".String],'IfElse['_or._[''apto.Qid,'not._[''vacunado.Qid]],
+    --- 'Cuerpo['=[''adoptado.Qid,'False.bool],'Cuerpo['=[''dueno.Qid,''protectora.Qid],'=[''datos.Qid,'CallP[
+    --- ''empty.Qid,''Datos.Qid]]]],'Cuerpo['=[''vacunado.Qid,'False.bool],'=[''tope.Qid,'_+._[
+    --- 'block.timestamp.VarEnt,''tiempo_revision.Qid]]]]]]]]],'ListaF['Fun['headerD['@external.Decorator,''ceder.Qid,
+    --- 'P[''_chip.Qid,'->['String.tipo,'1.5e+1.FiniteFloat]]],'Cuerpo['Assert[''adoptado.Qid,'"Adoptado".String],
+    --- 'Cuerpo['Assert['_==._[''microchip.Qid,''_chip.Qid],'"Microchip correcto".String],'Cuerpo['Assert['_==._[
+    --- 'msg.sender.VarEnt,''dueno.Qid],'"Dueno".String],'Cuerpo['=[''adoptado.Qid,'False.bool],'Cuerpo['=[
+    --- ''dueno.Qid,''protectora.Qid],'=[''datos.Qid,'CallP[''empty.Qid,''Datos.Qid]]]]]]]],'ListaF['Fun['headerD[
+    --- '@external.Decorator,''dar_baja.Qid,'P[''_chip.Qid,'->['String.tipo,'1.5e+1.FiniteFloat]]],'Cuerpo['Assert[
+    --- '_==._['msg.sender.VarEnt,''veterinario.Qid],'"Veterinario".String],'Cuerpo['Assert['_==._[''microchip.Qid,
+    --- ''_chip.Qid],'"Microchip correcto".String],'CallP[''selfdestruct.Qid,''protectora.Qid]]]],'ListaF['Fun[
+    --- 'headerD['@external.Decorator,''cambio_domicilio.Qid,'LParam['P[''_domicilio.Qid,'->['String.tipo,
+    --- '2.0e+1.FiniteFloat]],'P[''_chip.Qid,'->['String.tipo,'1.5e+1.FiniteFloat]]]],'Cuerpo['Assert[''adoptado.Qid,
+    --- '"Adoptado".String],'Cuerpo['Assert['_==._['msg.sender.VarEnt,''dueno.Qid],'"Dueno".String],'Cuerpo['Assert[
+    --- '_==._[''microchip.Qid,''_chip.Qid],'"Microchip correcto".String],'=[''datos.direccion.Qid,
+    --- ''_domicilio.Qid]]]]],'ListaF['Fun['headerD['@external.Decorator,''cambio_telefono.Qid,'LParam['P[
+    --- ''_telefono.Qid,'->['String.tipo,'9.0.FiniteFloat]],'P[''_chip.Qid,'->['String.tipo,'1.5e+1.FiniteFloat]]]],
+    --- 'Cuerpo['Assert[''adoptado.Qid,'"Adoptado".String],'Cuerpo['Assert['_==._['msg.sender.VarEnt,''dueno.Qid],
+    --- '"Dueno".String],'Cuerpo['Assert['_==._[''microchip.Qid,''_chip.Qid],'"Microchip correcto".String],'=[
+    --- ''datos.telefono.Qid,''_telefono.Qid]]]]],'ListaF['Fun['headerD['@external.Decorator,''cambio_veterinario.Qid,
+    --- 'LParam['P[''_veterinario.Qid,'address.tipo],'P[''_chip.Qid,'->['String.tipo,'1.5e+1.FiniteFloat]]]],'Cuerpo[
+    --- 'Assert['_or._['_==._['msg.sender.VarEnt,''dueno.Qid],'_==._['msg.sender.VarEnt,''protectora.Qid]],
+    --- '"Dueno o protectora".String],'Cuerpo['Assert['_==._[''microchip.Qid,''_chip.Qid],
+    --- '"Microchip correcto".String],'=[''veterinario.Qid,''_veterinario.Qid]]]],'ListaF['Fun['headerDDR[
+    --- '@view.Decorator,'@external.Decorator,''consultar_datos.Qid,''Datos.Qid,'PaV.Parametros],'Cuerpo['Assert[
+    --- '_==._['msg.sender.VarEnt,''protectora.Qid],'"Protectora".String],'Return[''datos.Qid]]],'Fun['headerDDR[
+    --- '@view.Decorator,'@external.Decorator,''consultar_adoptado.Qid,'bool.tipo,'PaV.Parametros],'Return[
+    --- ''adoptado.Qid]]]]]]]]]]]]] , errorC) .
+
+	--- Contrato(ListaD(Ds('Datos, ListaD(D('nombre, ->(String, 2.0e+1)), ListaD(D('apellidos, ->(
+	--- 	String, 4.0e+1)), ListaD(D('direccion, ->(String, 2.0e+1)), D('telefono, ->(String, 9.0)))))), ListaD(Dp(
+	--- 	'tiempo_revision, uint256, "public"), ListaD(Dp('protectora, address, "public"), ListaD(Dp('microchip, ->(
+	--- 	String, 1.5e+1), "public"), ListaD(Dp('veterinario, address, "public"), ListaD(Dp('tasas, uint256, "public"),
+	--- 	ListaD(Dp('dueno, address, "public"), ListaD(Dp('adoptado, bool, "public"), ListaD(D('tope, uint256), ListaD(
+	--- 	Dp('datos, 'Datos, "public"), D('vacunado, bool))))))))))), ListaF(Fun(init(@external, LParam(P('_revision,
+	--- 	uint256), LParam(P('_numerochip, ->(String, 1.5e+1)), LParam(P('_veterinario, address), P('_tasas,
+	--- 	uint256))))), Cuerpo(=('protectora, msg.sender), Cuerpo(=('tiempo_revision, '_revision), Cuerpo(=('microchip,
+	--- 	'_numerochip), Cuerpo(=('veterinario, '_veterinario), =('tasas, '_tasas)))))), ListaF(Fun(headerDD(@payable,
+	--- 	@external, 'adoptar, LParam(P('_direccion, ->(String, 2.0e+1)), LParam(P('_telefono, ->(String, 9.0)), LParam(
+	--- 	P('_nombre, ->(String, 2.0e+1)), P('_apellidos, ->(String, 4.0e+1)))))), Cuerpo(Assert(not. 'adoptado,
+	--- 	"No adoptado"), Cuerpo(Assert(msg.value ==. 'tasas, "Tasas exactas"), Cuerpo(=('dueno, msg.sender), Cuerpo(=(
+	--- 	'adoptado, True), Cuerpo(=('tope, 'tiempo_revision +. block.timestamp), Cuerpo(=St('datos, 'Datos, LParam(P(
+	--- 	'nombre, '_nombre), LParam(P('apellidos, '_apellidos), LParam(P('direccion, '_direccion), P('telefono,
+	--- 	'_telefono))))), Cuerpo(CallP('send, ArgL('protectora, 'tasas)), =('vacunado, True))))))))), ListaF(Fun(
+	--- 	headerD(@external, 'vacunar, LParam(P('maltrato, bool), LParam(P('operaciones, bool), P('_chip, ->(String,
+	--- 	1.5e+1))))), Cuerpo(Assert('adoptado, "Adoptado"), Cuerpo(Assert(msg.sender ==. 'veterinario, "Veterinario"),
+	--- 	Cuerpo(Assert(block.timestamp <. 'tope, "Dentro de tiempo"), Cuerpo(Assert('microchip ==. '_chip,
+	--- 	"Microchip correcto"), Cuerpo(=('vacunado, True), If('maltrato or. 'operaciones, Cuerpo(=('adoptado, False),
+	--- 	Cuerpo(=('dueno, 'protectora), =('datos, CallP('empty, 'Datos))))))))))), ListaF(Fun(headerD(@external,
+	--- 	'revision, LParam(P('apto, bool), P('_chip, ->(String, 1.5e+1)))), Cuerpo(Assert('adoptado, "Adoptado"),
+	--- 	Cuerpo(Assert(msg.sender ==. 'protectora, "Protectora"), Cuerpo(Assert(block.timestamp >. 'tope,
+	--- 	"Superior al tope"), Cuerpo(Assert('microchip ==. '_chip, "Microchip correcto"), IfElse('apto or. not.
+	--- 	'vacunado, Cuerpo(=('adoptado, False), Cuerpo(=('dueno, 'protectora), =('datos, CallP('empty, 'Datos)))),
+	--- 	Cuerpo(=('vacunado, False), =('tope, 'tiempo_revision +. block.timestamp)))))))), ListaF(Fun(headerD(
+	--- 	@external, 'ceder, P('_chip, ->(String, 1.5e+1))), Cuerpo(Assert('adoptado, "Adoptado"), Cuerpo(Assert(
+	--- 	'microchip ==. '_chip, "Microchip correcto"), Cuerpo(Assert(msg.sender ==. 'dueno, "Dueno"), Cuerpo(=(
+	--- 	'adoptado, False), Cuerpo(=('dueno, 'protectora), =('datos, CallP('empty, 'Datos)))))))), ListaF(Fun(headerD(
+	--- 	@external, 'dar_baja, P('_chip, ->(String, 1.5e+1))), Cuerpo(Assert(msg.sender ==. 'veterinario,
+	--- 	"Veterinario"), Cuerpo(Assert('microchip ==. '_chip, "Microchip correcto"), CallP('selfdestruct,
+	--- 	'protectora)))), ListaF(Fun(headerD(@external, 'cambio_domicilio, LParam(P('_domicilio, ->(String, 2.0e+1)),
+	--- 	P('_chip, ->(String, 1.5e+1)))), Cuerpo(Assert('adoptado, "Adoptado"), Cuerpo(Assert(msg.sender ==. 'dueno,
+	--- 	"Dueno"), Cuerpo(Assert('microchip ==. '_chip, "Microchip correcto"), =('datos.direccion, '_domicilio))))),
+	--- 	ListaF(Fun(headerD(@external, 'cambio_telefono, LParam(P('_telefono, ->(String, 9.0)), P('_chip, ->(String,
+	--- 	1.5e+1)))), Cuerpo(Assert('adoptado, "Adoptado"), Cuerpo(Assert(msg.sender ==. 'dueno, "Dueno"), Cuerpo(
+	--- 	Assert('microchip ==. '_chip, "Microchip correcto"), =('datos.telefono, '_telefono))))), ListaF(Fun(headerD(
+	--- 	@external, 'cambio_veterinario, LParam(P('_veterinario, address), P('_chip, ->(String, 1.5e+1)))), Cuerpo(
+	--- 	Assert(msg.sender ==. 'dueno or. msg.sender ==. 'protectora, "Dueno o protectora"), Cuerpo(Assert('microchip
+	--- 	==. '_chip, "Microchip correcto"), =('veterinario, '_veterinario)))), ListaF(Fun(headerDDR(@view, @external,
+	--- 	'consultar_datos, 'Datos, PaV), Cuerpo(Assert(msg.sender ==. 'protectora, "Protectora"), Return('datos))),
+	--- 	Fun(headerDDR(@view, @external, 'consultar_adoptado, bool, PaV), Return('adoptado)))))))))))))
+---contrato 81
+	--- rew downTerm('Contrato['ListaD['Ds[''DatosE.Qid,'ListaD['D[''nombre.Qid,'->['String.tipo,
+    --- '2.0e+1.FiniteFloat]],'ListaD['D[''apellidos.Qid,'->['String.tipo,'4.0e+1.FiniteFloat]],'ListaD['D[
+    --- ''direccion.Qid,'->['String.tipo,'2.0e+1.FiniteFloat]],'D[''telefono.Qid,'->['String.tipo,
+    --- '9.0.FiniteFloat]]]]]],'ListaD['Dp[''tiempo_revision.Qid,'uint256.tipo,'"public".String],'ListaD[
+    --- 'Dp[''protectora.Qid,'address.tipo,'"public".String],'ListaD['Dp[''microchip.Qid,'->['String.tipo,
+    --- '1.5e+1.FiniteFloat],'"public".String],'ListaD['Dp[''veterinario.Qid,'address.tipo,
+    --- '"public".String],'ListaD['Dp[''tasas.Qid,'uint256.tipo,'"public".String],'ListaD['Dp[''dueno.Qid,
+    --- 'address.tipo,'"public".String],'ListaD['Dp[''adoptado.Qid,'bool.tipo,'"public".String],'ListaD['D[
+    --- ''tope.Qid,'uint256.tipo],'ListaD['Dp[''datos.Qid,''DatosE.Qid,'"public".String],'D[''vacunado.Qid,
+    --- 'bool.tipo]]]]]]]]]]],'ListaF['Fun['init['@external.Decorator,'LParam['P[''_revision.Qid,
+    --- 'uint256.tipo],'LParam['P[''_numerochip.Qid,'->['String.tipo,'1.5e+1.FiniteFloat]],'LParam['P[
+    --- ''_veterinario.Qid,'address.tipo],'P[''_tasas.Qid,'uint256.tipo]]]]],'Cuerpo['=[''protectora.Qid,
+    --- 'msg.sender.VarEnt],'Cuerpo['=[''tiempo_revision.Qid,''_revision.Qid],'Cuerpo['=[''microchip.Qid,
+    --- ''_numerochip.Qid],'Cuerpo['=[''veterinario.Qid,''_veterinario.Qid],'=[''tasas.Qid,
+    --- ''_tasas.Qid]]]]]],'ListaF['Fun['headerDD['@payable.Decorator,'@external.Decorator,''adoptar.Qid,
+    --- 'LParam['P[''_direccion.Qid,'->['String.tipo,'2.0e+1.FiniteFloat]],'LParam['P[''_telefono.Qid,'->[
+    --- 'String.tipo,'9.0.FiniteFloat]],'LParam['P[''_nombre.Qid,'->['String.tipo,'2.0e+1.FiniteFloat]],'P[
+    --- ''_apellidos.Qid,'->['String.tipo,'4.0e+1.FiniteFloat]]]]]],'Cuerpo['Assert['not._[''adoptado.Qid],
+    --- '"No adoptado".String],'Cuerpo['Assert['_==._['msg.value.VarEnt,''tasas.Qid],
+    --- '"Tasas exactas".String],'Cuerpo['=[''dueno.Qid,'msg.sender.VarEnt],'Cuerpo['=[''adoptado.Qid,
+    --- 'True.bool],'Cuerpo['=[''tope.Qid,'_+._['block.timestamp.VarEnt,''tiempo_revision.Qid]],'Cuerpo[
+    --- '=St[''datos.Qid,''DatosE.Qid,'LParam['P[''nombre.Qid,''_nombre.Qid],'LParam['P[''apellidos.Qid,
+    --- ''_apellidos.Qid],'LParam['P[''direccion.Qid,''_direccion.Qid],'P[''telefono.Qid,
+    --- ''_telefono.Qid]]]]],'Cuerpo['CallP[''send.Qid,'ArgL[''protectora.Qid,''tasas.Qid]],'=[
+    --- ''vacunado.Qid,'True.bool]]]]]]]]],'ListaF['Fun['headerD['@external.Decorator,''vacunar.Qid,
+    --- 'LParam['P[''maltrato.Qid,'bool.tipo],'LParam['P[''operaciones.Qid,'bool.tipo],'P[''_chip.Qid,'->[
+    --- 'String.tipo,'1.5e+1.FiniteFloat]]]]],'Cuerpo['Assert[''adoptado.Qid,'"Adoptado".String],'Cuerpo[
+    --- 'Assert['_==._['msg.sender.VarEnt,''veterinario.Qid],'"Veterinario".String],'Cuerpo['Assert['_<._[
+    --- 'block.timestamp.VarEnt,''tope.Qid],'"Dentro de tiempo".String],'Cuerpo['Assert['_==._[
+    --- ''microchip.Qid,''_chip.Qid],'"Microchip correcto".String],'Cuerpo['=[''vacunado.Qid,'True.bool],
+    --- 'If['_or._[''maltrato.Qid,''operaciones.Qid],'Cuerpo['=[''adoptado.Qid,'False.bool],'Cuerpo['=[
+    --- ''dueno.Qid,''protectora.Qid],'=[''datos.Qid,'CallP[''empty.Qid,''DatosE.Qid]]]]]]]]]]],'ListaF[
+    --- 'Fun['headerD['@external.Decorator,''revision.Qid,'LParam['P[''apto.Qid,'bool.tipo],'P[''_chip.Qid,
+    --- '->['String.tipo,'1.5e+1.FiniteFloat]]]],'Cuerpo['Assert[''adoptado.Qid,'"Adoptado".String],
+    --- 'Cuerpo['Assert['_==._['msg.sender.VarEnt,''protectora.Qid],'"Protectora".String],'Cuerpo['Assert[
+    --- '_>._['block.timestamp.VarEnt,''tope.Qid],'"Superior al tope".String],'Cuerpo['Assert['_==._[
+    --- ''microchip.Qid,''_chip.Qid],'"Microchip correcto".String],'IfElse['_or._[''apto.Qid,'not._[
+    --- ''vacunado.Qid]],'Cuerpo['=[''adoptado.Qid,'False.bool],'Cuerpo['=[''dueno.Qid,''protectora.Qid],
+    --- '=[''datos.Qid,'CallP[''empty.Qid,''DatosE.Qid]]]],'Cuerpo['=[''vacunado.Qid,'False.bool],'=[
+    --- ''tope.Qid,'_+._['block.timestamp.VarEnt,''tiempo_revision.Qid]]]]]]]]],'ListaF['Fun['headerD[
+    --- '@external.Decorator,''ceder.Qid,'P[''_chip.Qid,'->['String.tipo,'1.5e+1.FiniteFloat]]],'Cuerpo[
+    --- 'Assert[''adoptado.Qid,'"Adoptado".String],'Cuerpo['Assert['_==._[''microchip.Qid,''_chip.Qid],
+    --- '"Microchip correcto".String],'Cuerpo['Assert['_==._['msg.sender.VarEnt,''dueno.Qid],
+    --- '"Dueno".String],'Cuerpo['=[''adoptado.Qid,'False.bool],'Cuerpo['=[''dueno.Qid,''protectora.Qid],
+    --- '=[''datos.Qid,'CallP[''empty.Qid,''DatosE.Qid]]]]]]]],'ListaF['Fun['headerD['@external.Decorator,
+    --- ''dar_baja.Qid,'P[''_chip.Qid,'->['String.tipo,'1.5e+1.FiniteFloat]]],'Cuerpo['Assert['_==._[
+    --- 'msg.sender.VarEnt,''veterinario.Qid],'"Veterinario".String],'Cuerpo['Assert['_==._[
+    --- ''microchip.Qid,''_chip.Qid],'"Microchip correcto".String],'CallP[''selfdestruct.Qid,
+    --- ''protectora.Qid]]]],'ListaF['Fun['headerD['@external.Decorator,''cambio_domicilio.Qid,'LParam['P[
+    --- ''_domicilio.Qid,'->['String.tipo,'2.0e+1.FiniteFloat]],'P[''_chip.Qid,'->['String.tipo,
+    --- '1.5e+1.FiniteFloat]]]],'Cuerpo['Assert[''adoptado.Qid,'"Adoptado".String],'Cuerpo['Assert['_==._[
+    --- 'msg.sender.VarEnt,''dueno.Qid],'"Dueno".String],'Cuerpo['Assert['_==._[''microchip.Qid,
+    --- ''_chip.Qid],'"Microchip correcto".String],'=[''datos.direccion.Qid,''_domicilio.Qid]]]]],'ListaF[
+    --- 'Fun['headerD['@external.Decorator,''cambio_telefono.Qid,'LParam['P[''_telefono.Qid,'->[
+    --- 'String.tipo,'9.0.FiniteFloat]],'P[''_chip.Qid,'->['String.tipo,'1.5e+1.FiniteFloat]]]],'Cuerpo[
+    --- 'Assert[''adoptado.Qid,'"Adoptado".String],'Cuerpo['Assert['_==._['msg.sender.VarEnt,''dueno.Qid],
+    --- '"Dueno".String],'Cuerpo['Assert['_==._[''microchip.Qid,''_chip.Qid],'"Microchip correcto".String],
+    --- '=[''datos.telefono.Qid,''_telefono.Qid]]]]],'ListaF['Fun['headerD['@external.Decorator,
+    --- ''cambio_veterinario.Qid,'LParam['P[''_veterinario.Qid,'address.tipo],'P[''_chip.Qid,'->[
+    --- 'String.tipo,'1.5e+1.FiniteFloat]]]],'Cuerpo['Assert['_or._['_==._['msg.sender.VarEnt,''dueno.Qid],
+    --- '_==._['msg.sender.VarEnt,''protectora.Qid]],'"Dueno o protectora".String],'Cuerpo['Assert['_==._[
+    --- ''microchip.Qid,''_chip.Qid],'"Microchip correcto".String],'=[''veterinario.Qid,
+    --- ''_veterinario.Qid]]]],'ListaF['Fun['headerDDR['@view.Decorator,'@external.Decorator,
+    --- ''consultar_datos.Qid,''DatosE.Qid,'PaV.Parametros],'Cuerpo['Assert['_==._['msg.sender.VarEnt,
+    --- ''protectora.Qid],'"Protectora".String],'Return[''datos.Qid]]],'Fun['headerDDR['@view.Decorator,
+    --- '@external.Decorator,''consultar_adoptado.Qid,'bool.tipo,'PaV.Parametros],'Return[
+    --- ''adoptado.Qid]]]]]]]]]]]]], errorC) .
+	
+--- Contrato(ListaD(Ds('DatosE, ListaD(D('nombre, ->(String, 2.0e+1)), ListaD(D(
+---     'apellidos, ->(String, 4.0e+1)), ListaD(D('direccion, ->(String, 2.0e+1)), D('telefono, ->(String,
+---     9.0)))))), ListaD(Dp('tiempo_revision, uint256, "public"), ListaD(Dp('protectora, address,
+---     "public"), ListaD(Dp('microchip, ->(String, 1.5e+1), "public"), ListaD(Dp('veterinario, address,
+---     "public"), ListaD(Dp('tasas, uint256, "public"), ListaD(Dp('dueno, address, "public"), ListaD(Dp(
+---     'adoptado, bool, "public"), ListaD(D('tope, uint256), ListaD(Dp('datos, 'DatosE, "public"), D(
+---     'vacunado, bool))))))))))), ListaF(Fun(init(@external, LParam(P('_revision, uint256), LParam(P(
+---     '_numerochip, ->(String, 1.5e+1)), LParam(P('_veterinario, address), P('_tasas, uint256))))),
+---     Cuerpo(=('protectora, msg.sender), Cuerpo(=('tiempo_revision, '_revision), Cuerpo(=('microchip,
+---     '_numerochip), Cuerpo(=('veterinario, '_veterinario), =('tasas, '_tasas)))))), ListaF(Fun(headerDD(
+---     @payable, @external, 'adoptar, LParam(P('_direccion, ->(String, 2.0e+1)), LParam(P('_telefono, ->(
+---     String, 9.0)), LParam(P('_nombre, ->(String, 2.0e+1)), P('_apellidos, ->(String, 4.0e+1)))))),
+---     Cuerpo(Assert(not. 'adoptado, "No adoptado"), Cuerpo(Assert(msg.value ==. 'tasas, "Tasas exactas"),
+---     Cuerpo(=('dueno, msg.sender), Cuerpo(=('adoptado, True), Cuerpo(=('tope, 'tiempo_revision +.
+---     block.timestamp), Cuerpo(=St('datos, 'DatosE, LParam(P('nombre, '_nombre), LParam(P('apellidos,
+---     '_apellidos), LParam(P('direccion, '_direccion), P('telefono, '_telefono))))), Cuerpo(CallP('send,
+---     ArgL('protectora, 'tasas)), =('vacunado, True))))))))), ListaF(Fun(headerD(@external, 'vacunar,
+---     LParam(P('maltrato, bool), LParam(P('operaciones, bool), P('_chip, ->(String, 1.5e+1))))), Cuerpo(
+---     Assert('adoptado, "Adoptado"), Cuerpo(Assert(msg.sender ==. 'veterinario, "Veterinario"), Cuerpo(
+---     Assert(block.timestamp <. 'tope, "Dentro de tiempo"), Cuerpo(Assert('microchip ==. '_chip,
+---     "Microchip correcto"), Cuerpo(=('vacunado, True), If('maltrato or. 'operaciones, Cuerpo(=(
+---     'adoptado, False), Cuerpo(=('dueno, 'protectora), =('datos, CallP('empty, 'DatosE))))))))))),
+---     ListaF(Fun(headerD(@external, 'revision, LParam(P('apto, bool), P('_chip, ->(String, 1.5e+1)))),
+---     Cuerpo(Assert('adoptado, "Adoptado"), Cuerpo(Assert(msg.sender ==. 'protectora, "Protectora"),
+---     Cuerpo(Assert(block.timestamp >. 'tope, "Superior al tope"), Cuerpo(Assert('microchip ==. '_chip,
+---     "Microchip correcto"), IfElse('apto or. not. 'vacunado, Cuerpo(=('adoptado, False), Cuerpo(=(
+---     'dueno, 'protectora), =('datos, CallP('empty, 'DatosE)))), Cuerpo(=('vacunado, False), =('tope,
+---     'tiempo_revision +. block.timestamp)))))))), ListaF(Fun(headerD(@external, 'ceder, P('_chip, ->(
+---     String, 1.5e+1))), Cuerpo(Assert('adoptado, "Adoptado"), Cuerpo(Assert('microchip ==. '_chip,
+---     "Microchip correcto"), Cuerpo(Assert(msg.sender ==. 'dueno, "Dueno"), Cuerpo(=('adoptado, False),
+---     Cuerpo(=('dueno, 'protectora), =('datos, CallP('empty, 'DatosE)))))))), ListaF(Fun(headerD(
+---     @external, 'dar_baja, P('_chip, ->(String, 1.5e+1))), Cuerpo(Assert(msg.sender ==. 'veterinario,
+---     "Veterinario"), Cuerpo(Assert('microchip ==. '_chip, "Microchip correcto"), CallP('selfdestruct,
+---     'protectora)))), ListaF(Fun(headerD(@external, 'cambio_domicilio, LParam(P('_domicilio, ->(String,
+---     2.0e+1)), P('_chip, ->(String, 1.5e+1)))), Cuerpo(Assert('adoptado, "Adoptado"), Cuerpo(Assert(
+---     msg.sender ==. 'dueno, "Dueno"), Cuerpo(Assert('microchip ==. '_chip, "Microchip correcto"), =(
+---     'datos.direccion, '_domicilio))))), ListaF(Fun(headerD(@external, 'cambio_telefono, LParam(P(
+---     '_telefono, ->(String, 9.0)), P('_chip, ->(String, 1.5e+1)))), Cuerpo(Assert('adoptado,
+---     "Adoptado"), Cuerpo(Assert(msg.sender ==. 'dueno, "Dueno"), Cuerpo(Assert('microchip ==. '_chip,
+---     "Microchip correcto"), =('datos.telefono, '_telefono))))), ListaF(Fun(headerD(@external,
+---     'cambio_veterinario, LParam(P('_veterinario, address), P('_chip, ->(String, 1.5e+1)))), Cuerpo(
+---     Assert(msg.sender ==. 'dueno or. msg.sender ==. 'protectora, "Dueno o protectora"), Cuerpo(Assert(
+---     'microchip ==. '_chip, "Microchip correcto"), =('veterinario, '_veterinario)))), ListaF(Fun(
+---     headerDDR(@view, @external, 'consultar_datos, 'DatosE, PaV), Cuerpo(Assert(msg.sender ==.
+---     'protectora, "Protectora"), Return('datos))), Fun(headerDDR(@view, @external, 'consultar_adoptado,
+---     bool, PaV), Return('adoptado)))))))))))))
+---CONTRATO 9:
+	--- red downTerm( 'Contrato['ListaD['De[''Transaccion.Qid,'ListaD['Di[''receptor.Qid,'address.tipo,'"indexed".String],
+    --- 'ListaD['Di[''emisor.Qid,'address.tipo,'"indexed".String],'D[''valor.Qid,'uint256.tipo]]]],'ListaD['De[
+    --- ''Clave.Qid,'ListaD['Di[''receptor.Qid,'address.tipo,'"indexed".String],'ListaD['Di[''emisor.Qid,
+    --- 'address.tipo,'"indexed".String],'D[''clave_.Qid,'uint256.tipo]]]],'ListaD['Dp[''arrendador.Qid,'address.tipo,
+    --- '"public".String],'ListaD['Dp[''fianza.Qid,'uint256.tipo,'"public".String],'ListaD['Dp[''mensualidad.Qid,
+    --- 'uint256.tipo,'"public".String],'ListaD['Dp[''tiempo.Qid,'uint256.tipo,'"public".String],'ListaD['Dp[
+    --- ''tiempo_contrato.Qid,'uint256.tipo,'"public".String],'ListaD['Dp[''tiempo_mensual.Qid,'uint256.tipo,
+    --- '"public".String],'ListaD['Dp[''arrendatario.Qid,'address.tipo,'"public".String],'ListaD['Dp[''alquilada.Qid,
+    --- 'bool.tipo,'"public".String],'ListaD['D[''pagada.Qid,'bool.tipo],'D[''llave.Qid,'uint256.tipo]]]]]]]]]]]],
+    --- 'ListaF['Fun['init['@payable.Decorator,'@external.Decorator,'LParam['P[''_mensualidad.Qid,'uint256.tipo],
+    --- 'LParam['P[''_tiempo.Qid,'uint256.tipo],'LParam['P[''_tiempo_contrato.Qid,'uint256.tipo],'P[''_llave.Qid,
+    --- 'uint256.tipo]]]]],'Cuerpo['Assert['_>._['msg.value.VarEnt,'0.0.FiniteFloat]],'Cuerpo['Assert['_>._[
+    --- ''_mensualidad.Qid,'0.0.FiniteFloat]],'Cuerpo['Assert['_>._[''_tiempo.Qid,'0.0.FiniteFloat]],'Cuerpo['Assert[
+    --- '_>=._[''_tiempo_contrato.Qid,''_tiempo.Qid]],'Cuerpo['=[''fianza.Qid,'msg.value.VarEnt],'Cuerpo['=[
+    --- ''arrendador.Qid,'msg.sender.VarEnt],'Cuerpo['=[''mensualidad.Qid,''_mensualidad.Qid],'Cuerpo['=[''tiempo.Qid,
+    --- ''_tiempo.Qid],'Cuerpo['=[''llave.Qid,''_llave.Qid],'=[''tiempo_contrato.Qid,
+    --- ''_tiempo_contrato.Qid]]]]]]]]]]],'ListaF['Fun['headerDD['@payable.Decorator,'@external.Decorator,
+    --- ''alquilar.Qid,'PaV.Parametros],'Cuerpo['Assert['not._[''alquilada.Qid],'"No esta alquilada".String],'Cuerpo[
+    --- 'Assert['_==._['msg.value.VarEnt,'_+._[''fianza.Qid,''mensualidad.Qid]],'"Valor exacto".String],'Cuerpo['=[
+    --- ''arrendatario.Qid,'msg.sender.VarEnt],'Cuerpo['=[''alquilada.Qid,'True.bool],'Cuerpo['=[''tiempo_mensual.Qid,
+    --- '_+._['block.timestamp.VarEnt,''tiempo.Qid]],'Cuerpo['+=[''tiempo_contrato.Qid,'block.timestamp.VarEnt],
+    --- 'Cuerpo['=[''pagada.Qid,'True.bool],'Cuerpo['CallP[''send.Qid,'ArgL[''arrendador.Qid,''mensualidad.Qid]],
+    --- 'Cuerpo['logE[''Transaccion.Qid,'ArgL[''arrendador.Qid,'ArgL[''arrendatario.Qid,''mensualidad.Qid]]],'Cuerpo[
+    --- 'logE[''Clave.Qid,'ArgL[''arrendatario.Qid,'ArgL[''arrendador.Qid,''llave.Qid]]],'=[''llave.Qid,
+    --- '0.0.FiniteFloat]]]]]]]]]]]],'ListaF['Fun['headerD['@external.Decorator,''darllave.Qid,'P[''clave.Qid,
+    --- 'uint256.tipo]],'Cuerpo['Assert[''alquilada.Qid,'"Alquilada".String],'Cuerpo['Assert['_==._[
+    --- 'msg.sender.VarEnt,''arrendador.Qid],'"Arrendador".String],'Cuerpo['Assert['_<._['block.timestamp.VarEnt,
+    --- ''tiempo_mensual.Qid],'"Dentro de plazo".String],'=[''llave.Qid,''clave.Qid]]]]],'ListaF['Fun['headerD[
+    --- '@external.Decorator,''cambio.Qid,'PaV.Parametros],'Cuerpo['Assert[''alquilada.Qid,'"Alquilada".String],
+    --- 'Cuerpo['Assert['_>._['block.timestamp.VarEnt,''tiempo_mensual.Qid],'"Plazo cumplido".String],'Cuerpo['Assert[
+    --- '_or._['_==._['msg.sender.VarEnt,''arrendador.Qid],'_==._['msg.sender.VarEnt,''arrendatario.Qid]],
+    --- '"Arrendador o arrendatario".String],'IfElse['_>._['block.timestamp.VarEnt,''tiempo_contrato.Qid],'Cuerpo[
+    --- 'CallP[''send.Qid,'ArgL[''arrendatario.Qid,''fianza.Qid]],'CallP[''selfdestruct.Qid,''arrendador.Qid]],
+    --- 'IfElse['_!=._[''llave.Qid,'0.0.FiniteFloat],'IfElse[''pagada.Qid,'Cuerpo['logE[''Transaccion.Qid,'ArgL[
+    --- ''arrendador.Qid,'ArgL[''arrendatario.Qid,''mensualidad.Qid]]],'Cuerpo['CallP[''send.Qid,'ArgL[
+    --- ''arrendador.Qid,''mensualidad.Qid]],'Cuerpo['logE[''Clave.Qid,'ArgL[''arrendatario.Qid,'ArgL[
+    --- ''arrendador.Qid,''llave.Qid]]],'Cuerpo['=[''tiempo_mensual.Qid,'_+._['block.timestamp.VarEnt,''tiempo.Qid]],
+    --- 'Cuerpo['=[''llave.Qid,'0.0.FiniteFloat],'=[''pagada.Qid,'False.bool]]]]]],'CallP[''selfdestruct.Qid,
+    --- ''arrendador.Qid]],'CallP[''selfdestruct.Qid,''arrendatario.Qid]]]]]]],'ListaF['Fun['headerD[
+    --- '@external.Decorator,''pagar.Qid,'PaV.Parametros],'Cuerpo['Assert[''alquilada.Qid,'"Alquilada".String],
+    --- 'Cuerpo['Assert['_==._['msg.sender.VarEnt,''arrendatario.Qid],'"Arrendatario".String],'Cuerpo['Assert['_<._[
+    --- 'block.timestamp.VarEnt,''tiempo_mensual.Qid],'"Dentro del plazo".String],'Cuerpo['Assert['_==._[
+    --- 'msg.value.VarEnt,''mensualidad.Qid],'"Mensualidad".String],'=[''pagada.Qid,'True.bool]]]]]],'Fun['headerD[
+    --- '@external.Decorator,''eliminarcontrato.Qid,'PaV.Parametros],'Cuerpo['Assert['_==._['msg.sender.VarEnt,
+    --- ''arrendador.Qid],'"Arrendador".String],'Cuerpo['Assert['_<._['block.timestamp.VarEnt,''tiempo_contrato.Qid],
+    --- '"Dentro del tiempo del contrato".String],'IfElse[''alquilada.Qid,'CallP[''selfdestruct.Qid,
+    --- ''arrendatario.Qid],'CallP[''selfdestruct.Qid,''arrendador.Qid]]]]]]]]]]] , errorC) .
+
+	--- Contrato(ListaD(De('Transaccion, ListaD(Di('receptor, address, "indexed"), ListaD(Di('emisor,
+	--- 	address, "indexed"), D('valor, uint256)))), ListaD(De('Clave, ListaD(Di('receptor, address, "indexed"),
+	--- 	ListaD(Di('emisor, address, "indexed"), D('clave_, uint256)))), ListaD(Dp('arrendador, address, "public"),
+	--- 	ListaD(Dp('fianza, uint256, "public"), ListaD(Dp('mensualidad, uint256, "public"), ListaD(Dp('tiempo, uint256,
+	--- 	"public"), ListaD(Dp('tiempo_contrato, uint256, "public"), ListaD(Dp('tiempo_mensual, uint256, "public"),
+	--- 	ListaD(Dp('arrendatario, address, "public"), ListaD(Dp('alquilada, bool, "public"), ListaD(D('pagada, bool),
+	--- 	D('llave, uint256)))))))))))), ListaF(Fun(init(@payable, @external, LParam(P('_mensualidad, uint256), LParam(
+	--- 	P('_tiempo, uint256), LParam(P('_tiempo_contrato, uint256), P('_llave, uint256))))), Cuerpo(Assert(msg.value
+	--- 	>. 0.0), Cuerpo(Assert('_mensualidad >. 0.0), Cuerpo(Assert('_tiempo >. 0.0), Cuerpo(Assert('_tiempo_contrato
+	--- 	>=. '_tiempo), Cuerpo(=('fianza, msg.value), Cuerpo(=('arrendador, msg.sender), Cuerpo(=('mensualidad,
+	--- 	'_mensualidad), Cuerpo(=('tiempo, '_tiempo), Cuerpo(=('llave, '_llave), =('tiempo_contrato,
+	--- 	'_tiempo_contrato))))))))))), ListaF(Fun(headerDD(@payable, @external, 'alquilar, PaV), Cuerpo(Assert(not.
+	--- 	'alquilada, "No esta alquilada"), Cuerpo(Assert(msg.value ==. 'fianza +. 'mensualidad, "Valor exacto"),
+	--- 	Cuerpo(=('arrendatario, msg.sender), Cuerpo(=('alquilada, True), Cuerpo(=('tiempo_mensual, 'tiempo +.
+	--- 	block.timestamp), Cuerpo(+=('tiempo_contrato, block.timestamp), Cuerpo(=('pagada, True), Cuerpo(CallP('send,
+	--- 	ArgL('arrendador, 'mensualidad)), Cuerpo(logE('Transaccion, ArgL('arrendador, 'arrendatario, 'mensualidad)),
+	--- 	Cuerpo(logE('Clave, ArgL('arrendatario, 'arrendador, 'llave)), =('llave, 0.0)))))))))))), ListaF(Fun(headerD(
+	--- 	@external, 'darllave, P('clave, uint256)), Cuerpo(Assert('alquilada, "Alquilada"), Cuerpo(Assert(msg.sender
+	--- 	==. 'arrendador, "Arrendador"), Cuerpo(Assert(block.timestamp <. 'tiempo_mensual, "Dentro de plazo"), =(
+	--- 	'llave, 'clave))))), ListaF(Fun(headerD(@external, 'cambio, PaV), Cuerpo(Assert('alquilada, "Alquilada"),
+	--- 	Cuerpo(Assert(block.timestamp >. 'tiempo_mensual, "Plazo cumplido"), Cuerpo(Assert(msg.sender ==. 'arrendador
+	--- 	or. msg.sender ==. 'arrendatario, "Arrendador o arrendatario"), IfElse(block.timestamp >. 'tiempo_contrato,
+	--- 	Cuerpo(CallP('send, ArgL('arrendatario, 'fianza)), CallP('selfdestruct, 'arrendador)), IfElse('llave !=. 0.0,
+	--- 	IfElse('pagada, Cuerpo(logE('Transaccion, ArgL('arrendador, 'arrendatario, 'mensualidad)), Cuerpo(CallP('send,
+	--- 	ArgL('arrendador, 'mensualidad)), Cuerpo(logE('Clave, ArgL('arrendatario, 'arrendador, 'llave)), Cuerpo(=(
+	--- 	'tiempo_mensual, 'tiempo +. block.timestamp), Cuerpo(=('llave, 0.0), =('pagada, False)))))), CallP(
+	--- 	'selfdestruct, 'arrendador)), CallP('selfdestruct, 'arrendatario))))))), ListaF(Fun(headerD(@external, 'pagar,
+	--- 	PaV), Cuerpo(Assert('alquilada, "Alquilada"), Cuerpo(Assert(msg.sender ==. 'arrendatario, "Arrendatario"),
+	--- 	Cuerpo(Assert(block.timestamp <. 'tiempo_mensual, "Dentro del plazo"), Cuerpo(Assert(msg.value ==.
+	--- 	'mensualidad, "Mensualidad"), =('pagada, True)))))), Fun(headerD(@external, 'eliminarcontrato, PaV), Cuerpo(
+	--- 	Assert(msg.sender ==. 'arrendador, "Arrendador"), Cuerpo(Assert(block.timestamp <. 'tiempo_contrato,
+	--- 	"Dentro del tiempo del contrato"), IfElse('alquilada, CallP('selfdestruct, 'arrendatario), CallP(
+	--- 	'selfdestruct, 'arrendador)))))))))))
+---Contrato 10
+	--- 	rew downTerm('Contrato['ListaD['De[''Transaccion.Qid,'ListaD['Di[''receptor.Qid,'address.tipo,'"indexed".String],
+    --- 'ListaD['Di[''emisor.Qid,'address.tipo,'"indexed".String],'D[''valor.Qid,'uint256.tipo]]]],'ListaD['De[
+    --- ''Clave.Qid,'ListaD['Di[''receptor.Qid,'address.tipo,'"indexed".String],'ListaD['Di[''emisor.Qid,
+    --- 'address.tipo,'"indexed".String],'D[''clave_.Qid,'uint256.tipo]]]],'ListaD['Ds[''Caja.Qid,'ListaD['D[
+    --- ''propietario.Qid,'address.tipo],'ListaD['D[''tdisfrute.Qid,'uint256.tipo],'ListaD['D[''ttope.Qid,
+    --- 'uint256.tipo],'ListaD['D[''pagada.Qid,'bool.tipo],'ListaD['D[''llave.Qid,'uint256.tipo],'ListaD['D[
+    --- ''dejar.Qid,'bool.tipo],'D[''primera.Qid,'bool.tipo]]]]]]]],'ListaD['Dp[''tienda.Qid,'address.tipo,
+    --- '"public".String],'ListaD['Dp[''cajas.Qid,'uint256.tipo,'"public".String],'ListaD['Dp[''mensualidad.Qid,
+    --- 'uint256.tipo,'"public".String],'ListaD['Dp[''tiempo_disfrute.Qid,'uint256.tipo,'"public".String],'ListaD[
+    --- 'DhmP[''clientes.Qid,'uint256.tipo,''Caja.Qid,'"public".String],'ListaD['D[''indice.Qid,'uint256.tipo],
+    --- 'ListaD['Dp[''fianza.Qid,'uint256.tipo,'"public".String],'ListaD['Dp[''tiempo_pagar.Qid,'uint256.tipo,
+    --- '"public".String],'ListaD['D[''cajas_totales.Qid,'uint256.tipo],'ListaD['D[''indice_libres.Qid,'uint256.tipo],
+    --- 'ListaD['Dhm[''cajaslibres.Qid,'uint256.tipo,'uint256.tipo],'DhmP[''uso.Qid,'uint256.tipo,'bool.tipo,
+    --- '"public".String]]]]]]]]]]]]]]],'ListaF['Fun['init['@external.Decorator,'LParam['P[''_cajas.Qid,
+    --- 'uint256.tipo],'LParam['P[''_mensualidad.Qid,'uint256.tipo],'LParam['P[''_tiempo_disfrute.Qid,'uint256.tipo],
+    --- 'LParam['P[''_tiempo_pagar.Qid,'uint256.tipo],'P[''_fianza.Qid,'uint256.tipo]]]]]],'Cuerpo['Assert['_>._[
+    --- ''_cajas.Qid,'0.0.FiniteFloat]],'Cuerpo['Assert['_>._[''_mensualidad.Qid,'0.0.FiniteFloat]],'Cuerpo['Assert[
+    --- '_>._[''_tiempo_disfrute.Qid,'0.0.FiniteFloat]],'Cuerpo['Assert['_>._[''_tiempo_pagar.Qid,'0.0.FiniteFloat]],
+    --- 'Cuerpo['=[''tienda.Qid,'msg.sender.VarEnt],'Cuerpo['=[''cajas.Qid,''_cajas.Qid],'Cuerpo['=[
+    --- ''cajas_totales.Qid,''_cajas.Qid],'Cuerpo['=[''mensualidad.Qid,''_mensualidad.Qid],'Cuerpo['=[
+    --- ''tiempo_disfrute.Qid,''_tiempo_disfrute.Qid],'Cuerpo['=[''tiempo_pagar.Qid,''_tiempo_pagar.Qid],'=[
+    --- ''fianza.Qid,''_fianza.Qid]]]]]]]]]]]],'ListaF['Fun['headerDD['@payable.Decorator,'@external.Decorator,
+    --- ''alquilar.Qid,'PaV.Parametros],'Cuerpo['Assert['_>._[''cajas.Qid,'0.0.FiniteFloat],
+    --- '"Suficientes cajas".String],'Cuerpo['Assert['_==._['msg.value.VarEnt,'_+._[''mensualidad.Qid,''fianza.Qid]],
+    --- '"Valor exacto".String],'Cuerpo['IfElse['_<=._[''indice.Qid,''cajas_totales.Qid],'Cuerpo['=St['->[
+    --- ''clientes.Qid,''indice.Qid],''Caja.Qid,'LParam['P[''propietario.Qid,'msg.sender.VarEnt],'LParam['P[
+    --- ''tdisfrute.Qid,'_+._['block.timestamp.VarEnt,''tiempo_disfrute.Qid]],'LParam['P[''ttope.Qid,'_+._[
+    --- 'block.timestamp.VarEnt,'_+._[''tiempo_disfrute.Qid,''tiempo_pagar.Qid]]],'LParam['P[''pagada.Qid,'True.bool],
+    --- 'LParam['P[''llave.Qid,'1.0.FiniteFloat],'LParam['P[''dejar.Qid,'False.bool],'P[''primera.Qid,
+    --- 'True.bool]]]]]]]],'Cuerpo['=['->[''uso.Qid,''indice.Qid],'True.bool],'+=[''indice.Qid,'1.0.FiniteFloat]]],
+    --- 'Cuerpo['Dv[''index.Qid,'uint256.tipo,'->[''cajaslibres.Qid,'_-._[''indice_libres.Qid,'1.0.FiniteFloat]]],
+    --- 'Cuerpo['=St['->[''clientes.Qid,''index.Qid],''Caja.Qid,'LParam['P[''propietario.Qid,'msg.sender.VarEnt],
+    --- 'LParam['P[''tdisfrute.Qid,'_+._['block.timestamp.VarEnt,''tiempo_disfrute.Qid]],'LParam['P[''ttope.Qid,'_+._[
+    --- 'block.timestamp.VarEnt,'_+._[''tiempo_disfrute.Qid,''tiempo_pagar.Qid]]],'LParam['P[''pagada.Qid,'True.bool],
+    --- 'LParam['P[''llave.Qid,'1.0.FiniteFloat],'LParam['P[''dejar.Qid,'False.bool],'P[''primera.Qid,
+    --- 'True.bool]]]]]]]],'Cuerpo['=['->[''uso.Qid,''index.Qid],'True.bool],'-=[''indice_libres.Qid,
+    --- '1.0.FiniteFloat]]]]],'-=[''cajas.Qid,'1.0.FiniteFloat]]]]],'ListaF['Fun['headerD['@external.Decorator,
+    --- ''asignarllave.Qid,'LParam['P[''clave.Qid,'uint256.tipo],'P[''ncaja.Qid,'uint256.tipo]]],'Cuerpo['Assert['->[
+    --- ''uso.Qid,''ncaja.Qid],'"Caja asignada".String],'Cuerpo['Assert['_<=._['block.timestamp.VarEnt,'.['->[
+    --- ''clientes.Qid,''ncaja.Qid],''tdisfrute.Qid]],'"Dentro de tiempo".String],'Cuerpo['Assert['_==._[
+    --- 'msg.sender.VarEnt,''tienda.Qid],'"Tienda".String],'Cuerpo['Assert['_>._[''clave.Qid,'1.0.FiniteFloat],
+    --- '"Clave valida".String],'=['.['->[''clientes.Qid,''ncaja.Qid],''llave.Qid],''clave.Qid]]]]]],'ListaF['Fun[
+    --- 'headerD['@internal.Decorator,''_moroso.Qid,'P[''ncaja.Qid,'uint256.tipo]],'Cuerpo['=['->[''uso.Qid,
+    --- ''ncaja.Qid],'False.bool],'Cuerpo['=['->[''clientes.Qid,''ncaja.Qid],'CallP[''empty.Qid,''Caja.Qid]],'Cuerpo[
+    --- '+=[''cajas.Qid,'1.0.FiniteFloat],'Cuerpo['=['->[''cajaslibres.Qid,''indice_libres.Qid],''ncaja.Qid],'+=[
+    --- ''indice_libres.Qid,'1.0.FiniteFloat]]]]]],'ListaF['Fun['headerDDR['@view.Decorator,'@internal.Decorator,
+    --- ''_tqpagar.Qid,'bool.tipo,'P[''ncaja.Qid,'uint256.tipo]],'Return['not._['.['->[''clientes.Qid,''ncaja.Qid],
+    --- ''pagada.Qid]]]],'ListaF['Fun['headerDDR['@view.Decorator,'@external.Decorator,''tqpagar.Qid,'bool.tipo,'P[
+    --- ''ncaja.Qid,'uint256.tipo]],'Cuerpo['Assert['->[''uso.Qid,''ncaja.Qid],'"Caja asignada".String],'Cuerpo[
+    --- 'Assert['PA_PC['_or._['_==._['msg.sender.VarEnt,''tienda.Qid],'_==._['.['->[''clientes.Qid,''ncaja.Qid],
+    --- ''propietario.Qid],'msg.sender.VarEnt]]],'"Propietario o tienda".String],'Return['CallP[''_tqpagar.Qid,
+    --- ''ncaja.Qid]]]]],'ListaF['Fun['headerDDR['@view.Decorator,'@internal.Decorator,''_tiempoqueda.Qid,
+    --- 'uint256.tipo,'P[''ncaja.Qid,'uint256.tipo]],'Return['_-._['.['->[''clientes.Qid,''ncaja.Qid],
+    --- ''tdisfrute.Qid],'block.timestamp.VarEnt]]],'ListaF['Fun['headerDDR['@view.Decorator,'@external.Decorator,
+    --- ''tiempoqueda.Qid,'uint256.tipo,'P[''ncaja.Qid,'uint256.tipo]],'Cuerpo['Assert['->[''uso.Qid,''ncaja.Qid],
+    --- '"Caja asignada".String],'Cuerpo['Assert['PA_PC['_or._['_==._['.['->[''clientes.Qid,''ncaja.Qid],
+    --- ''propietario.Qid],'msg.sender.VarEnt],'_==._[''tienda.Qid,'msg.sender.VarEnt]]],
+    --- '"Propietario o tienda".String],'Cuerpo['Assert['_<=._['block.timestamp.VarEnt,'.['->[''clientes.Qid,
+    --- ''ncaja.Qid],''tdisfrute.Qid]],'"Dentro de tiempo".String],'Return['CallP[''_tiempoqueda.Qid,
+    --- ''ncaja.Qid]]]]]],'ListaF['Fun['headerD['@external.Decorator,''cambio.Qid,'P[''ncaja.Qid,'uint256.tipo]],
+    --- 'Cuerpo['Assert['->[''uso.Qid,''ncaja.Qid],'"Caja asignada".String],'Cuerpo['Assert['PA_PC['_or._['_==._['.[
+    --- '->[''clientes.Qid,''ncaja.Qid],''propietario.Qid],'msg.sender.VarEnt],'_==._[''tienda.Qid,
+    --- 'msg.sender.VarEnt]]],'"Propietario o tienda".String],'Cuerpo['Assert['PA_PC['_or._['PA_PC['_<._['.['->[
+    --- ''clientes.Qid,''ncaja.Qid],''tdisfrute.Qid],'block.timestamp.VarEnt]],'_or._['PA_PC['.['->[''clientes.Qid,
+    --- ''ncaja.Qid],''primera.Qid]],'PA_PC['.['->[''clientes.Qid,''ncaja.Qid],''dejar.Qid]]]]],
+    --- '"Posibilidades de llamada".String],'IfElse['_<._['.['->[''clientes.Qid,''ncaja.Qid],''ttope.Qid],
+    --- 'block.timestamp.VarEnt],'IfElse['.['->[''clientes.Qid,''ncaja.Qid],''pagada.Qid],'CallP[''send.Qid,'ArgL['.[
+    --- '->[''clientes.Qid,''ncaja.Qid],''propietario.Qid],'_+._[''fianza.Qid,''mensualidad.Qid]]],'CallP[
+    --- ''_moroso.Qid,''ncaja.Qid]],'IfElif['.['->[''clientes.Qid,''ncaja.Qid],''dejar.Qid],'Cuerpo['CallP[''send.Qid,
+    --- 'ArgL[''tienda.Qid,''mensualidad.Qid]],'Cuerpo['CallP[''send.Qid,'ArgL['.['->[''clientes.Qid,''ncaja.Qid],
+    --- ''propietario.Qid],''fianza.Qid]],'Cuerpo['logE[''Transaccion.Qid,'ArgL[''tienda.Qid,'ArgL['.['->[
+    --- ''clientes.Qid,''ncaja.Qid],''propietario.Qid],''mensualidad.Qid]]],'Cuerpo['=['.['->[''clientes.Qid,
+    --- ''ncaja.Qid],''pagada.Qid],'False.bool],'CallP[''_moroso.Qid,''ncaja.Qid]]]]],'Elif['_==._['.['->[
+    --- ''clientes.Qid,''ncaja.Qid],''llave.Qid],'0.0.FiniteFloat],'Cuerpo['CallP[''send.Qid,'ArgL['.['->[
+    --- ''clientes.Qid,''ncaja.Qid],''propietario.Qid],'_+._[''fianza.Qid,''mensualidad.Qid]]],'Cuerpo['logE[
+    --- ''Transaccion.Qid,'ArgL[''tienda.Qid,'ArgL['.['->[''clientes.Qid,''ncaja.Qid],''propietario.Qid],
+    --- ''mensualidad.Qid]]],'Cuerpo['=['.['->[''clientes.Qid,''ncaja.Qid],''pagada.Qid],'False.bool],'Cuerpo['=['.[
+    --- '->[''clientes.Qid,''ncaja.Qid],''dejar.Qid],'True.bool],'CallP[''_moroso.Qid,''ncaja.Qid]]]]]],'Cuerpo['=['.[
+    --- '->[''clientes.Qid,''ncaja.Qid],''pagada.Qid],'False.bool],'Cuerpo['CallP[''send.Qid,'ArgL[''tienda.Qid,
+    --- ''mensualidad.Qid]],'Cuerpo['logE[''Transaccion.Qid,'ArgL[''tienda.Qid,'ArgL['.['->[''clientes.Qid,
+    --- ''ncaja.Qid],''propietario.Qid],''mensualidad.Qid]]],'Cuerpo['logE[''Clave.Qid,'ArgL['.['->[''clientes.Qid,
+    --- ''ncaja.Qid],''propietario.Qid],'ArgL[''tienda.Qid,'.['->[''clientes.Qid,''ncaja.Qid],''llave.Qid]]]],'Cuerpo[
+    --- '=['.['->[''clientes.Qid,''ncaja.Qid],''llave.Qid],'0.0.FiniteFloat],'IfElse['.['->[''clientes.Qid,
+    --- ''ncaja.Qid],''primera.Qid],'=['.['->[''clientes.Qid,''ncaja.Qid],''primera.Qid],'False.bool],'Cuerpo['+=['.[
+    --- '->[''clientes.Qid,''ncaja.Qid],''tdisfrute.Qid],''tiempo_disfrute.Qid],'=['.['->[''clientes.Qid,''ncaja.Qid],
+    --- ''ttope.Qid],'_+._['.['->[''clientes.Qid,''ncaja.Qid],''tdisfrute.Qid],''tiempo_pagar.Qid]]]]]]]]]]]]]]],
+    --- 'ListaF['Fun['headerDD['@payable.Decorator,'@external.Decorator,''pagar.Qid,'P[''ncaja.Qid,'uint256.tipo]],
+    --- 'Cuerpo['Assert['->[''uso.Qid,''ncaja.Qid],'"Caja asignada".String],'Cuerpo['Assert['_==._['.['->[
+    --- ''clientes.Qid,''ncaja.Qid],''propietario.Qid],'msg.sender.VarEnt],'"Propietario".String],'Cuerpo['Assert[
+    --- 'not._['.['->[''clientes.Qid,''ncaja.Qid],''pagada.Qid]],'"No pagada".String],'Cuerpo['Assert['_==._[
+    --- 'msg.value.VarEnt,''mensualidad.Qid],'"Valor exacto".String],'Cuerpo['Assert['_<=._['block.timestamp.VarEnt,
+    --- '.['->[''clientes.Qid,''ncaja.Qid],''tdisfrute.Qid]],'"Dentro de tiempo".String],'=['.['->[''clientes.Qid,
+    --- ''ncaja.Qid],''pagada.Qid],'True.bool]]]]]]],'Fun['headerD['@external.Decorator,''dejarcaja.Qid,'P[
+    --- ''ncaja.Qid,'uint256.tipo]],'Cuerpo['Assert['->[''uso.Qid,''ncaja.Qid],'"Caja asignada".String],'Cuerpo[
+    --- 'Assert['_==._['msg.sender.VarEnt,'.['->[''clientes.Qid,''ncaja.Qid],''propietario.Qid]],
+    --- '"Propietario".String],'Cuerpo['Assert['_<=._['block.timestamp.VarEnt,'.['->[''clientes.Qid,''ncaja.Qid],
+    --- ''tdisfrute.Qid]],'"Dentro de tiempo".String],'=['.['->[''clientes.Qid,''ncaja.Qid],''dejar.Qid],
+    --- 'True.bool]]]]]]]]]]]]]]]], errorC) .
+--- Contrato(ListaD(De('Transaccion, ListaD(Di('receptor, address, "indexed"), ListaD(Di('emisor,
+---     address, "indexed"), D('valor, uint256)))), ListaD(De('Clave, ListaD(Di('receptor, address, "indexed"),
+---     ListaD(Di('emisor, address, "indexed"), D('clave_, uint256)))), ListaD(Ds('Caja, ListaD(D('propietario,
+---     address), ListaD(D('tdisfrute, uint256), ListaD(D('ttope, uint256), ListaD(D('pagada, bool), ListaD(D('llave,
+---     uint256), ListaD(D('dejar, bool), D('primera, bool)))))))), ListaD(Dp('tienda, address, "public"), ListaD(Dp(
+---     'cajas, uint256, "public"), ListaD(Dp('mensualidad, uint256, "public"), ListaD(Dp('tiempo_disfrute, uint256,
+---     "public"), ListaD(DhmP('clientes, uint256, 'Caja, "public"), ListaD(D('indice, uint256), ListaD(Dp('fianza,
+---     uint256, "public"), ListaD(Dp('tiempo_pagar, uint256, "public"), ListaD(D('cajas_totales, uint256), ListaD(D(
+---     'indice_libres, uint256), ListaD(Dhm('cajaslibres, uint256, uint256), DhmP('uso, uint256, bool,
+---     "public"))))))))))))))), ListaF(Fun(init(@external, LParam(P('_cajas, uint256), LParam(P('_mensualidad,
+---     uint256), LParam(P('_tiempo_disfrute, uint256), LParam(P('_tiempo_pagar, uint256), P('_fianza, uint256)))))),
+---     Cuerpo(Assert('_cajas >. 0.0), Cuerpo(Assert('_mensualidad >. 0.0), Cuerpo(Assert('_tiempo_disfrute >. 0.0),
+---     Cuerpo(Assert('_tiempo_pagar >. 0.0), Cuerpo(=('tienda, msg.sender), Cuerpo(=('cajas, '_cajas), Cuerpo(=(
+---     'cajas_totales, '_cajas), Cuerpo(=('mensualidad, '_mensualidad), Cuerpo(=('tiempo_disfrute,
+---     '_tiempo_disfrute), Cuerpo(=('tiempo_pagar, '_tiempo_pagar), =('fianza, '_fianza)))))))))))), ListaF(Fun(
+---     headerDD(@payable, @external, 'alquilar, PaV), Cuerpo(Assert('cajas >. 0.0, "Suficientes cajas"), Cuerpo(
+---     Assert(msg.value ==. 'fianza +. 'mensualidad, "Valor exacto"), Cuerpo(IfElse('indice <=. 'cajas_totales,
+---     Cuerpo(=St(->('clientes, 'indice), 'Caja, LParam(P('propietario, msg.sender), LParam(P('tdisfrute,
+---     'tiempo_disfrute +. block.timestamp), LParam(P('ttope, 'tiempo_disfrute +. 'tiempo_pagar +. block.timestamp),
+---     LParam(P('pagada, True), LParam(P('llave, 1.0), LParam(P('dejar, False), P('primera, True)))))))), Cuerpo(=(
+---     ->('uso, 'indice), True), +=('indice, 1.0))), Cuerpo(Dv('index, uint256, ->('cajaslibres, 'indice_libres -.
+---     1.0)), Cuerpo(=St(->('clientes, 'index), 'Caja, LParam(P('propietario, msg.sender), LParam(P('tdisfrute,
+---     'tiempo_disfrute +. block.timestamp), LParam(P('ttope, 'tiempo_disfrute +. 'tiempo_pagar +. block.timestamp),
+---     LParam(P('pagada, True), LParam(P('llave, 1.0), LParam(P('dejar, False), P('primera, True)))))))), Cuerpo(=(
+---     ->('uso, 'index), True), -=('indice_libres, 1.0))))), -=('cajas, 1.0))))), ListaF(Fun(headerD(@external,
+---     'asignarllave, LParam(P('clave, uint256), P('ncaja, uint256))), Cuerpo(Assert(->('uso, 'ncaja),
+---     "Caja asignada"), Cuerpo(Assert(block.timestamp <=. .(->('clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"),
+---     Cuerpo(Assert(msg.sender ==. 'tienda, "Tienda"), Cuerpo(Assert('clave >. 1.0, "Clave valida"), =(.(->(
+---     'clientes, 'ncaja), 'llave), 'clave)))))), ListaF(Fun(headerD(@internal, '_moroso, P('ncaja, uint256)),
+---     Cuerpo(=(->('uso, 'ncaja), False), Cuerpo(=(->('clientes, 'ncaja), CallP('empty, 'Caja)), Cuerpo(+=('cajas,
+---     1.0), Cuerpo(=(->('cajaslibres, 'indice_libres), 'ncaja), +=('indice_libres, 1.0)))))), ListaF(Fun(headerDDR(
+---     @view, @internal, '_tqpagar, bool, P('ncaja, uint256)), Return(not. .(->('clientes, 'ncaja), 'pagada))),
+---     ListaF(Fun(headerDDR(@view, @external, 'tqpagar, bool, P('ncaja, uint256)), Cuerpo(Assert(->('uso, 'ncaja),
+---     "Caja asignada"), Cuerpo(Assert(PA msg.sender ==. 'tienda or. .(->('clientes, 'ncaja), 'propietario) ==.
+---     msg.sender PC, "Propietario o tienda"), Return(CallP('_tqpagar, 'ncaja))))), ListaF(Fun(headerDDR(@view,
+---     @internal, '_tiempoqueda, uint256, P('ncaja, uint256)), Return(.(->('clientes, 'ncaja), 'tdisfrute) -.
+---     block.timestamp)), ListaF(Fun(headerDDR(@view, @external, 'tiempoqueda, uint256, P('ncaja, uint256)), Cuerpo(
+---     Assert(->('uso, 'ncaja), "Caja asignada"), Cuerpo(Assert(PA .(->('clientes, 'ncaja), 'propietario) ==.
+---     msg.sender or. 'tienda ==. msg.sender PC, "Propietario o tienda"), Cuerpo(Assert(block.timestamp <=. .(->(
+---     'clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"), Return(CallP('_tiempoqueda, 'ncaja)))))), ListaF(Fun(
+---     headerD(@external, 'cambio, P('ncaja, uint256)), Cuerpo(Assert(->('uso, 'ncaja), "Caja asignada"), Cuerpo(
+---     Assert(PA .(->('clientes, 'ncaja), 'propietario) ==. msg.sender or. 'tienda ==. msg.sender PC,
+---     "Propietario o tienda"), Cuerpo(Assert(PA PA .(->('clientes, 'ncaja), 'tdisfrute) <. block.timestamp PC or. PA
+---     .(->('clientes, 'ncaja), 'primera) PC or. PA .(->('clientes, 'ncaja), 'dejar) PC PC,
+---     "Posibilidades de llamada"), IfElse(.(->('clientes, 'ncaja), 'ttope) <. block.timestamp, IfElse(.(->(
+---     'clientes, 'ncaja), 'pagada), CallP('send, ArgL(.(->('clientes, 'ncaja), 'propietario), 'fianza +.
+---     'mensualidad)), CallP('_moroso, 'ncaja)), IfElif(.(->('clientes, 'ncaja), 'dejar), Cuerpo(CallP('send, ArgL(
+---     'tienda, 'mensualidad)), Cuerpo(CallP('send, ArgL(.(->('clientes, 'ncaja), 'propietario), 'fianza)), Cuerpo(
+---     logE('Transaccion, ArgL('tienda, .(->('clientes, 'ncaja), 'propietario), 'mensualidad)), Cuerpo(=(.(->(
+---     'clientes, 'ncaja), 'pagada), False), CallP('_moroso, 'ncaja))))), Elif(.(->('clientes, 'ncaja), 'llave) ==.
+---     0.0, Cuerpo(CallP('send, ArgL(.(->('clientes, 'ncaja), 'propietario), 'fianza +. 'mensualidad)), Cuerpo(logE(
+---     'Transaccion, ArgL('tienda, .(->('clientes, 'ncaja), 'propietario), 'mensualidad)), Cuerpo(=(.(->('clientes,
+---     'ncaja), 'pagada), False), Cuerpo(=(.(->('clientes, 'ncaja), 'dejar), True), CallP('_moroso, 'ncaja)))))),
+---     Cuerpo(=(.(->('clientes, 'ncaja), 'pagada), False), Cuerpo(CallP('send, ArgL('tienda, 'mensualidad)), Cuerpo(
+---     logE('Transaccion, ArgL('tienda, .(->('clientes, 'ncaja), 'propietario), 'mensualidad)), Cuerpo(logE('Clave,
+---     ArgL(.(->('clientes, 'ncaja), 'propietario), 'tienda, .(->('clientes, 'ncaja), 'llave))), Cuerpo(=(.(->(
+---     'clientes, 'ncaja), 'llave), 0.0), IfElse(.(->('clientes, 'ncaja), 'primera), =(.(->('clientes, 'ncaja),
+---     'primera), False), Cuerpo(+=(.(->('clientes, 'ncaja), 'tdisfrute), 'tiempo_disfrute), =(.(->('clientes,
+---     'ncaja), 'ttope), 'tiempo_pagar +. .(->('clientes, 'ncaja), 'tdisfrute))))))))))))))), ListaF(Fun(headerDD(
+---     @payable, @external, 'pagar, P('ncaja, uint256)), Cuerpo(Assert(->('uso, 'ncaja), "Caja asignada"), Cuerpo(
+---     Assert(.(->('clientes, 'ncaja), 'propietario) ==. msg.sender, "Propietario"), Cuerpo(Assert(not. .(->(
+---     'clientes, 'ncaja), 'pagada), "No pagada"), Cuerpo(Assert(msg.value ==. 'mensualidad, "Valor exacto"), Cuerpo(
+---     Assert(block.timestamp <=. .(->('clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"), =(.(->('clientes,
+---     'ncaja), 'pagada), True))))))), Fun(headerD(@external, 'dejarcaja, P('ncaja, uint256)), Cuerpo(Assert(->('uso,
+---     'ncaja), "Caja asignada"), Cuerpo(Assert(msg.sender ==. .(->('clientes, 'ncaja), 'propietario),
+---     "Propietario"), Cuerpo(Assert(block.timestamp <=. .(->('clientes, 'ncaja), 'tdisfrute), "Dentro de tiempo"),
+---     =(.(->('clientes, 'ncaja), 'dejar), True))))))))))))))))
+--- CONTRATO 11
+	--- rew downTerm('Contrato['ListaD['Ds[''Comprador.Qid,'ListaD['D[''cliente.Qid,'address.tipo],'D[''cantidad.Qid,'uint256.tipo]]],'ListaD[
+    --- 'De[''Aviso.Qid,'ListaD['Di[''receptor.Qid,'address.tipo,'"indexed".String],'ListaD['D[''lote.Qid,'->['String.tipo,
+    --- '1.0e+1.FiniteFloat]],'D[''frase.Qid,'->['String.tipo,'1.5e+2.FiniteFloat]]]]],'ListaD['Dp[''empresa.Qid,'address.tipo,
+    --- '"public".String],'ListaD['Dp[''lote.Qid,'->['String.tipo,'1.0e+1.FiniteFloat],'"public".String],'ListaD['D[
+    --- ''fechacaducidad.Qid,'uint256.tipo],'ListaD['Dp[''precio.Qid,'uint256.tipo,'"public".String],'ListaD['Dp[''cantidad.Qid,
+    --- 'uint256.tipo,'"public".String],'ListaD['Dhm[''registro.Qid,'uint256.tipo,''Comprador.Qid],'ListaD['Dhm[''hacomprado.Qid,
+    --- 'address.tipo,'bool.tipo],'ListaD['D[''indice.Qid,'uint256.tipo],'ListaD['D[''sigindice.Qid,'uint256.tipo],'ListaD['D[
+    --- ''aviso.Qid,'bool.tipo],'D[''devuelto.Qid,'bool.tipo]]]]]]]]]]]]],'ListaF['Fun['init['@external.Decorator,'LParam['P[
+    --- ''_lote.Qid,'->['String.tipo,'1.0e+1.FiniteFloat]],'LParam['P[''_duracion.Qid,'uint256.tipo],'LParam['P[''_precio.Qid,
+    --- 'uint256.tipo],'P[''_cantidad.Qid,'uint256.tipo]]]]],'Cuerpo['=[''empresa.Qid,'msg.sender.VarEnt],'Cuerpo['=[''lote.Qid,
+    --- ''_lote.Qid],'Cuerpo['=[''fechacaducidad.Qid,'_+._['block.timestamp.VarEnt,''_duracion.Qid]],'Cuerpo['=[''precio.Qid,
+    --- ''_precio.Qid],'=[''cantidad.Qid,''_cantidad.Qid]]]]]],'ListaF['Fun['headerDD['@payable.Decorator,'@external.Decorator,
+    --- ''comprar.Qid,'P[''_cantidad.Qid,'uint256.tipo]],'Cuerpo['Assert['_==._['msg.value.VarEnt,'_*._[''cantidad.Qid,
+    --- ''precio.Qid]],'"Precio exacto".String],'Cuerpo['Assert['_<._['block.timestamp.VarEnt,''fechacaducidad.Qid],
+    --- '"Antes de caducarse".String],'Cuerpo['Assert['_<=._[''_cantidad.Qid,''cantidad.Qid],'"Hay suficientes".String],'Cuerpo[
+    --- '-=[''cantidad.Qid,''_cantidad.Qid],'Cuerpo['=['->[''hacomprado.Qid,'msg.sender.VarEnt],'True.bool],'Cuerpo['=St['->[
+    --- ''registro.Qid,''indice.Qid],''Comprador.Qid,'LParam['P[''cliente.Qid,'msg.sender.VarEnt],'P[''cantidad.Qid,
+    --- ''_cantidad.Qid]]],'+=[''indice.Qid,'1.0.FiniteFloat]]]]]]]],'ListaF['Fun['headerD['@external.Decorator,
+    --- ''mensaje_aviso.Qid,'P[''descripcion.Qid,'->['String.tipo,'1.5e+2.FiniteFloat]]],'Cuerpo['Assert['->[''hacomprado.Qid,
+    --- 'msg.sender.VarEnt],'"Ha comprado".String],'Cuerpo['Assert['_<._['block.timestamp.VarEnt,''fechacaducidad.Qid],
+    --- '"Antes de caducarse".String],'Cuerpo['logE[''Aviso.Qid,'ArgL[''empresa.Qid,'ArgL[''lote.Qid,''descripcion.Qid]]],'=[
+    --- ''aviso.Qid,'True.bool]]]]],'ListaF['Fun['headerD['@external.Decorator,''retirar_del_mercado.Qid,'P[''descripcion.Qid,
+    --- '->['String.tipo,'1.5e+2.FiniteFloat]]],'Cuerpo['Assert['_==._['msg.sender.VarEnt,''empresa.Qid],'"Empresa".String],
+    --- 'Cuerpo['Assert[''aviso.Qid,'"Avisado".String],'Cuerpo['Dv[''nive.Qid,'uint256.tipo,''sigindice.Qid],'Cuerpo['ForR[
+    --- ''i.Qid,'ArgL[''nive.Qid,'_+._[''nive.Qid,'2.0e+1.FiniteFloat]],'IfElse['_>=._[''i.Qid,''indice.Qid],'Cuerpo['=[
+    --- ''nive.Qid,''indice.Qid],'Cuerpo['=[''devuelto.Qid,'True.bool],'return.controlFlow]],'Cuerpo['logE[''Aviso.Qid,'ArgL['.[
+    --- '->[''registro.Qid,''i.Qid],''cliente.Qid],'ArgL[''lote.Qid,''descripcion.Qid]]],'CallP[''send.Qid,'ArgL['.['->[
+    --- ''registro.Qid,''i.Qid],''cliente.Qid],'_*._['.['->[''registro.Qid,''i.Qid],''cantidad.Qid],''precio.Qid]]]]]],'=[
+    --- ''sigindice.Qid,'_+._[''nive.Qid,'2.0e+1.FiniteFloat]]]]]]],'ListaF['Fun['headerD['@external.Decorator,
+    --- ''aviso_a_clientes.Qid,'P[''descripcion.Qid,'->['String.tipo,'1.5e+2.FiniteFloat]]],'Cuerpo['Assert['_==._[
+    --- 'msg.sender.VarEnt,''empresa.Qid],'"Empresa".String],'Cuerpo['Assert[''aviso.Qid,'"Avisado".String],'Cuerpo['=[
+    --- ''aviso.Qid,'False.bool],'Cuerpo['Dv[''nive.Qid,'uint256.tipo,''sigindice.Qid],'ForR[''i.Qid,'ArgL[''nive.Qid,'_+._[
+    --- ''nive.Qid,'2.0e+1.FiniteFloat]],'Cuerpo['IfElse['_>=._[''i.Qid,''indice.Qid],'Cuerpo['=[''nive.Qid,''indice.Qid],
+    --- 'return.controlFlow],'logE[''Aviso.Qid,'ArgL['.['->[''registro.Qid,''i.Qid],''cliente.Qid],'ArgL[''lote.Qid,
+    --- ''descripcion.Qid]]]],'=[''sigindice.Qid,'_+._[''nive.Qid,'2.0e+1.FiniteFloat]]]]]]]]],'Fun['headerD[
+    --- '@external.Decorator,''fin.Qid,'PaV.Parametros],'Cuerpo['Assert['_==._['msg.sender.VarEnt,''empresa.Qid],
+    --- '"Empresa".String],'Cuerpo['Assert['_or._['PA_PC['_and._[''aviso.Qid,''devuelto.Qid]],'_>._['block.timestamp.VarEnt,
+    --- ''fechacaducidad.Qid]],'"Avisado o caducado".String],'CallP[''selfdestruct.Qid,''empresa.Qid]]]]]]]]]], errorC) .
+--- Contrato(ListaD(Ds('Comprador, ListaD(D('cliente, address), D('cantidad, uint256))), ListaD(De('Aviso,
+---     ListaD(Di('receptor, address, "indexed"), ListaD(D('lote, ->(String, 1.0e+1)), D('frase, ->(String, 1.5e+2))))), ListaD(
+---     Dp('empresa, address, "public"), ListaD(Dp('lote, ->(String, 1.0e+1), "public"), ListaD(D('fechacaducidad, uint256),
+---     ListaD(Dp('precio, uint256, "public"), ListaD(Dp('cantidad, uint256, "public"), ListaD(Dhm('registro, uint256,
+---     'Comprador), ListaD(Dhm('hacomprado, address, bool), ListaD(D('indice, uint256), ListaD(D('sigindice, uint256), ListaD(D(
+---     'aviso, bool), D('devuelto, bool))))))))))))), ListaF(Fun(init(@external, LParam(P('_lote, ->(String, 1.0e+1)), LParam(P(
+---     '_duracion, uint256), LParam(P('_precio, uint256), P('_cantidad, uint256))))), Cuerpo(=('empresa, msg.sender), Cuerpo(=(
+---     'lote, '_lote), Cuerpo(=('fechacaducidad, '_duracion +. block.timestamp), Cuerpo(=('precio, '_precio), =('cantidad,
+---     '_cantidad)))))), ListaF(Fun(headerDD(@payable, @external, 'comprar, P('_cantidad, uint256)), Cuerpo(Assert(msg.value ==.
+---     'cantidad *. 'precio, "Precio exacto"), Cuerpo(Assert(block.timestamp <. 'fechacaducidad, "Antes de caducarse"), Cuerpo(
+---     Assert('_cantidad <=. 'cantidad, "Hay suficientes"), Cuerpo(-=('cantidad, '_cantidad), Cuerpo(=(->('hacomprado,
+---     msg.sender), True), Cuerpo(=St(->('registro, 'indice), 'Comprador, LParam(P('cliente, msg.sender), P('cantidad,
+---     '_cantidad))), +=('indice, 1.0)))))))), ListaF(Fun(headerD(@external, 'mensaje_aviso, P('descripcion, ->(String,
+---     1.5e+2))), Cuerpo(Assert(->('hacomprado, msg.sender), "Ha comprado"), Cuerpo(Assert(block.timestamp <. 'fechacaducidad,
+---     "Antes de caducarse"), Cuerpo(logE('Aviso, ArgL('empresa, 'lote, 'descripcion)), =('aviso, True))))), ListaF(Fun(headerD(
+---     @external, 'retirar_del_mercado, P('descripcion, ->(String, 1.5e+2))), Cuerpo(Assert(msg.sender ==. 'empresa, "Empresa"),
+---     Cuerpo(Assert('aviso, "Avisado"), Cuerpo(Dv('nive, uint256, 'sigindice), Cuerpo(ForR('i, ArgL('nive, 'nive +. 2.0e+1),
+---     IfElse('i >=. 'indice, Cuerpo(=('nive, 'indice), Cuerpo(=('devuelto, True), return)), Cuerpo(logE('Aviso, ArgL(.(->(
+---     'registro, 'i), 'cliente), 'lote, 'descripcion)), CallP('send, ArgL(.(->('registro, 'i), 'cliente), 'precio *. .(->(
+---     'registro, 'i), 'cantidad)))))), =('sigindice, 'nive +. 2.0e+1)))))), ListaF(Fun(headerD(@external, 'aviso_a_clientes, P(
+---     'descripcion, ->(String, 1.5e+2))), Cuerpo(Assert(msg.sender ==. 'empresa, "Empresa"), Cuerpo(Assert('aviso, "Avisado"),
+---     Cuerpo(=('aviso, False), Cuerpo(Dv('nive, uint256, 'sigindice), ForR('i, ArgL('nive, 'nive +. 2.0e+1), Cuerpo(IfElse('i
+---     >=. 'indice, Cuerpo(=('nive, 'indice), return), logE('Aviso, ArgL(.(->('registro, 'i), 'cliente), 'lote, 'descripcion))),
+---     =('sigindice, 'nive +. 2.0e+1)))))))), Fun(headerD(@external, 'fin, PaV), Cuerpo(Assert(msg.sender ==. 'empresa,
+---     "Empresa"), Cuerpo(Assert(PA 'aviso and. 'devuelto PC or. block.timestamp >. 'fechacaducidad, "Avisado o caducado"),
+---     CallP('selfdestruct, 'empresa))))))))))

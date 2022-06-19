@@ -1,0 +1,595 @@
+mod Semantica is
+	pr MY-PROG .
+	pr MEMORIA .
+	pr MEMORIAFUNCIONES .
+	pr funcionesAuxiliaresPrueba .
+	pr CONVERSION * (op string to stringF) .
+	sort Estado .
+	sort ExecutionTuple .
+	subsort Value < ExecutionTuple .
+	subsort ArgList < ExecutionTuple .
+	subsort Parametros < ExecutionTuple .
+	--- subsort Value < ExecutionTuple .
+	op exec : Contrato Body -> ExecutionTuple [ctor] .
+	op <_,_,_> : Body MemoriaFunciones Stack -> ExecutionTuple [ctor] .
+	--- op <_,_,_,_,_> : Exp MemoriaFunciones Stack Value Memoria -> ExecutionTuple [ctor] .
+	--- op a : ExecutionTuple -> Value .
+	var C : Contrato .
+	var M M1 M2 : Memoria .
+	var MF MF1 : MemoriaFunciones . 
+	var E E1 E2 : Exp .
+	var Q Q1 Q2 Q3 : Qid .
+	var B B1 B2 B3 : Body .
+	var Ac Ac1 : Acceso .
+	var F F1 : Float .
+	var AL AL1 AL' : ArgList .
+	var Pa : Parametros .
+	var LE : LEntra .
+	var V V1 V2 V3 V4 : Value .
+	var S S1 S2 S3 S4 : Stack .
+	var Par Par1 : Parametros .
+	var Str Str1 : String . 
+	var LEI : ListElseif .
+	var T : tipo .
+	
+	crl[exec] : exec(C,B) 
+	=> < B , MF1, push(initMemory(C) , stackE) > 
+	if MF := initMemoryFunctions(C) /\
+	   MF1 := addMemoryBuiltFunctions(MF) .
+
+*** REGLA QUE LLAMA A UNA FUNCION SIN PARAMETROS 	CallP('convert, ArgL('value, bytes32))
+	crl [call] :
+    < Cuerpo(Call(Q), B) , MF , S > => < B,  MF , S1 >
+ 	if not FunHasReturn?(MF,Q) /\ 
+	 B1 := getF(MF,Q) /\
+	< B1 ,  MF , push(mv,S) > =>  < bv ,  MF , push(M1 ,S1) > [print "CALL " Q] . 
+
+ crl [callReturnsStruct] :
+    < Cuerpo(Call(Q), B) , MF , S > => V
+ 	if FunHasReturn?(MF,Q) /\ 
+	V1 := returnIsStruct(MF,Q) /\
+	isQid(V1) /\
+	T := getTypeFromStack(S,V1) /\
+	T == struct /\
+	 B1 := getF(MF,Q) /\
+	< B1 ,  MF , push(mv,S) > =>  V /\
+	M := getMemoryStack(S , V) [print "Return = " M] .
+
+crl [callReturns] :
+    < Cuerpo(Call(Q), B) , MF , S > => V
+ 	if FunHasReturn?(MF,Q) /\ 
+	 B1 := getF(MF,Q) /\
+	< B1 ,  MF , push(mv,S) > =>  V [print "CALLR " Q V] .
+*** REGLA QUE LLAMA A UNA FUNCION CON PARAMETROS 
+	***CALL PARA VER LOS FALLOS
+	crl [callParameters] :
+    < CallP(Q,AL) ,  MF , S > => < B1 ,  MF , push(M1,S) >
+ 	if not FunHasReturn?(MF,Q) /\
+	 LE := getParametersFunction(Q , MF) /\
+	 	< AL , MF , S > => AL1  /\
+	 	adjustParameters(LE , AL1) /\
+		B1 := getF(MF,Q) /\
+		M1 := addMemory(LE , AL1 , mv) [print "callParameters " Q  AL1 ] .
+	*** CALLL DE VERDAD
+	--- crl [callParameters] :
+    --- < Cuerpo(CallP(Q,AL), B) ,  MF , S > => < B ,  MF , S1 >
+ 	--- if not FunHasReturn?(MF,Q) /\
+	---  	LE := getParametersFunction(Q , MF) /\
+	--- 	< AL , MF , S > => AL1 /\
+	---  	adjustParameters(LE , AL1)  /\
+	--- 	B1 := getF(MF,Q) /\
+	--- 	M1 := addMemory(LE , AL1 , mv) /\
+	--- 	< B1 ,  MF , push(M1,S) > =>  < bv ,  MF , push(M2 , S1) > [print "callParameters " Q B M1] .
+
+	crl [callParametersReturn] :
+    < Cuerpo(CallP(Q,AL), B) ,  MF , S > => V
+ 	if FunHasReturn?(MF,Q) /\
+	 	LE := getParametersFunction(Q , MF) /\
+		 < AL , MF , S > => AL1 /\
+	 	adjustParameters(LE , AL1)  /\
+		B1 := getF(MF,Q) /\
+		M1 := addMemory(LE , AL1 , mv)  /\
+		< B1 ,  MF , push(M1,S) > =>  V [print "callParametersReturn " V] .
+
+	crl [CallnewStruct] :
+    < CallP('empty, AL) ,  MF , S > => < bv , MF , push(M,S) > 
+ 	if M := getMemoryStack(S, AL) [print "Call empty " AL M] .
+
+	crl [CallConvert] :
+    < CallP('convert, AL) ,  MF , S > => V1
+ 	if < AL , MF ,S > => AL1 /\
+	 ArgL(V , T) := AL1 /\
+	 V1 := convert(V) [print "Call CONVERT " AL1 V T V1 ] .
+
+	crl [CallConcatenate] :
+    < CallP('concat, AL) ,  MF , S > => V
+ 	if < AL , MF ,S > => AL1 /\
+	V := concat(AL1)  [print "Call concat " AL1 V ] .
+
+	crl [CallKeccak256] :
+    < CallP('keccak256, AL) ,  MF , S > => AL1
+ 	if < AL , MF ,S > => AL1 [print "Call Keccak256 " AL1 ] .
+
+
+	crl [assig] : 
+	< Cuerpo( =(E,E1) , B) ,  MF, S > =>  < B ,  MF , S1 > 
+	if isQid(E) /\
+	< E1 ,  MF , S > =>  V1 /\
+	 S1 := storeMemoryStack(S , E , V1) [print "asig"  E V1 ]  .
+	
+	crl [assigEmptyStruct] : 
+	< Cuerpo( =(E,CallP('empty, Q)) , B) ,  MF, S > =>  < B ,  MF , S1 > 
+	if isQid(E) /\ 
+	getTypeFromStack(S,Q) == struct /\
+	M := getMemoryStack(S, Q) /\
+	S1 := storeMemoryOnMemoryStack(S , E , M)  [print "asigEmptyStruct" E Q ]  .
+
+	crl [assigAccess] : 
+	< Cuerpo( =(E,E1) , B) ,  MF, S > =>  < B ,  MF , S1 > 
+	if isAcces(E) /\
+	< E1 ,  MF , S > =>  V1 /\
+	Q := getAccessQid(E) /\
+	E2 := getAccessExp(E) /\
+	< E2 ,  MF , S > =>  V2 /\
+	S1 := storeMemoryHMStack(S , Q ,  V2 , V1) [print "asigAccess" E " " V2 " "  ]  .
+
+	crl [assigAccessPoint] : 
+	< Cuerpo( =(E,E1) , B) ,  MF, S > =>  < B ,  MF , S1 > 
+	if isPointQid(E) /\
+	< E1 ,  MF , S > =>  V1 /\
+	Q := getFQofPoint(E) /\
+	Q1 := getSQofPoint(E) /\  
+	S1 := storeValueOnVariableStructStack(S , Q ,  Q1 , V1 , S) [print "asigpOINT" Q " " Q1 " " V1 " "  ]  .
+
+	crl [assigAccessMemory] : 
+	< Cuerpo( =(E,E1) , B) ,  MF, S > =>  < B ,  MF , S1 > 
+	if isAcces(E) /\
+	< E1 ,  MF , S > =>  < bv , MF , push(M,S) > /\
+	Q := getAccessQid(E) /\
+	E2 := getAccessExp(E) /\
+	< E2 ,  MF , S > =>  V /\
+	S1 := storeMemoryHMStructStackWQ1(S , Q ,  V , M) [print "asigAccessMemory" E  S1 M ]  .
+	*** esta sin acabaar crep
+	crl [assigAccessRecursive] : 
+	< Cuerpo( =(E,E1) , B) ,  MF, S > =>  < bv ,  MF , S > 
+	if isAccesRecursive(E) /\
+	< E1 ,  MF , S > =>  V1 /\
+	 Ac := getAccessRecursive(E) /\
+	 V := getValueRecursive(E) /\
+	 Q := getAccessQid(Ac) /\
+	 V2 := getAccessExp(Ac) [print "asigAccessRecursive"  E Q V V1 V2 ] .
+
+	***********REVISAR
+	crl [assigHS] : 
+	< Cuerpo( =(E,E1) , B) ,  MF, S > =>  < B ,  MF , S1 > 
+	if .(->(Q , E2) , V1) := E /\
+	< E2 ,  MF , S > =>  V /\
+	< E1 ,  MF , S > =>  V2 /\
+	 S1 := storeValueIntoHMSStack(S , Q , V , V1 , V2) [print "asigHSE"  Q V V1 V2  ]  .
+
+	rl [addAssig] : 
+	< Cuerpo( +=(E,E1) , B) ,  MF, S > =>  < Cuerpo( =(E, E +. E1) , B) ,  MF , S >  [print "ADDasig" ] .
+
+	rl [subAssig] : 
+	< Cuerpo( -=(E,E1) , B) ,  MF, S > =>  < Cuerpo( =(E, E -. E1) , B) ,  MF , S >  [print "sub ASIG" ] .
+	***comprobar si es true pasar si no no
+	crl [assert] :
+	< Cuerpo( Assert( E ) , B)  ,  MF, S > =>  < B ,  MF , S > 
+	if < E ,  MF , S > =>  V [print "assert" V] .
+
+	crl [assertString] : 
+	< Cuerpo( Assert( E, Str ) , B)  ,  MF, S > =>  < B ,  MF , S > 
+	if < E ,  MF , S > =>  V [print "assertS" V Str] .
+
+	crl [newVariable] : 
+	< Cuerpo( Dv( Q , V , E ) , B)  ,  MF, S > =>  < B ,  MF , S1 > 
+	if < E ,  MF , S > =>  V1 /\
+	S1 := addNewVariableStack(S, Q , V , V1) [print "newVariable" Q S1] .
+
+	crl [newVariable2] : 
+	< Cuerpo( Dv( Q , V , E ) , B)  ,  MF, S > =>  < B ,  MF , S1 > 
+	if isQid(V) /\
+	->(->(Q1 , V1), V2) := E /\
+	< V1 , MF , S > => V3 /\
+	< V2 , MF , S > => V4 /\
+	M := getMemory->>Stack(S , Q1 , V3 , V4) /\
+	S1 := addNewVariableMStack(S, Q , V , M) [print "newVariable"  Q V3 V4 M S1 ] .
+
+
+	*** comprueba si la expresion es un acceso y en ese caso devuelve el valor |||||varias reglas si es qid , si es acceso si es bool  etcccccc 
+	crl [ExpIsAcces] :
+	< E ,  MF, S > => V1 
+	if  isAcces(E) /\
+	Q := getAccessQid(E) /\
+	E1 := getAccessExp(E) /\
+	< E1 , MF , S > => V2 /\
+	V1 := getMemoryHMStack(S , Q , V2) [print "expisaccess" Q  V2 V1 ]  .
+	
+	***SERIA ESTA AUNQUE QUIZAS LA DE ARRIBVA TAMBIEN
+	crl [ExpIsHMStruct] :
+	< .(->(Q , E) , V1) , MF, S > =>  V2 
+	if < E , MF , S > => V /\
+	V2 := getValue.->Stack(S, Q, V, V1) [print "EEE expis.-> " Q "  " V "   " V1 "     " V2 ] .
+
+	crl [ExpIsEnviromentVariable] :
+	< E ,  MF, S > =>  V 
+	if  not isAcces(E) /\ 
+	not isQid(E) /\
+	E :: VarEnt /\ 
+	V := EnvVar(E) [print "expisVE "  E V ]  . *** seria < E,  MF > => < v >
+	
+	crl [ExpIsQid] :
+	< E ,  MF, S > =>  V 
+	if not isAcces(E) /\
+	isQid(E) /\
+	V := getValueStack(S , E) [print "expisQID" E V]  .
+
+	crl [ExpIsPoinTQid] :
+	< E ,  MF, S > =>  V 
+	if  isPointQid(E) /\
+	Q := getFQofPoint(E) /\
+	Q1 := getSQofPoint(E) /\ 
+	M := getMemoryStack(S , Q) /\
+	V := getValueMemory(Q1 , M  , getTypeFromMemory(M,Q1)) [print "expisPointQID" Q Q1 V]  .
+
+	crl [ExpIsBool] :
+	< E , MF, S > =>  V 
+	if not isAcces(E) /\
+	not isQid(E) /\
+	isBool(E) /\
+	V := getValueOfBool(E) [print "expisbool" E V]  .
+
+	crl [ExpIsFloat] :
+	< E , MF, S > =>  E 
+	if not isAcces(E) /\
+	not isQid(E) /\
+	not isBool(E) /\
+	E :: Float  [print "expisfloat" E ]  .
+
+	crl [ExpIsBuiltConstant] :
+	< E , MF, S > =>  V 
+	if not isAcces(E) /\
+	not isQid(E) /\
+	not isBool(E) /\
+	isConstant(E) /\ 
+	V := getValueOfConstant(E) [print "expisConstant" E V ] .
+
+	crl [ExpIsTipo] :
+	< E ,  MF, S > =>  E 
+	if E :: tipo [print "Exp is tipo " E ]  .
+	
+	crl [ExpIsStringVar] :
+	< E , MF, S > =>  E 
+	if not isAcces(E) /\
+	not isQid(E) /\
+	not isBool(E) /\
+	E :: stringVar [print "expisStringVar" E ]  .
+	*** si las descomento me da ejecucion infinita
+	crl [ExpIsArglRecursive] :
+	< ArgL(E, AL) , MF, S > =>  ArgL(V , AL')
+	if  AL =/= argV /\ < E , MF , S > => V /\ < AL , MF , S > => AL'  [print "expisALR" E AL' ] .
+
+	rl [ExpIsArgV] :
+	< argV , MF, S > =>  argV [print "expisALvACIA" ] .
+	*** PUES NO SE SI PARAM ESTA BIEN
+	crl [ExpIsParamRecursive] :
+	< LParam(P(Q, E) , Par) , MF, S > =>  LParam(P(Q , V) , Par1)
+	if  Par =/= PaV /\ < E , MF , S > => V /\ < Par , MF , S > => Par1  [print "expisParam" E Par ] .
+
+	crl [ExpIsP] :
+	< P(Q,E) , MF, S > => P(Q , V)  
+	if < E , MF , S > => V [print "expisparaP" V ] .
+
+	rl [ExpIsPaV] :
+	< PaV , MF, S > =>  PaV [print "expisparamvACIA" ] .
+
+
+	rl [ExpIsReturn] :
+	< Cuerpo(return , B) , MF, S > => < B, MF , S > [print "return" B ] .
+	
+	rl [ExpIsContinue] :
+	< Cuerpo(continu , B) , MF, S > => < B , MF , S > [print "continue" B ] .
+
+	rl [ExpIsBreak] :
+	< Cuerpo(break , B) , MF, S > => < bv , MF , S > [print "BREAK" B ] .
+
+	crl [not] :
+	< not. E ,  MF, S > =>  V1 
+	if < E ,  MF , S > =>  V /\
+	V1 := not V  [print "not" V V1] .
+
+	crl [and] :
+	< E and. E1 ,  MF, S > =>  V2
+	if < E ,  MF , S > =>  V /\
+	 < E1 ,  MF , S > =>  V1 /\
+	 V2 := V and V1 [print "and" V V1 V2 ] .
+	crl [or] :
+	< E or. E1 ,  MF, S > =>  V2
+	if < E ,  MF , S > =>  V /\
+	 < E1 ,  MF , S > =>  V1 /\
+	 V2 := V or V1 [print "or" V V1 V2 ] .
+
+	crl [add] :
+	< E +. E1 ,  MF, S > =>  V2
+	if < E ,  MF , S > =>  V /\
+	 < E1 ,  MF , S > =>  V1 /\
+	 V2 := V + V1 [print "add" V V1 ] .
+	
+	crl [sub] :
+	< E -. E1 ,  MF, S > =>  V2
+	if < E ,  MF , S > =>  V /\
+	 < E1 ,  MF , S > =>  V1 /\
+	 V2 := V - V1 [print "sub" V V1 ] .
+
+	crl [mul] :
+	< E *. E1 ,  MF, S > =>  V2
+	if < E ,  MF , S > =>  V /\
+	 < E1 ,  MF , S > =>  V1 /\
+	 V2 := V * V1 [print "mul" V V1 ] .
+	 
+	crl [div] :
+	< E /. E1 ,  MF, S > =>  V2
+	if < E ,  MF , S > =>  V /\
+	 < E1 ,  MF , S > =>  V1 /\
+	 V2 := V / V1 [print "div" V V1 ] .
+
+
+	crl [lessThan] :
+	< E <. E1 ,  MF, S > => V2 
+	if < E ,  MF , S > =>  V /\
+	 < E1 ,  MF , S > =>  V1 /\
+	 V :: Float /\
+	 V1 :: Float /\
+	 V2 := V < V1 [print "lessthan" V V1 V2] .
+	
+	crl [lessEqualThan] :
+	< E <=. E1 ,  MF, S > => V2 
+	if < E ,  MF , S > =>  V /\
+	 < E1 ,  MF , S > =>  V1 /\
+	 V :: Float /\
+	 V1 :: Float /\
+	 V2 := V <= V1 [print "lessEqualthan" V V1 V2] .
+	---  /\
+	---  V2 := V + V1 [print "lessthan" V V1 ] .
+	
+	crl [greatherEqualThan] :
+	< E >=. E1 ,  MF, S > =>  V2 
+	if < E ,  MF , S > =>  V /\
+	 < E1 ,  MF , S > =>  V1  /\
+	 V :: Float /\
+	 V1 :: Float /\
+	 V2 := V >= V1 [print "greatherEqualThan" V V1 V2] .
+
+	crl [greatherThan] :
+	< E >. E1 ,  MF, S > =>  V2 
+	if < E ,  MF , S > =>  V /\
+	 < E1 ,  MF , S > =>  V1 /\
+	 V :: Float /\
+	 V1 :: Float /\
+	 V2 := V > V1 [print "greathertjan" V V1 V2] .
+
+	crl [distinct] :
+	< E !=. E1 ,  MF, S > =>  V2 
+	if < E ,  MF , S > =>  V /\
+	 < E1 ,  MF , S > =>  V1 /\
+	 V :: Float /\
+	 V1 :: Float /\
+	 V2 := V =/= V1 [print "different" V V1 V2] .
+
+	
+	crl [equal] :
+	< E ==. E1 ,  MF, S > =>  V2 
+	if < E ,  MF , S > =>  V /\
+	 < E1 ,  MF , S > =>  V1 /\
+	 V :: Float /\
+	 V1 :: Float /\
+	 V2 := V == V1 [print "equal" V V1 V2] .
+
+	crl [equalStr] :
+	< E ==. E1 ,  MF, S > =>  V2 
+	if < E ,  MF , S > =>  V /\
+	 < E1 ,  MF , S > =>  V1 /\
+	 V :: stringVar /\
+	 V1 :: stringVar /\
+	[Str] := V /\
+	[Str1] := V1 /\
+	 V2 := Str == Str1 [print "equalStr" V2 Str Str1] .
+*** coger float pasarlo a string quitar lo de delante del punto hacer el modulo y concatenarle otra vez .0
+	crl [mod] : 
+	< E %. E1 ,  MF, S > =>  V2 
+	if < E ,  MF , S > =>  V /\
+	 < E1 ,  MF , S > =>  V1 /\
+	 V :: Float /\
+	 V1 :: Float /\
+	Str := stringF(V) /\
+	 V2 := V + V1 [print "mod" V V1 V2 Str] .
+	
+	rl [Parenthesis] :
+	< PA E PC ,  MF, S > =>  < E , MF , S > .
+
+	crl [ifBasicT] : 
+	<  Cuerpo( If(E , B) , B1) ,  MF , S > => < B1 ,  MF1 , S1 > 
+	if < E , MF , S > => V /\ 
+	V == true /\
+	< B , MF , S > => < bv , MF1 , S1 > [print "IF T " V  ] . ***no se si tiene que ser bv o b2
+
+	crl [ifBasicTReturnV] : 
+	<  Cuerpo( If(E , B) , B1) ,  MF , S > => V1
+	if < E , MF , S > => V /\ 
+	V == true /\
+	< B , MF , S > => V1 [print "IF T " V V1 ] . ***no se si tiene que ser bv o b2
+
+	crl [ifBasicF] : 
+	<  Cuerpo( If(E , B) , B1) ,  MF , S > => < B1 ,  MF , S > 
+	if < E , MF , S > => V /\ 
+	V == false [print "IF F " V  ] .
+	crl [ifElseT] : 
+	< Cuerpo( IfElse(E , B , B1) , B2) ,  MF , S > => < B2 ,  MF1 , S1 > 
+	if < E , MF , S > => V /\ 
+	V == true /\
+	< B , MF , S > => < bv , MF1 , S1 > [print "IFelse TRUE"  ] .
+
+	crl [ifElseTReturnV] : 
+	< Cuerpo( IfElse(E , B , B1) , B2) ,  MF , S > => V1
+	if < E , MF , S > => V /\ 
+	V == true /\
+	< B , MF , S > => V1 [print "IFelse TRUE returnV" V1  ] .
+
+	crl [ifElseF] : 
+	< Cuerpo( IfElse(E , B , B1) , B2) ,  MF , S > => < B2 ,  MF1 , S1 > 
+	if < E , MF , S > => V /\ 
+	V == false /\
+	< B1 , MF , S > => < bv , MF1 , S1 > [print "IFelse FASLE"  ] .
+
+	crl [ifElifTFF] : 
+	< Cuerpo( IfElif(E , B , Elif(E1 , B3) ,B1) , B2) ,  MF , S > => < B2 ,  MF1 , S1 > 
+	if < E , MF , S > => V /\ 
+	V == true /\
+	< B , MF , S > => < bv , MF1 , S1 > [print "IFelif TRUE"  ] .
+
+	crl [ifElifFTF] : 
+	< Cuerpo( IfElif(E , B , Elif(E1 , B3) ,B1) , B2) ,  MF , S > => < B2 ,  MF , S1 > 
+	if < E , MF , S > => V /\ 
+	V == false /\
+	< E1 , MF , S > => V1 /\
+	V1 == true /\
+	< B3 , MF , S > => < bv , MF , S1 > [print "IFelif False tRUE"  ] .
+
+	crl [ifElifFFT] : 
+	< Cuerpo( IfElif(E , B , Elif(E1 , B3) ,B1) , B2) ,  MF , S > => < B2 ,  MF , S1 > 
+	if < E , MF , S > => V /\ 
+	V == false /\
+	< E1 , MF , S > => V1 /\
+	V1 == false /\
+	< B1 , MF , S > => < bv , MF , S1 > [print "IFelif False tRUE"  ] .
+
+	crl [LogEvent] : 
+	<  Cuerpo( logE(Q , AL) , B) ,  MF , S > => < B ,  MF , S > 
+	if M := getMemoryStack(S , Q) /\
+		< AL , MF , S > => AL1  /\
+		compareMemoryAL(M, AL1) /\
+		M1 := replaceMemorywithArgList(M , AL1) [print "lE"  AL1 " " M1 ] .
+	
+	crl [ReturnValue] :
+	<  Cuerpo( Return(E) , B) ,  MF , S > => E
+	if isQid(E) /\
+	V1 := getTypeVFromStack(S ,E) /\
+	getTypeFromStack(S,V1) == struct  [print "ReturnValueStruct"  V1 ] .
+	
+	crl [ReturnValue] :
+	<  Cuerpo( Return(E) , B) ,  MF , S > => < print(V) , MF , S >
+	if < E , MF , S > => V [print "ReturnValue" V  ] .
+
+	crl [StructValueQid] : 
+	<  Cuerpo( =St(E , Q , Par) , B) ,  MF , S > => < B ,  MF , S1 >
+	if isQid(E) /\
+	M := getMemoryStack(S,Q) /\
+	< Par , MF , S > => Par1 /\
+	M1 := changeValueMemoryParameters(M , Par1, S) /\
+	S1 := storeMemoryOnMemoryStack(S , E , M1) [print "=STq" M1 S1  ] . 
+
+	crl [StructValueAsig] : 
+	<  Cuerpo( =St(E , Q , Par) , B) ,  MF , S > => < B ,  MF , S1 >
+	if isAcces(E) /\
+	Q1 := getAccessQid(E) /\
+	E1 := getAccessExp(E) /\
+	< E1 , MF , S > => V3 /\
+	< Par , MF , S > => Par1 /\
+	M := getMemoryStack(S,Q) /\
+	M1 := changeValueMemoryParameters(M , Par1, S) /\
+	S1 := storeMemoryHMStructStack(S , Q1, V3 , Q , M1) [print "=STs" Par1 M1 S1 ] .
+
+	crl [StructValueAsigRecursive] : 
+	<  Cuerpo( =St(E , Q , Par) , B) ,  MF , S > => < B ,  MF , S1 >
+	if isAccesRecursive(E) /\
+	 Ac := getAccessRecursive(E) /\
+	 V := getValueRecursive(E) /\ 
+	Q1 := getAccessQid(Ac) /\
+	V2 := getAccessExp(Ac) /\
+	M := getMemoryStack(S,Q) /\
+	< V , MF , S > => V3 /\
+	< V2 , MF , S > => V4 /\
+	< Par , MF , S > => Par1 /\
+	M1 := changeValueMemoryParameters(M , Par1 , S) /\
+	S1 := storeMemoryHMArrayStack(S , Q1, V4 , V3 , Q , M1) [print "=STr" Q1 V2 V S1 V3 V4 ] .
+	
+	crl [ForRangeTrueFirstReturn] : 
+	<  Cuerpo( ForR(Q , ArgL(E ,E1) , B) , B1) ,  MF , S > => < bv,  MF , S4 > 
+	if 	< E , MF , S > => V /\
+	< E1 , MF , S > => V1 /\
+	V < V1 /\
+	< Dv( Q , int128 , V ) , MF , S > => < bv , MF , S1 > /\
+	< B , MF , S1 > => < bv , MF , S2 > /\
+	S3 := delVariableStack(S2 , Q) /\
+	V2 := V + 1.0 /\
+	< ForR(Q , ArgL(V2 , E1) , B) , MF , S3 > => < bv , MF , S4 > [print "FORR1" V " " V1 " " V2  B1 ] .	
+	--- crl [ForRangeTrueFirstReturn] : 
+	--- <  Cuerpo( ForR(Q , ArgL(E ,E1) , B) , B1) ,  MF , S > => < bv,  MF , S4 > 
+	--- if 	B1 =/= bv /\
+	--- < E , MF , S > => V /\
+	--- < E1 , MF , S > => V1 /\
+	--- V < V1 /\
+	--- < Dv( Q , int128 , V ) , MF , S > => < bv , MF , S1 > /\
+	--- < B , MF , S1 > => < bv , MF , S2 > /\
+	--- S3 := delVariableStack(S2 , Q) /\
+	--- V2 := V + 1.0 /\
+	--- < ForR(Q , ArgL(V2 , E1) , B) , MF , S3 > => < bv , MF , S4 > /\
+	--- V3 := inStack(S4 , 'end_encontrado) /\
+	--- V3 == true [print "FORR1" V " " V1 " " V2 V3 B  B1 ] .
+
+	--- crl [ForRangeTrueFirstNoReturn] : 
+	--- <  Cuerpo( ForR(Q , ArgL(E ,E1) , B) , B1) ,  MF , S > => < B1 ,  MF , S4 > 
+	--- if 	B1 =/= bv /\
+	--- < E , MF , S > => V /\
+	--- < E1 , MF , S > => V1 /\
+	--- V < V1 /\
+	--- < Dv( Q , int128 , V ) , MF , S > => < bv , MF , S1 > /\
+	--- < B , MF , S1 > => < bv , MF , S2 > /\
+	--- S3 := delVariableStack(S2 , Q) /\
+	--- V2 := V + 1.0 /\
+	--- < ForR(Q , ArgL(V2 , E1) , B) , MF , S3 > => < bv , MF , S4 > /\
+	--- V3 := inStack(S4 , 'end_encontrado) /\
+	--- V3 == false [print "FORR1.2" V " " V1 " " V2 V3 B  B1 ] .
+	
+	--- crl [ForRangeTrueOther] : 
+	--- <  Cuerpo( ForR(Q , ArgL(E ,E1) , B) , B1) ,  MF , S > => < B1 ,  MF , S4 > 
+	--- if B1 == bv /\
+	--- < E , MF , S > => V /\
+	--- < E1 , MF , S > => V1 /\
+	--- V < V1 /\
+	--- < Dv( Q , int128 , V ) , MF , S > => < bv , MF , S1 > /\
+	--- < B , MF , S1 > => < bv , MF , S2 > /\
+	--- S3 := delVariableStack(S2 , Q) /\
+	--- V2 := V + 1.0 /\
+	--- < ForR(Q , ArgL(V2 , E1) , B) , MF , S3 > => < bv , MF , S4 >  [print "FORR2" V " " V1 " " V2 B  B1 ] .
+
+	--- crl [ForRangeBreakorReturn] : 
+	--- <  Cuerpo( ForR(Q , ArgL(E ,E1) , B) , B1) ,  MF , S > => < bv , MF , S4 >
+	--- if < E , MF , S > => V /\
+	--- < E1 , MF , S > => V1 /\
+	--- V < V1 /\
+	--- < Dv( Q , int128 , V ) , MF , S > => < bv , MF , S1 > /\
+	--- < B , MF , S1 > => [Str] /\
+	--- Str == "END" /\
+	--- S2 := delVariableStack(S1 , Q) /\
+	--- S3 := addNewVariableStack(S2 , 'end_encontrado, bool , true) /\
+	--- V2 := V - 1.0 /\
+	--- < ForR(Q , ArgL(V , V2) , B) , MF , S3 > => < bv , MF , S4 > [print "FORbreakORreturn" V " " V1 " " V2 Str S4] .
+
+
+	crl [ForRangeFalse] : 
+	<  Cuerpo( ForR(Q , ArgL(E ,E1) , B) , B1) ,  MF , S > => < B1 ,  MF , S > 
+	if < E , MF , S > => V /\
+	< E1 , MF , S > => V1 /\
+	V >= V1  [print "FORRFalse" V " " V1 ] .
+
+	rl [ForRange1] : 
+	<  Cuerpo( ForR(Q , E , B) , B1) ,  MF , S > => < Cuerpo( ForR(Q , ArgL(0.0 ,E) , B) , B1) ,  MF , S > [print "FORRange 1" Q E ] .
+
+	rl [print] : 
+	< print(V) , MF , S > => V [print "RESULTADO PRINT" S ] .
+
+
+	rl [returnEmpty] : 
+	< returnEm(B) , MF , S > => ["END"]  [print "funcion terminada" B ] .
+endm
